@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MD Gallery</title>
+  <meta name="description" content="Drop a Markdown file and read it as an editorial poster gallery. Search and table of contents included.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link id="fonts-link" rel="stylesheet" href="">
+  <link rel="stylesheet" href="assets/site.css">
+  <link rel="stylesheet" href="assets/reader.css">
+</head>
+<body id="app">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <section class="page-landing" id="landing" aria-label="Open a Markdown file">
+    <header class="site-header">
+      <div class="header-inner">
+        <span class="brand"><span class="brand-mark">◆</span> MD Gallery</span>
+      </div>
+    </header>
+    <main class="landing-main" id="main">
+      <label class="drop-zone" id="drop-zone">
+        <input type="file" id="file-input" accept=".md,.markdown,.txt,text/markdown,text/plain">
+        <h1 class="drop-zone__title">Drop a Markdown file</h1>
+        <p class="drop-zone__hint">or click to browse · stays on your device</p>
+      </label>
+    </main>
+    <footer class="landing-foot mono-label">
+      Posters split on <code>##</code> headings (see <a href="docs/POSTER_LOGIC.md">POSTER_LOGIC.md</a>)
+    </footer>
+  </section>
+
+  <section class="page-reader" id="reader" hidden aria-label="Document reader">
+    <header class="site-header site-header--reader">
+      <div class="header-inner">
+        <span class="brand brand--reader"><span class="brand-mark">◆</span> <span id="doc-label">MD Gallery</span></span>
+        <div class="reader-actions">
+          <nav class="nav nav--search" aria-label="Search document">
+            <label class="visually-hidden" for="search-input">Search</label>
+            <input type="search" id="search-input" class="nav-search-input" placeholder="Search…" autocomplete="off">
+            <span class="search-status" id="search-status" aria-live="polite"></span>
+          </nav>
+          <div class="nav-toc-wrap">
+            <button type="button" class="btn-ghost" id="toc-toggle" aria-expanded="false" aria-controls="toc-panel">Contents</button>
+            <div class="toc-panel" id="toc-panel" role="navigation" aria-label="Table of contents">
+              <p class="toc-panel__label">Contents</p>
+              <div id="toc-root"></div>
+            </div>
+          </div>
+          <button type="button" class="btn-ghost" id="open-another">Open file</button>
+        </div>
+      </div>
+    </header>
+    <main id="main-reader" class="content-feed collection-feed"></main>
+    <button type="button" id="back-to-top" class="back-to-top" aria-label="Back to top">↑</button>
+  </section>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "marked": "./node_modules/marked/lib/marked.esm.js",
+      "isomorphic-dompurify": "./node_modules/isomorphic-dompurify/index.js"
+    }
+  }
+  </script>
+  <script type="module" src="assets/reader.js"></script>
+</body>
+</html>

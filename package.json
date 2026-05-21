@@ -1,0 +1,14 @@
+{
+  "name": "md-gallery",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Browser-based Markdown reader — poster gallery, search, TOC",
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "dependencies": {
+    "isomorphic-dompurify": "^3.14.0",
+    "marked": "^15.0.7"
+  }
+}
