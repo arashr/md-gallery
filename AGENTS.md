@@ -14,6 +14,7 @@ Read these before changing code:
 - **Render / sanitize** → `lib/render-document.js`, `lib/sanitize.js`.
 - **App shell / drop / search / TOC** → `assets/reader.js`, `assets/reader.css`.
 - **Poster look** → `assets/site.css` (shared with figlets-blog; sync manually if needed).
+- **Theme / fonts / grounds** → `config/gallery.config.json` + `lib/gallery-config.js`.
 - **Sister repo** `figlets-blog` — do not merge builds; keep MD Gallery client-only.
 
 ## Commands
@@ -23,8 +24,8 @@ npm install
 npm start
 ```
 
-No production build step. Test parser/render with Node:
+No production build step. Run parser tests:
 
 ```bash
-node -e "import { parseDocument } from './lib/parse-document.js'; ..."
+npm test
 ```

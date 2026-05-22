@@ -10,8 +10,8 @@ Each **poster** is one colored card in the vertical gallery. Splitting happens i
 
 ## Document chrome (above the gallery)
 
-- **Title** — First `# …` line, or YAML `title:`, or filename without `.md`.
-- **Intro** — Paragraphs after the title and before the first poster split (rendered as markdown).
+- **Title** — First `# …` line, or YAML `title:`, or filename without `.md`. Inline markdown in the title (e.g. `**bold**`) is rendered, not shown literally.
+- **Intro** — Short metadata between the `#` title and the first `##` (or first `---` split) stays in the hero and is rendered as Markdown. If that block is long or contains its own `##`/`###` headings, it becomes the first poster (“Overview”) instead.
 
 ## What stays inside one poster
 

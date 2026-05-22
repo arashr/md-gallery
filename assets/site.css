@@ -1,14 +1,19 @@
 /* Portfolio design tokens — figlets-blog */
 :root {
-  --paper: #eff1f3;
-  --ink: #0c0e10;
-  --ink-soft: #1b1f24;
+  --paper: var(--config-paper, #eff1f3);
+  --ink: var(--config-ink, #0c0e10);
+  --ink-soft: var(--config-ink-soft, #1b1f24);
   --ink-mute: rgba(12, 14, 16, 0.66);
-  --hair: rgba(12, 14, 16, 0.16);
-  --red: #c8102e;
-  --red-bright: #e8334e;
-  /* Reading width: ~50–75 chars/line (WCAG max 80ch); 65ch is a common optimum */
-  --measure: 65ch;
+  --surface: var(--paper);
+  --edge-mix: var(--config-edge-mix, 12%);
+  --edge-1: color-mix(in oklch, var(--surface) calc(100% - var(--edge-mix)), black);
+  --hair: color-mix(in oklch, var(--edge-1) calc(100% - var(--edge-mix)), black);
+  --red: var(--config-red, #c8102e);
+  --red-bright: var(--config-red-bright, #e8334e);
+  /* Prose line length (~50–75 chars/line); font-independent if you use rem/px in config */
+  --measure: var(--config-measure, 65ch);
+  /* Poster card width; decoupled from --measure so UI font changes do not shrink cards */
+  --poster-width: var(--config-poster-width, 42rem);
   --pad: clamp(16px, 4vw, 56px);
   --scroll-offset: 6.5rem; /* sticky site-header + crumb; JS refines scrollToPost */
   --font-mono: 'Inter Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -20,7 +25,7 @@
   --ground-butter: #ffc64d;
   --ground-mint: #a7dbce;
   --ground-carmine: #b52840;
-  --card-shadow-solid: -4px 4px 0 #000;
+  --card-shadow-solid: -4px 4px 0 var(--hair);
   --card-shadow-rest: -4px 4px 0 transparent;
   --card-hover-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --card-hover-duration: 0.4s;
@@ -41,11 +46,16 @@ html {
 body {
   margin: 0;
   overflow-x: clip;
-  font-family: 'Inter Tight', system-ui, sans-serif;
+  font-family: var(--font-ui-sans, 'Inter Tight', system-ui, sans-serif);
   font-size: 17px;
   line-height: 1.6;
   color: var(--ink-soft);
   background: var(--paper);
+}
+
+html[data-prose-font='serif'] .post-card .prose.post-body,
+html[data-prose-font='serif'] .collection-hero .prose-brief {
+  font-family: var(--font-ui-serif, 'Libre Baskerville', Georgia, serif);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -62,9 +72,6 @@ body {
   .collection-card.reveal.is-visible:focus-visible {
     transform: none;
     box-shadow: var(--card-shadow-rest);
-  }
-  #custom-cursor {
-    display: none !important;
   }
 }
 
@@ -125,15 +132,20 @@ body {
   margin: 0.2em 0;
 }
 
-/* Ground backgrounds */
-.ground-pink { background: var(--ground-pink); }
-.ground-chartreuse { background: var(--ground-chartreuse); }
-.ground-tangerine { background: var(--ground-tangerine); }
-.ground-lilac { background: var(--ground-lilac); }
-.ground-forest { background: var(--ground-forest); }
-.ground-butter { background: var(--ground-butter); }
-.ground-mint { background: var(--ground-mint); }
-.ground-carmine { background: var(--ground-carmine); }
+/* Ground backgrounds — --surface drives 2-step edge color (--on-ground-edge) */
+.ground-pink { background: var(--ground-pink); --surface: var(--ground-pink); }
+.ground-chartreuse { background: var(--ground-chartreuse); --surface: var(--ground-chartreuse); }
+.ground-tangerine { background: var(--ground-tangerine); --surface: var(--ground-tangerine); }
+.ground-lilac { background: var(--ground-lilac); --surface: var(--ground-lilac); }
+.ground-forest { background: var(--ground-forest); --surface: var(--ground-forest); }
+.ground-butter { background: var(--ground-butter); --surface: var(--ground-butter); }
+.ground-mint { background: var(--ground-mint); --surface: var(--ground-mint); }
+.ground-carmine { background: var(--ground-carmine); --surface: var(--ground-carmine); }
+
+[class*='ground-'] {
+  --on-ground-edge-1: color-mix(in oklch, var(--surface) calc(100% - var(--edge-mix)), black);
+  --on-ground-edge: color-mix(in oklch, var(--on-ground-edge-1) calc(100% - var(--edge-mix)), black);
+}
 
 /*
  * Accessible foreground pairings per ground (WCAG 2.1 AA).
@@ -214,7 +226,16 @@ body {
 }
 
 .post-card[class*='ground-'] .prose a {
-  color: var(--on-ground-accent);
+  color: var(--on-ground-body);
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+  text-decoration-thickness: 1px;
+}
+
+.post-card[class*='ground-'] .prose a:hover {
+  color: var(--surface);
+  background: var(--ink);
+  text-decoration: none;
 }
 
 .post-card[class*='ground-'] .prose h2,
@@ -249,54 +270,6 @@ body {
 .page-index.shutter-open #shutter-bottom,
 .page-collection.shutter-open #shutter-bottom {
   transform: translateY(100%);
-}
-
-/* Custom cursor */
-@media (pointer: fine) {
-  .page-collection,
-  .page-index {
-    cursor: none;
-  }
-  #custom-cursor {
-    position: fixed;
-    width: 20px;
-    height: 20px;
-    margin: -10px 0 0 -10px;
-    pointer-events: none;
-    z-index: 9999;
-    mix-blend-mode: difference;
-  }
-  #custom-cursor::before,
-  #custom-cursor::after {
-    content: '';
-    position: absolute;
-    background: #fff;
-    transition: background 0.15s ease;
-  }
-  #custom-cursor::before {
-    left: 0;
-    right: 0;
-    top: 50%;
-    height: 1px;
-    transform: translateY(-50%);
-  }
-  #custom-cursor::after {
-    top: 0;
-    bottom: 0;
-    left: 50%;
-    width: 1px;
-    transform: translateX(-50%);
-  }
-  body.cursor-hover #custom-cursor::before,
-  body.cursor-hover #custom-cursor::after {
-    background: var(--red-bright);
-  }
-  body.cursor-hover #custom-cursor::before {
-    height: 2px;
-  }
-  body.cursor-hover #custom-cursor::after {
-    width: 2px;
-  }
 }
 
 #scroll-progress {
@@ -355,9 +328,25 @@ body {
   margin-left: auto;
 }
 
+.nav-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.nav-search-icon {
+  position: absolute;
+  left: 0.65rem;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  color: var(--ink-mute);
+}
+
 .nav-search-input {
   width: 100%;
-  padding: 0.5rem 0.75rem;
+  padding: 0.5rem 0.75rem 0.5rem 2.35rem;
   border: 1px solid var(--hair);
   background: var(--paper);
   font-family: inherit;
@@ -532,23 +521,51 @@ a.collection-card[class*='ground-'] .card-lede {
   color: var(--red);
 }
 
-/* Posts */
+/* Posts — collection hero sits on page paper (not a ground poster) */
 .collection-hero {
+  --hero-display: var(--red);
+  --hero-body: var(--ink-soft);
+  --hero-muted: var(--ink-mute);
+  --hero-edge: var(--hair);
   width: 100%;
+  max-width: 100%;
   margin-bottom: 0;
   text-align: left;
+  box-sizing: border-box;
+  color: var(--hero-body);
 }
 
-.page-collection .collection-hero .case-hero__sub {
-  margin: 0.75rem 0 0;
-  max-width: var(--measure);
-}
-.collection-hero .poster__title,
-.index-hero-title {
-  text-shadow: -4px 4px 0 #000;
-}
+.collection-hero .kicker,
 .collection-hero .poster__title {
+  color: var(--hero-display);
+}
+
+.collection-hero .doc-meta,
+.collection-hero .case-hero__sub {
+  color: var(--hero-body);
+}
+
+.collection-hero .doc-meta {
+  color: var(--hero-muted);
+}
+
+.collection-hero .case-hero__sub {
+  margin: 0.75rem 0 0;
+  max-width: min(var(--measure), 100%);
+}
+
+/* Wide intro media (images, tables, code) — same cap as poster cards */
+.collection-hero .case-hero__sub:has(:is(img, picture, video, svg, table, pre)) {
+  max-width: min(var(--poster-width), 100%);
+}
+
+.collection-hero .poster__title {
+  text-shadow: -4px 4px 0 var(--hero-edge);
   font-size: clamp(2.5rem, 8vw, 5rem);
+}
+
+.index-hero-title {
+  text-shadow: -4px 4px 0 var(--hair);
 }
 
 h1.poster__title {
@@ -580,47 +597,76 @@ h1.poster__title {
 }
 
 .collection-feed .poster-gallery .post-card {
-  width: fit-content;
-  max-width: 100%;
+  width: min(var(--poster-width), 100%);
+  max-width: min(var(--poster-width), 100%);
   margin-left: 0;
   margin-right: 0;
 }
 
 @media (min-width: 900px) {
   .collection-feed .poster-gallery .post-card {
-    grid-template-columns: minmax(0, var(--measure));
     margin-left: var(--poster-shift, 0);
-    max-width: calc(100% - var(--poster-shift, 0rem));
+    max-width: min(var(--poster-width), calc(100% - var(--poster-shift, 0rem)));
+    width: min(var(--poster-width), calc(100% - var(--poster-shift, 0rem)));
   }
 }
 
+/* Default: height hugs content. B-size min height only on .post-card--roomy (short posters). */
 .post-card {
+  container-type: inline-size;
+  container-name: poster-card;
   width: 100%;
   min-width: 0;
+  max-width: min(var(--poster-width), 100%);
   margin: 0;
   padding: clamp(2.5rem, 6vw, 4rem) var(--pad);
-  border: none;
+  border: 1px solid var(--on-ground-edge, var(--hair));
   box-sizing: border-box;
   text-align: left;
   scroll-margin-top: var(--scroll-offset);
-  display: grid;
-  grid-template-columns: minmax(0, min(var(--measure), 100%));
-  justify-content: start;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  height: auto;
+}
+
+/* ISO B portrait (250×353mm) — min height for short posters; grows if content is taller */
+.post-card.post-card--roomy {
+  min-height: var(--poster-min-height, auto);
+  display: flex;
+  flex-direction: column;
 }
 
 .post-card > .post-header,
-.post-card > .post-figure,
-.post-card > .prose {
-  grid-column: 1;
+.post-card > .post-figure {
   width: 100%;
   min-width: 0;
-  max-width: none;
+  max-width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.post-card > .prose {
+  width: 100%;
+  min-width: 0;
+  max-width: min(var(--measure), 100%);
   margin-left: 0;
   margin-right: 0;
 }
 
 .post-card > .post-header {
+  flex: 0 0 auto;
+  flex-shrink: 0;
   text-align: left;
+}
+
+.post-card > .prose.post-body {
+  flex: 0 0 auto;
+  flex-shrink: 0;
+}
+
+.post-card.post-card--roomy > .prose.post-body {
+  margin-top: auto;
 }
 
 .post-card .post-title,
@@ -641,31 +687,68 @@ h1.poster__title {
 h2.poster__title.post-title,
 .post-title {
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  margin: 16px 0;
-  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  margin: 0;
   line-height: 1.12;
   letter-spacing: -0.003em;
-  overflow-wrap: anywhere;
+}
+
+.post-card .poster__title,
+.post-card .post-title,
+.post-card .post-title a {
+  overflow-wrap: normal;
+  word-break: keep-all;
+  hyphens: none;
+  white-space: normal;
 }
 
 /* Post title poster fonts — see scripts/lib/title-faces.mjs & docs/TITLE_FONTS.md */
 .post-card[class*='title-face-'] .poster__title,
 .post-card[class*='title-face-'] .post-title,
-.post-card[class*='title-face-'] .post-title a,
+.post-card[class*='title-face-'] .post-title a {
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+}
+
 .post-card[class*='title-face-'] .prose :is(h2, h3, h4) {
   font-synthesis: none;
   text-wrap: balance;
   -webkit-font-smoothing: antialiased;
 }
 
+/* Title box — JS sets --poster-title-size and --poster-title-max-h from live layout */
+.post-title-bounds {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  max-height: var(--poster-title-max-h, none);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.post-card[class*='title-face-'] .post-header {
+  overflow: hidden;
+  width: 100%;
+}
+
 .post-card[class*='title-face-'] .poster__title,
 .post-card[class*='title-face-'] .post-title,
 .post-card[class*='title-face-'] .post-title a {
-  font-size: clamp(2.35rem, 6.5vw, 4rem);
-  line-height: 0.9;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  font-size: var(--poster-title-size, 2.5rem);
   letter-spacing: 0.02em;
+  padding-block: 0.04em;
+  white-space: normal;
+  overflow-wrap: normal;
+  word-break: keep-all;
+  hyphens: none;
+  text-wrap: balance;
+}
+
+.post-card.post-card--roomy > .post-header {
+  margin-bottom: 0;
 }
 
 /* In-post headings use the same display face as the poster title (smaller scale) */
@@ -744,17 +827,19 @@ h2.poster__title.post-title,
 .post-title a {
   display: block;
   width: 100%;
+  max-width: 100%;
   color: inherit;
   text-decoration: none;
   line-height: inherit;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 .post-title a:hover {
   color: var(--red);
 }
 .post-header {
   width: 100%;
-  margin-bottom: 128px;
+  margin: 0 0 clamp(1.5rem, 4vw, 2.5rem);
+  overflow: hidden;
 }
 
 .meta-strip {
@@ -801,6 +886,24 @@ h2.poster__title.post-title,
   font-size: 18px;
   line-height: 1.65;
   overflow-wrap: break-word;
+  max-width: 100%;
+}
+
+.prose :is(img, picture, video, svg) {
+  display: block;
+  max-width: 100%;
+  width: auto;
+  height: auto;
+}
+
+.prose img,
+.prose picture img,
+.prose video {
+  object-fit: contain;
+}
+
+.post-card[class*='ground-'] .prose :is(img, picture, video) {
+  border: 1px solid var(--on-ground-edge);
 }
 
 .post-card .prose hr {
@@ -823,12 +926,56 @@ h2.poster__title.post-title,
   margin: 0 0 1em;
   padding-left: 1.25em;
 }
+
+.prose table {
+  width: 100%;
+  margin: 0 0 1.25em;
+  border-collapse: collapse;
+  font-size: 0.92em;
+  line-height: 1.45;
+}
+
+.prose .table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 0 0 1.25em;
+  -webkit-overflow-scrolling: touch;
+}
+
+.prose .table-wrap table {
+  margin: 0;
+}
+
+.prose th,
+.prose td {
+  padding: 0.45em 0.65em;
+  text-align: left;
+  vertical-align: top;
+}
+
+.prose th {
+  border: 2px solid var(--hair);
+  font-weight: 600;
+}
+
+.prose td {
+  border: 2px solid var(--hair);
+}
+
+.post-card[class*='ground-'] .prose th,
+.post-card[class*='ground-'] .prose td {
+  border-color: var(--on-ground-edge);
+}
 .prose blockquote {
   margin: 1.5em 0;
   padding: 0.5em 0 0.5em 1.25em;
-  border-left: 3px solid var(--red);
+  border-left: 1px solid var(--hair);
   font-size: 1.15em;
   color: var(--ink);
+}
+
+.post-card[class*='ground-'] .prose blockquote {
+  border-left-color: var(--on-ground-edge);
 }
 .prose code {
   font-family: var(--font-mono);
@@ -853,7 +1000,16 @@ h2.poster__title.post-title,
   padding: 0;
 }
 .prose a {
-  color: var(--red);
+  color: var(--ink-soft);
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+  text-decoration-thickness: 1px;
+}
+
+.prose a:hover {
+  color: var(--paper);
+  background: var(--ink);
+  text-decoration: none;
 }
 .search-highlight {
   background: color-mix(in srgb, var(--ground-butter) 70%, transparent);
@@ -969,7 +1125,6 @@ h2.poster__title.post-title,
 
 @media print {
   .site-header,
-  #custom-cursor,
   .back-to-top,
   .shutter-bar,
   #scroll-progress {

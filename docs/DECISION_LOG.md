@@ -62,6 +62,22 @@ Format: **Date · Decision · Why**
 
 ---
 
+## 2026-05-21 — Promote substantial pre-## intro to first poster
+
+**Decision:** If content between the document `#` title and the first poster split is more than four non-fence lines, longer than 400 characters, or contains a real `##`/`###` heading, render it as the first gallery poster (“Overview”) instead of the hero blurb.
+
+**Why:** Long preambles (PRDs, specs) were stuck in the header; the gallery is the main reading surface.
+
+---
+
+## 2026-05-21 — Inline markdown in poster titles
+
+**Decision:** Poster titles, document `h1`, and TOC labels parse inline Markdown (`**bold**`, `*italic*`, etc.) via `lib/inline-markdown.js`.
+
+**Why:** `##` lines often include emphasis; escaping them as plain text showed literal `**`.
+
+---
+
 ## 2026-05-21 — In-post headings use poster title font
 
 **Decision:** `h2`–`h6` inside `.prose` inherit the same `title-face-*` display family as the poster title (smaller scale).

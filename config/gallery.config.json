@@ -1,0 +1,55 @@
+{
+  "theme": {
+    "paper": "#eff1f3",
+    "ink": "#0c0e10",
+    "inkSoft": "#1b1f24",
+    "red": "#c8102e",
+    "redBright": "#e8334e",
+    "measure": "65ch",
+    "posterWidth": "42rem",
+    "edgeStepMix": 0.12
+  },
+  "grounds": {
+    "pink": "#f4a8c2",
+    "chartreuse": "#d8e04a",
+    "tangerine": "#f0894e",
+    "lilac": "#c5bfe8",
+    "forest": "#8fb89b",
+    "butter": "#ffc64d",
+    "mint": "#a7dbce",
+    "carmine": "#b52840"
+  },
+  "fonts": {
+    "uiSans": {
+      "family": "Inconsolata",
+      "google": "Inconsolata:ital,wght@0,500;0,700;0,900;1,400"
+    },
+    "uiSerif": {
+      "family": "Libre Baskerville",
+      "google": "Libre+Baskerville:ital,wght@0,400;0,700;1,400"
+    },
+    "mono": {
+      "family": "Inter Mono",
+      "google": "Inter+Mono:ital,wght@0,400;0,500;1,400"
+    },
+    "titleFaces": [
+      { "id": "ultra", "google": "Ultra" },
+      { "id": "monoton", "google": "Monoton" },
+      { "id": "limelight", "google": "Limelight" },
+      { "id": "jersey25", "google": "Jersey+25" },
+      { "id": "blackops", "google": "Black+Ops+One" },
+      { "id": "notable", "google": "Notable" }
+    ]
+  },
+  "titleScale": {
+    "minPx": 14,
+    "maxPx": 280,
+    "maxWidthRatio": 0.45,
+    "tallTitleMaxPx": 400,
+    "tallTitleHeightRatio": 0.42,
+    "slackMinPx": 56,
+    "bAspect": 1.412,
+    "targetSlackRatio": 0.12,
+    "targetSlackMinPx": 48
+  }
+}

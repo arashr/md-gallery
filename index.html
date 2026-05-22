@@ -10,6 +10,11 @@
   <link id="fonts-link" rel="stylesheet" href="">
   <link rel="stylesheet" href="assets/site.css">
   <link rel="stylesheet" href="assets/reader.css">
+  <script>
+    if (localStorage.getItem('md-gallery-theme') === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  </script>
 </head>
 <body id="app">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -18,6 +23,11 @@
     <header class="site-header">
       <div class="header-inner">
         <span class="brand"><span class="brand-mark">◆</span> MD Gallery</span>
+        <div class="app-chrome-actions" role="group" aria-label="View options">
+          <button type="button" class="btn-icon btn-ghost theme-toggle" id="theme-toggle" aria-label="Dark mode" aria-pressed="false">
+            <span class="theme-toggle__icons" aria-hidden="true"></span>
+          </button>
+        </div>
       </div>
     </header>
     <main class="landing-main" id="main">
@@ -37,19 +47,41 @@
       <div class="header-inner">
         <span class="brand brand--reader"><span class="brand-mark">◆</span> <span id="doc-label">MD Gallery</span></span>
         <div class="reader-actions">
+          <button type="button" class="btn-ghost btn-with-icon" id="open-another">
+            <span class="btn-icon-slot" data-icon="folderOpen" aria-hidden="true"></span>
+            <span class="btn-label">Open file</span>
+          </button>
           <nav class="nav nav--search" aria-label="Search document">
-            <label class="visually-hidden" for="search-input">Search</label>
-            <input type="search" id="search-input" class="nav-search-input" placeholder="Search…" autocomplete="off">
-            <span class="search-status" id="search-status" aria-live="polite"></span>
+            <label class="nav-search-wrap">
+              <span class="visually-hidden">Search</span>
+              <span class="nav-search-icon" data-icon="search" aria-hidden="true"></span>
+              <input type="search" id="search-input" class="nav-search-input" placeholder="Search…" autocomplete="off">
+            </label>
           </nav>
+          <div class="reader-controls" role="group" aria-label="View options">
+            <button type="button" class="btn-icon btn-ghost" id="zoom-out" aria-label="Zoom out">
+              <span data-icon="zoomOut" aria-hidden="true"></span>
+            </button>
+            <button type="button" class="btn-icon btn-ghost" id="zoom-in" aria-label="Zoom in">
+              <span data-icon="zoomIn" aria-hidden="true"></span>
+            </button>
+            <button type="button" class="btn-icon btn-ghost font-toggle" id="font-toggle" aria-label="Serif body text" aria-pressed="false">
+              <span class="font-toggle__icons" aria-hidden="true"></span>
+            </button>
+            <button type="button" class="btn-icon btn-ghost theme-toggle" aria-label="Dark mode" aria-pressed="false">
+              <span class="theme-toggle__icons" aria-hidden="true"></span>
+            </button>
+          </div>
           <div class="nav-toc-wrap">
-            <button type="button" class="btn-ghost" id="toc-toggle" aria-expanded="false" aria-controls="toc-panel">Contents</button>
+            <button type="button" class="btn-ghost btn-with-icon" id="toc-toggle" aria-expanded="false" aria-controls="toc-panel">
+              <span class="btn-icon-slot" data-icon="list" aria-hidden="true"></span>
+              <span class="btn-label">Contents</span>
+            </button>
             <div class="toc-panel" id="toc-panel" role="navigation" aria-label="Table of contents">
               <p class="toc-panel__label">Contents</p>
               <div id="toc-root"></div>
             </div>
           </div>
-          <button type="button" class="btn-ghost" id="open-another">Open file</button>
         </div>
       </div>
     </header>
@@ -61,7 +93,8 @@
   {
     "imports": {
       "marked": "./node_modules/marked/lib/marked.esm.js",
-      "isomorphic-dompurify": "./node_modules/isomorphic-dompurify/index.js"
+      "dompurify": "./node_modules/dompurify/dist/purify.es.mjs",
+      "isomorphic-dompurify": "./node_modules/isomorphic-dompurify/dist/browser.mjs"
     }
   }
   </script>
