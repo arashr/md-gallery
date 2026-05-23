@@ -14,7 +14,7 @@ Read these before changing code:
 - **Render / sanitize** → `lib/render-document.js`, `lib/sanitize.js`.
 - **App shell / drop / search / TOC** → `assets/reader.js`, `assets/reader.css`.
 - **Poster look** → `assets/site.css` (shared with figlets-blog; sync manually if needed).
-- **Theme / fonts / grounds** → `config/gallery.config.json` + `lib/gallery-config.js`.
+- **Design system** → `config/gallery.config.json` + `lib/gallery-config.js` (colors, grounds + foreground pairs, fonts, spacing, dark chrome, grain).
 - **Sister repo** `figlets-blog` — do not merge builds; keep MD Gallery client-only.
 
 ## Commands

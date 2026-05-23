@@ -1,10 +1,6 @@
 import { parseDocument } from '../lib/parse-document.js';
 import { renderDocument, renderToc } from '../lib/render-document.js';
-import {
-  loadGalleryConfig,
-  applyGalleryConfigToDocument,
-  getGalleryConfig
-} from '../lib/gallery-config.js';
+import { reloadGalleryConfig, getGalleryConfig } from '../lib/gallery-config.js';
 import { fitPosterTitles } from '../lib/fit-poster-title.js';
 import { ICONS } from './icons.js';
 
@@ -111,8 +107,7 @@ import { ICONS } from './icons.js';
   }
 
   async function boot() {
-    await loadGalleryConfig();
-    applyGalleryConfigToDocument();
+    await reloadGalleryConfig();
     injectIcons();
     applyZoom();
     applyTheme(localStorage.getItem('md-gallery-theme') === 'dark' ? 'dark' : 'light');
@@ -333,6 +328,12 @@ import { ICONS } from './icons.js';
   }
 
   let resizeTimer;
+  let configReloadTimer;
+  window.addEventListener('focus', () => {
+    clearTimeout(configReloadTimer);
+    configReloadTimer = setTimeout(() => void reloadGalleryConfig(), 250);
+  });
+
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(schedulePosterTitleFit, 120);

@@ -3,7 +3,7 @@
   --paper: var(--config-paper, #eff1f3);
   --ink: var(--config-ink, #0c0e10);
   --ink-soft: var(--config-ink-soft, #1b1f24);
-  --ink-mute: rgba(12, 14, 16, 0.66);
+  --ink-mute: var(--config-ink-mute, rgba(12, 14, 16, 0.66));
   --surface: var(--paper);
   --edge-mix: var(--config-edge-mix, 12%);
   --edge-1: color-mix(in oklch, var(--surface) calc(100% - var(--edge-mix)), black);
@@ -14,21 +14,12 @@
   --measure: var(--config-measure, 65ch);
   /* Poster card width; decoupled from --measure so UI font changes do not shrink cards */
   --poster-width: var(--config-poster-width, 42rem);
-  --pad: clamp(16px, 4vw, 56px);
-  --scroll-offset: 6.5rem; /* sticky site-header + crumb; JS refines scrollToPost */
-  --font-mono: 'Inter Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-  --ground-pink: #f4a8c2;
-  --ground-chartreuse: #d8e04a;
-  --ground-tangerine: #f0894e;
-  --ground-lilac: #c5bfe8;
-  --ground-forest: #8fb89b;
-  --ground-butter: #ffc64d;
-  --ground-mint: #a7dbce;
-  --ground-carmine: #b52840;
+  --pad: var(--config-pad, clamp(16px, 4vw, 56px));
+  --scroll-offset: var(--config-scroll-offset, 6.5rem);
   --card-shadow-solid: -4px 4px 0 var(--hair);
   --card-shadow-rest: -4px 4px 0 transparent;
-  --card-hover-ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --card-hover-duration: 0.4s;
+  --card-hover-ease: var(--config-card-hover-ease, cubic-bezier(0.22, 1, 0.36, 1));
+  --card-hover-duration: var(--config-card-hover-duration, 0.4s);
 }
 
 *,
@@ -47,8 +38,8 @@ body {
   margin: 0;
   overflow-x: clip;
   font-family: var(--font-ui-sans, 'Inter Tight', system-ui, sans-serif);
-  font-size: 17px;
-  line-height: 1.6;
+  font-size: var(--config-body-size, 17px);
+  line-height: var(--config-body-line-height, 1.6);
   color: var(--ink-soft);
   background: var(--paper);
 }
@@ -110,15 +101,15 @@ html[data-prose-font='serif'] .collection-hero .prose-brief {
 .mono-label,
 .kicker {
   font-family: inherit;
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.06em;
+  font-size: var(--config-label-size, 0.75rem);
+  font-weight: var(--config-label-weight, 500);
+  letter-spacing: var(--config-label-letter-spacing, 0.06em);
   text-transform: uppercase;
 }
 
 .crumb {
   font-family: inherit;
-  font-size: 0.85rem;
+  font-size: var(--config-crumb-size, 0.85rem);
   letter-spacing: normal;
   text-transform: none;
 }
@@ -132,59 +123,10 @@ html[data-prose-font='serif'] .collection-hero .prose-brief {
   margin: 0.2em 0;
 }
 
-/* Ground backgrounds — --surface drives 2-step edge color (--on-ground-edge) */
-.ground-pink { background: var(--ground-pink); --surface: var(--ground-pink); }
-.ground-chartreuse { background: var(--ground-chartreuse); --surface: var(--ground-chartreuse); }
-.ground-tangerine { background: var(--ground-tangerine); --surface: var(--ground-tangerine); }
-.ground-lilac { background: var(--ground-lilac); --surface: var(--ground-lilac); }
-.ground-forest { background: var(--ground-forest); --surface: var(--ground-forest); }
-.ground-butter { background: var(--ground-butter); --surface: var(--ground-butter); }
-.ground-mint { background: var(--ground-mint); --surface: var(--ground-mint); }
-.ground-carmine { background: var(--ground-carmine); --surface: var(--ground-carmine); }
-
+/* Ground surface + foreground tokens come from config (lib/gallery-config.js → #gallery-config-grounds) */
 [class*='ground-'] {
   --on-ground-edge-1: color-mix(in oklch, var(--surface) calc(100% - var(--edge-mix)), black);
   --on-ground-edge: color-mix(in oklch, var(--on-ground-edge-1) calc(100% - var(--edge-mix)), black);
-}
-
-/*
- * Accessible foreground pairings per ground (WCAG 2.1 AA).
- * Body / meta: ≥ 4.5:1 · Display / large type: ≥ 3:1
- */
-.ground-pink,
-.ground-chartreuse,
-.ground-lilac,
-.ground-butter,
-.ground-mint {
-  --on-ground-display: var(--red);
-  --on-ground-body: var(--ink-soft);
-  --on-ground-muted: #363b40;
-  --on-ground-accent: var(--red);
-  --on-ground-focus: var(--red-bright);
-}
-
-.ground-tangerine {
-  --on-ground-display: #710617;
-  --on-ground-body: var(--ink);
-  --on-ground-muted: #363b40;
-  --on-ground-accent: #710617;
-  --on-ground-focus: #710617;
-}
-
-.ground-forest {
-  --on-ground-display: #0a3d28;
-  --on-ground-body: var(--ink);
-  --on-ground-muted: #2d4238;
-  --on-ground-accent: #0a3d28;
-  --on-ground-focus: #0a3d28;
-}
-
-.ground-carmine {
-  --on-ground-display: #ffffff;
-  --on-ground-body: #ffffff;
-  --on-ground-muted: #f5f7f9;
-  --on-ground-accent: #ffffff;
-  --on-ground-focus: #ffffff;
 }
 
 /* Colored posters and post cards */
@@ -523,9 +465,9 @@ a.collection-card[class*='ground-'] .card-lede {
 
 /* Posts — collection hero sits on page paper (not a ground poster) */
 .collection-hero {
-  --hero-display: var(--red);
-  --hero-body: var(--ink-soft);
-  --hero-muted: var(--ink-mute);
+  --hero-display: var(--config-hero-display, var(--red));
+  --hero-body: var(--config-hero-body, var(--ink-soft));
+  --hero-muted: var(--config-hero-muted, var(--ink-mute));
   --hero-edge: var(--hair);
   width: 100%;
   max-width: 100%;
@@ -611,6 +553,36 @@ h1.poster__title {
   }
 }
 
+/* Paper grain — assets/poster-grain.svg (your Figma export), blended over .ground-* */
+.post-card[class*='ground-'] {
+  position: relative;
+}
+
+.post-card[class*='ground-']::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url('poster-grain.svg');
+  background-repeat: repeat;
+  background-size: var(--config-grain-tile-size, 96px);
+  background-position: 0 0;
+  opacity: var(--poster-grain-opacity);
+  mix-blend-mode: overlay;
+}
+
+.post-card[class*='ground-'] > * {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .post-card[class*='ground-']::before {
+    content: none;
+  }
+}
+
 /* Default: height hugs content. B-size min height only on .post-card--roomy (short posters). */
 .post-card {
   container-type: inline-size;
@@ -620,7 +592,7 @@ h1.poster__title {
   max-width: min(var(--poster-width), 100%);
   margin: 0;
   padding: clamp(2.5rem, 6vw, 4rem) var(--pad);
-  border: 1px solid var(--on-ground-edge, var(--hair));
+  border: none;
   box-sizing: border-box;
   text-align: left;
   scroll-margin-top: var(--scroll-offset);
@@ -883,7 +855,7 @@ h2.poster__title.post-title,
 }
 
 .prose {
-  font-size: 18px;
+  font-size: var(--config-prose-size, 18px);
   line-height: 1.65;
   overflow-wrap: break-word;
   max-width: 100%;
@@ -1136,7 +1108,6 @@ h2.poster__title.post-title,
   }
   .post-card {
     break-inside: avoid;
-    border-color: #ccc;
   }
   .poster__title {
     color: #000;

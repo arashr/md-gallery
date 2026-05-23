@@ -266,14 +266,14 @@ html:not([data-prose-font='serif']) .font-toggle .icon-font-serif {
 
 /* Dark mode: dark chrome around posters; poster grounds keep light-theme text pairs */
 html[data-theme='dark'] {
-  --paper: #12151a;
+  --paper: var(--config-dark-paper, #12151a);
   --card-shadow-solid: -4px 4px 0 var(--hair);
-  --chrome-ink: #eef0f4;
-  --chrome-ink-soft: #c8cdd6;
-  --chrome-ink-mute: #9aa3b0;
-  /* UI chrome only — poster grounds still use :root --red / --red-bright */
-  --chrome-red: #ff6b7d;
-  --chrome-red-bright: #ff8a98;
+  --chrome-ink: var(--config-dark-ink, #eef0f4);
+  --chrome-ink-soft: var(--config-dark-ink-soft, #c8cdd6);
+  --chrome-ink-mute: var(--config-dark-ink-mute, #9aa3b0);
+  /* UI chrome only — poster grounds keep config foreground tokens */
+  --chrome-red: var(--config-dark-red, #ff6b7d);
+  --chrome-red-bright: var(--config-dark-red-bright, #ff8a98);
 }
 
 html[data-theme='dark'] body {
@@ -297,7 +297,7 @@ html[data-theme='dark'] .drop-zone {
 
 html[data-theme='dark'] .drop-zone:hover,
 html[data-theme='dark'] .drop-zone.is-dragover {
-  background: color-mix(in srgb, var(--ground-butter) 22%, var(--paper));
+  background: color-mix(in srgb, var(--ground-butter) var(--config-dark-drop-butter-mix, 22%), var(--paper));
   border-color: var(--chrome-red-bright);
 }
 

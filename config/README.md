@@ -1,14 +1,142 @@
-# Gallery configuration
+# Gallery design system (`gallery.config.json`)
 
-Edit **`gallery.config.json`** to change theme colors, poster ground colors, UI/body fonts, display title fonts, and title auto-scaling behavior.
+Single source of truth for theme, poster grounds, typography, spacing, and title fitting. Loaded at startup by `lib/gallery-config.js` and applied as CSS custom properties + a small injected stylesheet for per-ground tokens.
 
-The app loads this file on startup (`lib/gallery-config.js`). Changes take effect after a refresh.
+**Reload:** save the file, then refocus the browser tab (or refresh). Changes apply without rebuilding.
 
-| Section | What it controls |
-|---------|------------------|
-| `theme` | Paper, ink, accent red, `measure` (prose line length, e.g. `65ch`), `posterWidth` (card width, e.g. `42rem` — stable when changing UI fonts), `edgeStepMix` (each darken step mixes this much black into the surface; two steps → `--hair` / `--on-ground-edge`) |
-| `grounds` | Poster background colors (`--ground-*`) |
-| `fonts` | UI sans/serif, mono, and rotating `titleFaces` (Google Fonts family names) |
-| `titleScale` | `minPx` / `maxPx`, `maxWidthRatio`, tall-title height cap, B-aspect + slack (short posters use B min-height; all titles sized by DOM fit in `lib/fit-poster-title.js`) |
+---
 
-Per-ground text colors (display red on mint, etc.) remain in `assets/site.css` under `.ground-*` rules.
+## `theme` — page chrome & shared tokens
+
+### `theme.colors`
+
+| Key | Role |
+|-----|------|
+| `paper` | Page background |
+| `ink` | Primary text |
+| `inkSoft` | Body / secondary text |
+| `inkMute` | Meta, hints (rgba ok) |
+| `red` | Accent |
+| `redBright` | Accent hover / focus |
+
+### `theme.layout`
+
+| Key | Role |
+|-----|------|
+| `measure` | Prose max line length (`65ch`) |
+| `posterWidth` | Poster card width (`42rem`) |
+| `edgeStepMix` | How much black mixes into ground edges (0–0.4) |
+| `pad` | Horizontal page padding |
+| `scrollOffset` | Scroll-padding for sticky header |
+
+### `theme.hero`
+
+Collection hero (top of document) — values can be **semantic** or hex:
+
+| Key | Example |
+|-----|---------|
+| `display` | `"red"` |
+| `body` | `"inkSoft"` |
+| `muted` | `"inkMute"` |
+
+Semantic names: `paper`, `ink`, `inkSoft`, `inkMute`, `red`, `redBright`.
+
+### `theme.typography`
+
+| Key | Maps to |
+|-----|---------|
+| `bodySize` | `body` font-size |
+| `bodyLineHeight` | `body` line-height |
+| `labelSize` | `.kicker`, `.mono-label` |
+| `labelWeight` | label weight |
+| `labelLetterSpacing` | label tracking |
+| `proseSize` | `.prose` inside posters |
+| `crumbSize` | breadcrumbs |
+
+### `theme.motion`
+
+| Key | Role |
+|-----|------|
+| `cardHoverEase` | Card hover easing |
+| `cardHoverDuration` | Card hover duration |
+
+### `theme.grain`
+
+| Key | Role |
+|-----|------|
+| `opacity` | Default paper grain overlay on posters |
+| `opacityOnDarkGrounds` | Fallback when a ground omits `grainOpacity` |
+| `tileSize` | Fixed repeat size for grain tile (e.g. `"96px"`) — same on every poster |
+
+---
+
+## `darkTheme` — UI chrome only
+
+Posters keep their configured ground colors in dark mode; only the shell (header, drop zone, TOC) uses these.
+
+| Path | Role |
+|------|------|
+| `paper` | Dark page background |
+| `colors.ink` / `inkSoft` / `inkMute` | Chrome text |
+| `colors.red` / `redBright` | Chrome accents |
+| `dropZone.butterMix` | Butter tint on drop-zone hover (e.g. `"22%"`) |
+
+---
+
+## `grounds` — poster surfaces & text pairs
+
+Each ground is an object (or a **string** hex for surface only — then default foreground presets apply).
+
+```json
+"mint": {
+  "surface": "#a7dbce",
+  "foreground": {
+    "display": "red",
+    "body": "inkSoft",
+    "muted": "#363b40",
+    "accent": "red",
+    "focus": "redBright"
+  },
+  "grainOpacity": 0.55
+}
+```
+
+| Field | Role |
+|-------|------|
+| `surface` | Poster background (`--ground-*`) |
+| `foreground.display` | Titles, headings on ground |
+| `foreground.body` | Body / prose |
+| `foreground.muted` | Meta, captions |
+| `foreground.accent` | Tags, accents |
+| `foreground.focus` | Focus ring on ground |
+
+`foreground.*` values can be semantic (`"red"`, `"inkSoft"`) or any CSS color (`"#363b40"`).
+
+**Default presets** (when you only pass a hex string): light grounds → red display; `tangerine` / `forest` / `carmine` use their own pairs (see defaults in `lib/gallery-config.js`).
+
+---
+
+## `fonts`
+
+| Key | Role |
+|-----|------|
+| `uiSans` | UI + default sans (`family`, `google`) |
+| `uiSerif` | Serif body toggle |
+| `mono` | Mono labels (optional) |
+| `titleFaces` | Rotating display fonts per poster (`id`, `google`) |
+
+---
+
+## `titleScale`
+
+DOM title fitting (`lib/fit-poster-title.js`): `minPx`, `maxPx`, `maxWidthRatio`, tall-title caps, B-aspect slack for short posters.
+
+---
+
+## What stays in CSS
+
+- Layout that is not yet tokenized (gallery gaps, some clamps, title-face rules)
+- Dark-mode **component** rules that reference `--chrome-*`
+- Prose element styling (lists, tables, code blocks)
+
+To add a new ground: add a key under `grounds` in JSON — no CSS edit required.
