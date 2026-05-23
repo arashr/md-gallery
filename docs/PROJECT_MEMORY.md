@@ -2,7 +2,7 @@
 
 **Purpose:** Durable context for humans and agents continuing this repo. Update when architecture, workflows, or conventions change.
 
-**Last updated:** 2026-05-21
+**Last updated:** 2026-05-23
 
 ---
 
@@ -27,7 +27,7 @@ npm start          # npx serve . → http://localhost:3000
 - **Contents** in the nav opens the TOC drawer.
 - **Search** filters posters and highlights matches in visible bodies (no poster count label in the header).
 - **View controls:** theme toggle on landing + reader headers (synced); zoom −/+ in reader only; **serif/sans** toggle for poster body text (`data-prose-font`, persisted). Toolbar uses inline SVG icons. Dark mode uses `--chrome-*` / `--chrome-red*` on UI only; `:root` `--red` stays `#c8102e` on poster grounds.
-- **Design system:** edit `config/gallery.config.json` — theme colors, spacing, typography, dark chrome, per-ground surfaces + foreground pairs + grain, fonts, title-scale; applied via `lib/gallery-config.js` (see `config/README.md`). Refocus tab after save to reload.
+- **Design system:** ground rules in `docs/DESIGN.md` (APCA, OKLCH, 8px grid). Config in `config/gallery.config.json`; field reference in `config/README.md`. Applied via `lib/gallery-config.js`. Refocus tab after save to reload.
 - **Post cards:** Default height hugs content. Short posters (`.post-card--roomy`): B-min height, body `margin-top: auto`. **All** poster titles: `lib/fit-poster-title.js` binary-searches pixel `font-size` against live DOM width/height in `.post-title-bounds` (any font, any text).
 - **Cursor:** system default (custom crosshair CSS removed from `site.css`).
 - **Open file** returns to landing (file picker).

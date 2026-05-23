@@ -2,6 +2,8 @@
 
 Single source of truth for theme, poster grounds, typography, spacing, and title fitting. Loaded at startup by `lib/gallery-config.js` and applied as CSS custom properties + a small injected stylesheet for per-ground tokens.
 
+**Ground rules, APCA targets, OKLCH usage:** [`docs/DESIGN.md`](../docs/DESIGN.md).
+
 **Reload:** save the file, then refocus the browser tab (or refresh). Changes apply without rebuilding.
 
 ---
