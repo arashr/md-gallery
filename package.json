@@ -11,5 +11,8 @@
   "dependencies": {
     "isomorphic-dompurify": "^3.14.0",
     "marked": "^15.0.7"
+  },
+  "devDependencies": {
+    "apca-w3": "^0.1.9"
   }
 }

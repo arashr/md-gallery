@@ -20,6 +20,13 @@
   --card-shadow-rest: -4px 4px 0 transparent;
   --card-hover-ease: var(--config-card-hover-ease, cubic-bezier(0.22, 1, 0.36, 1));
   --card-hover-duration: var(--config-card-hover-duration, 0.4s);
+  --reveal-duration: var(--config-reveal-duration, 0.8s);
+  --reveal-ease: var(--config-reveal-ease, ease);
+  --shutter-duration: var(--config-shutter-duration, 0.9s);
+  --shutter-ease: var(--config-shutter-ease, cubic-bezier(0.77, 0, 0.18, 1));
+  --code-text: var(--config-code-text, #eff1f3);
+  --code-step-mix: var(--config-code-block-step-mix, var(--edge-mix));
+  --code-block-bg: var(--config-code-block-bg, var(--ink));
 }
 
 *,
@@ -39,14 +46,9 @@ body {
   overflow-x: clip;
   font-family: var(--font-ui-sans, 'Inter Tight', system-ui, sans-serif);
   font-size: var(--config-body-size, 17px);
-  line-height: var(--config-body-line-height, 1.6);
+  line-height: var(--config-body-line-height, 1.5);
   color: var(--ink-soft);
   background: var(--paper);
-}
-
-html[data-prose-font='serif'] .post-card .prose.post-body,
-html[data-prose-font='serif'] .collection-hero .prose-brief {
-  font-family: var(--font-ui-serif, 'Libre Baskerville', Georgia, serif);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -175,8 +177,8 @@ html[data-prose-font='serif'] .collection-hero .prose-brief {
 }
 
 .post-card[class*='ground-'] .prose a:hover {
-  color: var(--surface);
-  background: var(--ink);
+  color: var(--on-ground-link-hover-text, var(--surface));
+  background: var(--on-ground-link-hover-bg, var(--ink));
   text-decoration: none;
 }
 
@@ -201,7 +203,7 @@ html[data-prose-font='serif'] .collection-hero .prose-brief {
   background: var(--ink);
   z-index: 9998;
   pointer-events: none;
-  transition: transform 0.9s cubic-bezier(0.77, 0, 0.18, 1);
+  transition: transform var(--shutter-duration) var(--shutter-ease);
 }
 #shutter-top { top: 0; transform: translateY(0); }
 #shutter-bottom { bottom: 0; transform: translateY(0); }
@@ -229,7 +231,7 @@ html[data-prose-font='serif'] .collection-hero .prose-brief {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  background: color-mix(in oklch, var(--paper) 92%, transparent);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--hair);
   padding: 0.75rem var(--pad);
@@ -369,7 +371,7 @@ html[data-prose-font='serif'] .collection-hero .prose-brief {
 
 .prose-brief {
   font-size: 1.1rem;
-  line-height: 1.55;
+  line-height: var(--config-prose-line-height, 1.6);
 }
 .prose-brief p {
   margin: 0 0 0.5em;
@@ -482,6 +484,11 @@ a.collection-card[class*='ground-'] .card-lede {
   color: var(--hero-display);
 }
 
+.collection-hero .kicker {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
 .collection-hero .doc-meta,
 .collection-hero .case-hero__sub {
   color: var(--hero-body);
@@ -502,7 +509,6 @@ a.collection-card[class*='ground-'] .card-lede {
 }
 
 .collection-hero .poster__title {
-  text-shadow: -4px 4px 0 var(--hero-edge);
   font-size: clamp(2.5rem, 8vw, 5rem);
 }
 
@@ -511,9 +517,10 @@ a.collection-card[class*='ground-'] .card-lede {
 }
 
 h1.poster__title {
-  margin-top: 12px;
-  margin-bottom: 64px;
+  margin-top: 16px;
+  margin-bottom: 32px;
   box-sizing: content-box;
+  padding-bottom: 0px;
 }
 
 /* Each post = its own poster on paper */
@@ -660,7 +667,7 @@ h2.poster__title.post-title,
 .post-title {
   width: 100%;
   margin: 0;
-  line-height: 1.12;
+  line-height: var(--config-title-line-height, 1.12);
   letter-spacing: -0.003em;
 }
 
@@ -710,7 +717,6 @@ h2.poster__title.post-title,
   max-width: 100%;
   box-sizing: border-box;
   font-size: var(--poster-title-size, 2.5rem);
-  letter-spacing: 0.02em;
   padding-block: 0.04em;
   white-space: normal;
   overflow-wrap: normal;
@@ -726,8 +732,6 @@ h2.poster__title.post-title,
 /* In-post headings use the same display face as the poster title (smaller scale) */
 .post-card[class*='title-face-'] .prose :is(h2, h3, h4) {
   margin: 1.5em 0 0.65em;
-  line-height: 0.95;
-  letter-spacing: 0.02em;
 }
 .post-card[class*='title-face-'] .prose h2 {
   font-size: clamp(1.5rem, 4vw, 2.25rem);
@@ -745,7 +749,6 @@ h2.poster__title.post-title,
 .legend-sample.title-face-ultra {
   font-family: Ultra, serif;
   font-weight: 400;
-  letter-spacing: -0.005em;
 }
 
 .post-card.title-face-monoton .poster__title,
@@ -754,8 +757,6 @@ h2.poster__title.post-title,
 .legend-sample.title-face-monoton {
   font-family: Monoton, cursive;
   font-weight: 400;
-  letter-spacing: 0.04em;
-  line-height: 0.88;
 }
 
 .post-card.title-face-limelight .poster__title,
@@ -764,7 +765,6 @@ h2.poster__title.post-title,
 .legend-sample.title-face-limelight {
   font-family: Limelight, cursive;
   font-weight: 400;
-  letter-spacing: 0.02em;
 }
 
 .post-card.title-face-jersey25 .poster__title,
@@ -773,8 +773,6 @@ h2.poster__title.post-title,
 .legend-sample.title-face-jersey25 {
   font-family: 'Jersey 25', sans-serif;
   font-weight: 400;
-  letter-spacing: 0.03em;
-  line-height: 0.88;
 }
 
 .post-card.title-face-blackops .poster__title,
@@ -783,8 +781,6 @@ h2.poster__title.post-title,
 .legend-sample.title-face-blackops {
   font-family: 'Black Ops One', sans-serif;
   font-weight: 400;
-  letter-spacing: 0.02em;
-  line-height: 0.86;
 }
 
 .post-card.title-face-notable .poster__title,
@@ -793,8 +789,6 @@ h2.poster__title.post-title,
 .legend-sample.title-face-notable {
   font-family: Notable, cursive;
   font-weight: 400;
-  letter-spacing: 0.01em;
-  line-height: 0.9;
 }
 .post-title a {
   display: block;
@@ -856,7 +850,7 @@ h2.poster__title.post-title,
 
 .prose {
   font-size: var(--config-prose-size, 18px);
-  line-height: 1.65;
+  line-height: var(--config-prose-line-height, 1.6);
   overflow-wrap: break-word;
   max-width: 100%;
 }
@@ -952,24 +946,31 @@ h2.poster__title.post-title,
 .prose code {
   font-family: var(--font-mono);
   font-size: 0.9em;
-  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  background: color-mix(in oklch, var(--code-block-bg) var(--config-code-inline-mix, 35%), transparent);
+  color: inherit;
   padding: 0.1em 0.35em;
 }
 .prose pre {
   max-width: 100%;
   overflow-x: auto;
   padding: 1rem;
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--code-block-bg);
+  color: var(--code-text);
   font-family: var(--font-mono);
   font-size: 0.85rem;
+  line-height: var(--config-mono-line-height, 1.45);
 }
 .prose :not(pre) > code {
   overflow-wrap: anywhere;
 }
 .prose pre code {
   background: none;
+  color: inherit;
   padding: 0;
+}
+
+.post-card[class*='ground-'] .prose :not(pre) > code {
+  color: var(--on-ground-body);
 }
 .prose a {
   color: var(--ink-soft);
@@ -984,14 +985,16 @@ h2.poster__title.post-title,
   text-decoration: none;
 }
 .search-highlight {
-  background: color-mix(in srgb, var(--ground-butter) 70%, transparent);
+  background: color-mix(in oklch, var(--ground-butter) 70%, transparent);
   padding: 0 0.1em;
 }
 
 .reveal {
   opacity: 0;
   transform: translateY(24px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
+  transition:
+    opacity var(--reveal-duration) var(--reveal-ease),
+    transform var(--reveal-duration) var(--reveal-ease);
 }
 .reveal.is-visible {
   opacity: 1;
@@ -1001,7 +1004,7 @@ h2.poster__title.post-title,
 /* Index cards: `.reveal` sits later in the sheet and was overriding hover transitions */
 .collection-card.reveal {
   transition:
-    opacity 0.8s ease,
+    opacity var(--reveal-duration) var(--reveal-ease),
     transform var(--card-hover-duration) var(--card-hover-ease),
     box-shadow var(--card-hover-duration) var(--card-hover-ease);
 }

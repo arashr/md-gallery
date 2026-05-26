@@ -49,6 +49,10 @@ Semantic names: `paper`, `ink`, `inkSoft`, `inkMute`, `red`, `redBright`.
 |-----|---------|
 | `bodySize` | `body` font-size |
 | `bodyLineHeight` | `body` line-height |
+| `proseLineHeight` | `.prose` line-height (sans body) |
+| `titleLineHeight` | Default poster title line-height |
+| `titleHeadingLineHeight` | In-post h2–h4 on title-face cards (when face has no override) |
+| `titleFaceLetterSpacing` | Default letter-spacing for title faces |
 | `labelSize` | `.kicker`, `.mono-label` |
 | `labelWeight` | label weight |
 | `labelLetterSpacing` | label tracking |
@@ -61,6 +65,10 @@ Semantic names: `paper`, `ink`, `inkSoft`, `inkMute`, `red`, `redBright`.
 |-----|------|
 | `cardHoverEase` | Card hover easing |
 | `cardHoverDuration` | Card hover duration |
+| `revealDuration` | Scroll-reveal fade/slide duration |
+| `revealEase` | Scroll-reveal easing |
+| `shutterDuration` | Shutter intro duration |
+| `shutterEase` | Shutter intro easing |
 
 ### `theme.grain`
 
@@ -69,6 +77,21 @@ Semantic names: `paper`, `ink`, `inkSoft`, `inkMute`, `red`, `redBright`.
 | `opacity` | Default paper grain overlay on posters |
 | `opacityOnDarkGrounds` | Fallback when a ground omits `grainOpacity` |
 | `tileSize` | Fixed repeat size for grain tile (e.g. `"96px"`) — same on every poster |
+
+### `theme.code`
+
+Code blocks (`pre`) and inline `` `code` `` on posters and page prose.
+
+| Key | Role |
+|-----|------|
+| `text` | Text on code blocks — semantic or hex; maps to `--config-code-text` (does **not** follow dark-mode `--paper`) |
+| `blockSteps` | OKLCH darken steps from surface/paper (default `2`) |
+| `blockStepMix` | Target mix toward black for `referenceSteps` (default `0.36` at 2 steps) |
+| `referenceSteps` | Steps `blockStepMix` is calibrated for when `autoCompensateMix` is on (default `2`) |
+| `autoCompensateMix` | When `true` (default), scales per-step mix so total darkness stays constant as `blockSteps` changes — e.g. 1 step uses ~`0.59` to match 2×`0.36`. Set `false` to use literal `blockStepMix` per step. |
+| `inlineSurfaceMix` | Inline code tint: mix of code-block bg + surface (e.g. `"35%"`) |
+
+Injected CSS (`#gallery-config-code`) sets `--on-ground-code-bg` per ground and `--code-block-bg` on `:root`.
 
 ---
 
@@ -88,6 +111,8 @@ Posters keep their configured ground colors in dark mode; only the shell (header
 ## `grounds` — poster surfaces & text pairs
 
 Each ground is an object (or a **string** hex for surface only — then default foreground presets apply).
+
+**Accessibility:** choose **`surface` first** (the brand color). Tune **`foreground.*`** until APCA passes — do not lighten the surface just to salvage a default text color. See [`docs/DESIGN.md`](../docs/DESIGN.md#background-first-foreground-adapts).
 
 ```json
 "mint": {
@@ -111,6 +136,8 @@ Each ground is an object (or a **string** hex for surface only — then default 
 | `foreground.muted` | Meta, captions |
 | `foreground.accent` | Tags, accents |
 | `foreground.focus` | Focus ring on ground |
+| `foreground.linkHoverText` | Prose link hover text (default `#ffffff`) |
+| `foreground.linkHoverBg` | Prose link hover background (default `ink`) |
 
 `foreground.*` values can be semantic (`"red"`, `"inkSoft"`) or any CSS color (`"#363b40"`).
 
@@ -122,10 +149,12 @@ Each ground is an object (or a **string** hex for surface only — then default 
 
 | Key | Role |
 |-----|------|
-| `uiSans` | UI + default sans (`family`, `google`) |
-| `uiSerif` | Serif body toggle |
-| `mono` | Mono labels (optional) |
-| `titleFaces` | Rotating display fonts per poster (`id`, `google`) |
+| `uiSans` | UI + default sans (`family`, `google`, optional `lineHeight` — defaults to `bodyLineHeight`) |
+| `uiSerif` | Serif body toggle (`family`, `google`, optional `lineHeight`) |
+| `mono` | Mono labels and code blocks (`family`, `google`, optional `lineHeight`) |
+| `titleFaces` | Rotating display fonts per poster (`id`, `google`, optional `lineHeight`, `headingLineHeight`, `letterSpacing`) |
+
+Per-face typography is injected as `#gallery-config-title-faces` (same pattern as grounds/code). Title fitting (`lib/fit-poster-title.js`) reads live line-height from the DOM.
 
 ---
 
@@ -137,7 +166,7 @@ DOM title fitting (`lib/fit-poster-title.js`): `minPx`, `maxPx`, `maxWidthRatio`
 
 ## What stays in CSS
 
-- Layout that is not yet tokenized (gallery gaps, some clamps, title-face rules)
+- Layout that is not yet tokenized (gallery gaps, some clamps, title-face **font-family** rules)
 - Dark-mode **component** rules that reference `--chrome-*`
 - Prose element styling (lists, tables, code blocks)
 

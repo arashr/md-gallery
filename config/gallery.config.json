@@ -22,7 +22,11 @@
     },
     "typography": {
       "bodySize": "17px",
-      "bodyLineHeight": "1.6",
+      "bodyLineHeight": "1.5",
+      "proseLineHeight": "1.6",
+      "titleLineHeight": "1.12",
+      "titleHeadingLineHeight": "0.95",
+      "titleFaceLetterSpacing": "0.02em",
       "labelSize": "0.75rem",
       "labelWeight": "500",
       "labelLetterSpacing": "0.06em",
@@ -31,12 +35,24 @@
     },
     "motion": {
       "cardHoverEase": "cubic-bezier(0.22, 1, 0.36, 1)",
-      "cardHoverDuration": "0.4s"
+      "cardHoverDuration": "0.4s",
+      "revealDuration": "0.8s",
+      "revealEase": "ease",
+      "shutterDuration": "0.9s",
+      "shutterEase": "cubic-bezier(0.77, 0, 0.18, 1)"
     },
     "grain": {
       "opacity": 0.55,
       "opacityOnDarkGrounds": 0.45,
       "tileSize": "96px"
+    },
+    "code": {
+      "text": "paper",
+      "blockSteps": 1,
+      "blockStepMix": 0.36,
+      "referenceSteps": 1,
+      "autoCompensateMix": true,
+      "inlineSurfaceMix": "35%"
     }
   },
   "darkTheme": {
@@ -44,9 +60,9 @@
     "colors": {
       "ink": "#eef0f4",
       "inkSoft": "#c8cdd6",
-      "inkMute": "#9aa3b0",
-      "red": "#ff6b7d",
-      "redBright": "#ff8a98"
+      "inkMute": "#c0c8d4",
+      "red": "#ffa0ab",
+      "redBright": "#ffb3bc"
     },
     "dropZone": {
       "butterMix": "22%"
@@ -54,90 +70,106 @@
   },
   "grounds": {
     "pink": {
-      "surface": "#f4a8c2",
+      "surface": "#f8c0d4",
       "foreground": {
-        "display": "red",
-        "body": "inkSoft",
-        "muted": "#363b40",
-        "accent": "red",
-        "focus": "redBright"
+        "display": "#710617",
+        "body": "ink",
+        "muted": "#1f2428",
+        "accent": "#710617",
+        "focus": "ink",
+        "linkHoverText": "#ffffff",
+        "linkHoverBg": "ink"
       },
       "grainOpacity": 0.55
     },
     "chartreuse": {
       "surface": "#d8e04a",
       "foreground": {
-        "display": "red",
-        "body": "inkSoft",
-        "muted": "#363b40",
-        "accent": "red",
-        "focus": "redBright"
+        "display": "#710617",
+        "body": "ink",
+        "muted": "#1f2428",
+        "accent": "#710617",
+        "focus": "ink",
+        "linkHoverText": "#ffffff",
+        "linkHoverBg": "ink"
       },
       "grainOpacity": 0.55
     },
     "lime": {
-      "surface": "#E0FF83",
+      "surface": "#e0ff83",
       "foreground": {
-        "display": "red",
-        "body": "inkSoft",
-        "muted": "#363b40",
-        "accent": "red",
-        "focus": "redBright"
+        "display": "#0E0002",
+        "body": "ink",
+        "muted": "#1f2428",
+        "accent": "rgb(201, 239, 88)",
+        "focus": "ink",
+        "linkHoverText": "#ffffff",
+        "linkHoverBg": "ink"
       },
       "grainOpacity": 0.55
     },
     "tangerine": {
-      "surface": "#f0894e",
+      "surface": "#fbc090",
       "foreground": {
         "display": "#710617",
         "body": "ink",
-        "muted": "#363b40",
+        "muted": "#1f2428",
         "accent": "#710617",
-        "focus": "#710617"
+        "focus": "#710617",
+        "linkHoverText": "#ffffff",
+        "linkHoverBg": "ink"
       },
       "grainOpacity": 0.45
     },
     "lilac": {
-      "surface": "#c5bfe8",
+      "surface": "#d5d0ef",
       "foreground": {
-        "display": "red",
-        "body": "inkSoft",
-        "muted": "#363b40",
-        "accent": "red",
-        "focus": "redBright"
+        "display": "#710617",
+        "body": "ink",
+        "muted": "#1f2428",
+        "accent": "#710617",
+        "focus": "ink",
+        "linkHoverText": "#ffffff",
+        "linkHoverBg": "ink"
       },
       "grainOpacity": 0.55
     },
     "forest": {
-      "surface": "#8fb89b",
+      "surface": "#b8d8c5",
       "foreground": {
         "display": "#0a3d28",
         "body": "ink",
-        "muted": "#2d4238",
+        "muted": "#1f2428",
         "accent": "#0a3d28",
-        "focus": "#0a3d28"
+        "focus": "#0a3d28",
+        "linkHoverText": "#ffffff",
+        "linkHoverBg": "ink"
       },
       "grainOpacity": 0.45
     },
     "butter": {
       "surface": "#ffc64d",
       "foreground": {
-        "display": "red",
-        "body": "inkSoft",
-        "muted": "#363b40",
-        "accent": "red",
-        "focus": "redBright"
+        "display": "#710617",
+        "body": "ink",
+        "muted": "#1f2428",
+        "accent": "#710617",
+        "focus": "ink",
+        "linkHoverText": "#ffffff",
+        "linkHoverBg": "ink"
       },
       "grainOpacity": 0.55
     },
     "mint": {
       "surface": "#a7dbce",
       "foreground": {
-        "display": "red",
-        "body": "inkSoft",
-        "muted": "#363b40",
-        "accent": "red",
-        "focus": "redBright"
+        "display": "#710617",
+        "body": "ink",
+        "muted": "#1f2428",
+        "accent": "#710617",
+        "focus": "ink",
+        "linkHoverText": "#ffffff",
+        "linkHoverBg": "ink"
       },
       "grainOpacity": 0.55
     },
@@ -148,7 +180,9 @@
         "body": "#ffffff",
         "muted": "#f5f7f9",
         "accent": "#ffffff",
-        "focus": "#ffffff"
+        "focus": "#ffffff",
+        "linkHoverText": "#ffffff",
+        "linkHoverBg": "ink"
       },
       "grainOpacity": 0.45
     }
@@ -164,15 +198,16 @@
     },
     "mono": {
       "family": "Inter Mono",
-      "google": "Inter+Mono:ital,wght@0,400;0,500;1,400"
+      "google": "Inter+Mono:ital,wght@0,400;0,500;1,400",
+      "lineHeight": "1.45"
     },
     "titleFaces": [
-      { "id": "ultra", "google": "Ultra" },
-      { "id": "monoton", "google": "Monoton" },
-      { "id": "limelight", "google": "Limelight" },
-      { "id": "jersey25", "google": "Jersey+25" },
-      { "id": "blackops", "google": "Black+Ops+One" },
-      { "id": "notable", "google": "Notable" }
+      { "id": "ultra", "google": "Ultra", "letterSpacing": "-0.005em" },
+      { "id": "monoton", "google": "Monoton", "lineHeight": "0.88", "letterSpacing": "0.04em" },
+      { "id": "limelight", "google": "Limelight", "lineHeight": "0.95", "letterSpacing": "0.00em" },
+      { "id": "jersey25", "google": "Jersey+25", "lineHeight": "0.7", "letterSpacing": "-0.01em" },
+      { "id": "blackops", "google": "Black+Ops+One", "lineHeight": "0.86", "letterSpacing": "0.02em" },
+      { "id": "notable", "google": "Notable", "lineHeight": "0.8", "letterSpacing": "0.01em" }
     ]
   },
   "titleScale": {

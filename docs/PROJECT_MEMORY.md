@@ -83,7 +83,7 @@ Code fences are respected when detecting splits.
 
 - Body/UI: **Inter Tight**; code: **Inter Mono** (from `site.css`).  
 - Poster titles + in-post `h2`–`h6`: **title-face-*** (Ultra, Monoton, Limelight, Jersey 25, Black Ops One, Notable) cycled by poster index.  
-- Collection hero on reader view: fixed `ground-lilac` + Ultra for doc title (not per-file face).  
+- Collection hero on reader view: sits on **page paper** with `theme.hero` tokens (not a ground poster); doc title uses default Ultra styling (not per-file title face).  
 - Wide screens: `width: fit-content` posters + `--poster-shift` from `lib/stagger.js`.
 
 To change fonts/colors: edit `config/gallery.config.json` (preferred) or matching CSS in `assets/site.css` (search “Post title poster fonts” for per-face line-height tweaks).

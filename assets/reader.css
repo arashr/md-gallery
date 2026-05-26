@@ -34,7 +34,7 @@ body.page-collection #main-reader {
   width: min(100%, 520px);
   padding: clamp(2rem, 6vw, 3.5rem) var(--pad);
   border: 2px dashed var(--hair);
-  background: color-mix(in srgb, var(--paper) 92%, var(--ink) 8%);
+  background: color-mix(in oklch, var(--paper) 92%, var(--ink) 8%);
   text-align: center;
   cursor: pointer;
   transition:
@@ -45,7 +45,7 @@ body.page-collection #main-reader {
 .drop-zone:hover,
 .drop-zone.is-dragover {
   border-color: var(--red);
-  background: color-mix(in srgb, var(--ground-butter) 35%, var(--paper));
+  background: color-mix(in oklch, var(--ground-butter) 35%, var(--paper));
 }
 
 .drop-zone__title {
@@ -138,7 +138,7 @@ body.page-collection #main-reader {
 }
 
 .doc-meta {
-  margin: 0.5rem 0 0;
+  margin: 0;
   text-align: left;
 }
 
@@ -237,8 +237,7 @@ body.page-collection #main-reader {
   line-height: 1;
 }
 
-.theme-toggle__icons,
-.font-toggle__icons {
+.theme-toggle__icons {
   display: inline-flex;
   align-items: center;
   line-height: 0;
@@ -246,11 +245,6 @@ body.page-collection #main-reader {
 
 html:not([data-theme='dark']) .theme-toggle .icon-theme-light,
 html[data-theme='dark'] .theme-toggle .icon-theme-dark {
-  display: none;
-}
-
-html[data-prose-font='serif'] .font-toggle .icon-font-sans,
-html:not([data-prose-font='serif']) .font-toggle .icon-font-serif {
   display: none;
 }
 
@@ -264,16 +258,25 @@ html:not([data-prose-font='serif']) .font-toggle .icon-font-serif {
   color: var(--ink-soft);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .drop-zone,
+  .btn-ghost,
+  .btn-icon,
+  .toc-panel {
+    transition: none !important;
+  }
+}
+
 /* Dark mode: dark chrome around posters; poster grounds keep light-theme text pairs */
 html[data-theme='dark'] {
   --paper: var(--config-dark-paper, #12151a);
   --card-shadow-solid: -4px 4px 0 var(--hair);
   --chrome-ink: var(--config-dark-ink, #eef0f4);
   --chrome-ink-soft: var(--config-dark-ink-soft, #c8cdd6);
-  --chrome-ink-mute: var(--config-dark-ink-mute, #9aa3b0);
+  --chrome-ink-mute: var(--config-dark-ink-mute, #c0c8d4);
   /* UI chrome only — poster grounds keep config foreground tokens */
-  --chrome-red: var(--config-dark-red, #ff6b7d);
-  --chrome-red-bright: var(--config-dark-red-bright, #ff8a98);
+  --chrome-red: var(--config-dark-red, #ffa0ab);
+  --chrome-red-bright: var(--config-dark-red-bright, #ffb3bc);
 }
 
 html[data-theme='dark'] body {
@@ -287,17 +290,17 @@ html[data-theme='dark'] .brand--reader {
 }
 
 html[data-theme='dark'] .site-header {
-  background: color-mix(in srgb, var(--paper) 94%, transparent);
+  background: color-mix(in oklch, var(--paper) 94%, transparent);
 }
 
 html[data-theme='dark'] .drop-zone {
-  background: color-mix(in srgb, var(--paper) 90%, #fff 10%);
+  background: color-mix(in oklch, var(--paper) 90%, var(--chrome-ink) 10%);
   border-color: var(--hair);
 }
 
 html[data-theme='dark'] .drop-zone:hover,
 html[data-theme='dark'] .drop-zone.is-dragover {
-  background: color-mix(in srgb, var(--ground-butter) var(--config-dark-drop-butter-mix, 22%), var(--paper));
+  background: color-mix(in oklch, var(--ground-butter) var(--config-dark-drop-butter-mix, 22%), var(--paper));
   border-color: var(--chrome-red-bright);
 }
 
@@ -316,7 +319,7 @@ html[data-theme='dark'] .landing-foot a:hover {
 }
 
 html[data-theme='dark'] .btn-ghost {
-  background: color-mix(in srgb, var(--paper) 92%, #fff 8%);
+  background: color-mix(in oklch, var(--paper) 92%, var(--chrome-ink) 8%);
   color: var(--chrome-ink-soft);
   border-color: var(--hair);
 }
@@ -328,7 +331,7 @@ html[data-theme='dark'] .btn-ghost[aria-expanded='true'] {
 }
 
 html[data-theme='dark'] .nav-search-input {
-  background: color-mix(in srgb, var(--paper) 92%, #fff 8%);
+  background: color-mix(in oklch, var(--paper) 92%, var(--chrome-ink) 8%);
   color: var(--chrome-ink);
   border-color: var(--hair);
 }
@@ -338,9 +341,9 @@ html[data-theme='dark'] .nav-search-input::placeholder {
 }
 
 html[data-theme='dark'] .toc-panel {
-  background: color-mix(in srgb, var(--paper) 96%, #fff 4%);
+  background: color-mix(in oklch, var(--paper) 96%, var(--chrome-ink) 4%);
   border-color: var(--hair);
-  box-shadow: 4px 8px 0 rgba(0, 0, 0, 0.35);
+  box-shadow: 4px 8px 0 color-mix(in oklch, var(--ink) 35%, transparent);
 }
 
 html[data-theme='dark'] .toc-panel__label {
@@ -357,7 +360,7 @@ html[data-theme='dark'] .toc-item a.is-active {
 }
 
 html[data-theme='dark'] .back-to-top {
-  background: color-mix(in srgb, var(--paper) 92%, #fff 8%);
+  background: color-mix(in oklch, var(--paper) 92%, var(--chrome-ink) 8%);
   color: var(--chrome-ink);
   border-color: var(--hair);
 }
@@ -399,8 +402,8 @@ html[data-theme='dark'] .post-card[class*='ground-'] .prose a {
 }
 
 html[data-theme='dark'] .post-card[class*='ground-'] .prose a:hover {
-  color: var(--surface);
-  background: var(--ink);
+  color: var(--on-ground-link-hover-text, var(--surface));
+  background: var(--on-ground-link-hover-bg, var(--ink));
   text-decoration: none;
 }
 
@@ -409,23 +412,13 @@ html[data-theme='dark'] .post-card[class*='ground-'] .prose blockquote {
   border-left-color: var(--on-ground-accent);
 }
 
-html[data-theme='dark'] .post-card[class*='ground-'] .prose :not(pre) > code {
-  background: color-mix(in srgb, var(--on-ground-body) 10%, transparent);
-  color: var(--on-ground-body);
-}
-
-html[data-theme='dark'] .post-card[class*='ground-'] .prose pre {
-  background: #0c0e10;
-  color: #eff1f3;
-}
-
 html[data-theme='dark'] .post-card[class*='ground-'] .prose th,
 html[data-theme='dark'] .post-card[class*='ground-'] .prose td {
   border-color: var(--on-ground-edge);
 }
 
 html[data-theme='dark'] .search-highlight {
-  background: color-mix(in srgb, var(--ground-butter) 55%, #000 45%);
+  background: color-mix(in oklch, var(--ground-butter) 55%, var(--ink) 45%);
 }
 
 html[data-theme='dark'] .app-chrome-actions {
