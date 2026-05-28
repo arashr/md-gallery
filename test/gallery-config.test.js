@@ -9,6 +9,7 @@ import {
   getGroundDefs,
   buildGroundStylesheet,
   buildCodeStylesheet,
+  buildCodeStylesheetForExport,
   buildTitleFaceStylesheet,
   resolveTitleFaceTypography,
   codeBlockBgFromSurface,
@@ -56,6 +57,13 @@ describe('gallery config', () => {
     const css = buildCodeStylesheet(getGalleryConfig());
     assert.match(css, /--on-ground-code-bg:color-mix\(in oklch/);
     assert.match(css, /--code-block-bg:color-mix\(in oklch, color-mix\(in oklch, var\(--paper\)/);
+  });
+
+  it('builds export code CSS without OKLCH', () => {
+    setGalleryConfig({});
+    const css = buildCodeStylesheetForExport(getGalleryConfig());
+    assert.doesNotMatch(css, /oklch|color-mix/i);
+    assert.match(css, /\.ground-mint\{--on-ground-code-bg:#[0-9a-f]{6}/i);
   });
 
   it('builds per-title-face line-height and letter-spacing CSS', () => {

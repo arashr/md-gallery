@@ -1,5 +1,6 @@
-import { parseDocument } from '../lib/parse-document.js';
+import { parseDocument, peekDocumentTitle } from '../lib/parse-document.js';
 import { renderDocument, renderToc } from '../lib/render-document.js';
+import { renderLandingGallery } from '../lib/render-landing-gallery.js';
 import { reloadGalleryConfig, getGalleryConfig } from '../lib/gallery-config.js';
 import { fitPosterTitles } from '../lib/fit-poster-title.js';
 import {
@@ -10,6 +11,8 @@ import {
   resolveRelativeMarkdownPath
 } from '../lib/local-md-links.js';
 import { fetchBundledMarkdown } from '../lib/bundled-md.js';
+import { exportPosterAsPdf } from '../lib/poster-export.js';
+import { copyCodeFromButton, enhanceCodeBlocks } from '../lib/code-blocks.js';
 import { ICONS } from './icons.js';
 
 (function () {
@@ -21,6 +24,11 @@ import { ICONS } from './icons.js';
   const landing = document.getElementById('landing');
   const reader = document.getElementById('reader');
   const dropZone = document.getElementById('drop-zone');
+  const landingMain = document.getElementById('main');
+  const landingGallery = document.getElementById('landing-gallery');
+  const landingGalleryGrid = document.getElementById('landing-gallery-grid');
+  const landingGalleryCount = document.getElementById('landing-gallery-count');
+  const landingGalleryBack = document.getElementById('landing-gallery-back');
   const fileInput = document.getElementById('file-input');
   const mainReader = document.getElementById('main-reader');
   const docLabel = document.getElementById('doc-label');
@@ -47,6 +55,8 @@ import { ICONS } from './icons.js';
   let rootDirHandle = null;
   /** @type {Map<string, File> | null} */
   let droppedFileMap = null;
+  /** @type {{ path: string, title: string, index: number }[] | null} */
+  let landingGalleryItems = null;
   let currentRelativePath = '';
   let appDocsMode = false;
 
@@ -115,6 +125,7 @@ import { ICONS } from './icons.js';
   }
 
   boot();
+  history.replaceState({ view: 'landing' }, '', '#');
 
   function showReader() {
     landing.classList.add('is-hidden');
@@ -124,7 +135,7 @@ import { ICONS } from './icons.js';
     document.body.classList.add('page-collection');
   }
 
-  function showLanding() {
+  function showLandingShell() {
     landing.classList.remove('is-hidden');
     reader.hidden = true;
     reader.classList.remove('is-active');
@@ -133,6 +144,54 @@ import { ICONS } from './icons.js';
     searchInput.value = '';
     tocPanel.classList.remove('is-open');
     tocToggle.setAttribute('aria-expanded', 'false');
+  }
+
+  function showLanding() {
+    showLandingShell();
+    hideLandingGallery();
+  }
+
+  function hideLandingGallery() {
+    if (!landingGallery) return;
+    dropZone.hidden = false;
+    landingGallery.hidden = true;
+    landingGalleryGrid.innerHTML = '';
+    landingMain?.classList.remove('landing-main--gallery');
+    landingGalleryCount.textContent = '';
+  }
+
+  function pushGalleryState() {
+    history.pushState({ view: 'gallery' }, '', '#gallery');
+  }
+
+  function pushReadState(relativePath) {
+    history.pushState({ view: 'read', file: relativePath }, '', '#read');
+  }
+
+  async function showLandingGallery(map, { updateHistory = true } = {}) {
+    droppedFileMap = map;
+    rootDirHandle = null;
+    appDocsMode = false;
+
+    const paths = [...map.keys()].sort();
+    const items = await Promise.all(
+      paths.map(async (path, index) => {
+        const file = map.get(path);
+        const text = await file.text();
+        const title = peekDocumentTitle(text, displayNameForPath(path));
+        return { path, title, index };
+      })
+    );
+    landingGalleryItems = items;
+
+    dropZone.hidden = true;
+    landingGallery.hidden = false;
+    landingMain?.classList.add('landing-main--gallery');
+    landingGalleryCount.textContent = `${items.length} Markdown file${items.length === 1 ? '' : 's'} — choose one`;
+    landingGalleryGrid.innerHTML = renderLandingGallery(items);
+    window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+
+    if (updateHistory) pushGalleryState();
   }
 
   function isMarkdownFile(file) {
@@ -147,6 +206,7 @@ import { ICONS } from './icons.js';
   function clearLocalFileAccess() {
     rootDirHandle = null;
     droppedFileMap = null;
+    landingGalleryItems = null;
     currentRelativePath = '';
     appDocsMode = false;
   }
@@ -158,7 +218,17 @@ import { ICONS } from './icons.js';
     openMarkdown(text, path);
   }
 
-  function openMarkdown(text, relativePath) {
+  function enhanceReaderContent() {
+    enhanceCodeBlocks(mainReader, { copyIcon: ICONS.copy });
+    injectIcons();
+  }
+
+  function posterExportName(card) {
+    const title = card.querySelector('.post-title')?.textContent?.trim();
+    return card.getAttribute('data-slug') || title || 'poster';
+  }
+
+  function openMarkdown(text, relativePath, { updateHistory = true } = {}) {
     const filename = displayNameForPath(relativePath);
     currentRelativePath = relativePath;
     const doc = parseDocument(text, filename);
@@ -174,6 +244,7 @@ import { ICONS } from './icons.js';
       if (body) bodyCache.set(card.id, body.innerHTML);
     });
 
+    enhanceReaderContent();
     applySearch();
     setupTitleFitObserver();
     schedulePosterTitleFit();
@@ -183,13 +254,13 @@ import { ICONS } from './icons.js';
     if (document.fonts?.addEventListener) {
       document.fonts.addEventListener('loadingdone', schedulePosterTitleFit);
     }
-    history.replaceState({ file: relativePath }, '', '#read');
+    if (updateHistory) pushReadState(relativePath);
     window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
   }
 
-  async function openMarkdownFromFile(file, relativePath) {
+  async function openMarkdownFromFile(file, relativePath, opts) {
     const text = await file.text();
-    openMarkdown(text, relativePath);
+    openMarkdown(text, relativePath, opts);
   }
 
   async function openMarkdownFromHandle(fileHandle) {
@@ -351,6 +422,60 @@ import { ICONS } from './icons.js';
     return null;
   }
 
+  landingGalleryGrid?.addEventListener('click', (e) => {
+    const pick = e.target.closest('.landing-pick-card[data-md-path]');
+    if (!pick || !droppedFileMap) return;
+    const path = pick.getAttribute('data-md-path');
+    const file = droppedFileMap.get(path);
+    if (!file) return;
+    void openMarkdownFromFile(file, path).catch((err) => {
+      console.error(err);
+      alert('Could not read this file. See console for details.');
+    });
+  });
+
+  landingGalleryBack?.addEventListener('click', () => {
+    clearLocalFileAccess();
+    hideLandingGallery();
+    history.pushState({ view: 'landing' }, '', '#');
+  });
+
+  window.addEventListener('popstate', (e) => {
+    const state = e.state || {};
+    const view = state.view || (location.hash === '#read' ? 'read' : location.hash === '#gallery' ? 'gallery' : 'landing');
+
+    if (view === 'read') {
+      // If we can reopen from the dropped map, do it; otherwise just stay on landing.
+      const path = state.file;
+      const file = path && droppedFileMap?.get(path);
+      if (file) {
+        void openMarkdownFromFile(file, path, { updateHistory: false })
+          .catch((err) => console.error(err));
+      } else {
+        showLanding();
+      }
+      return;
+    }
+
+    if (view === 'gallery') {
+      showLandingShell();
+      if (droppedFileMap) {
+        if (landingGalleryItems) {
+          dropZone.hidden = true;
+          landingGallery.hidden = false;
+          landingMain?.classList.add('landing-main--gallery');
+          landingGalleryCount.textContent = `${landingGalleryItems.length} Markdown file${landingGalleryItems.length === 1 ? '' : 's'} — choose one`;
+          landingGalleryGrid.innerHTML = renderLandingGallery(landingGalleryItems);
+          return;
+        }
+        void showLandingGallery(droppedFileMap, { updateHistory: false }).catch((err) => console.error(err));
+      }
+      return;
+    }
+
+    showLanding();
+  });
+
   landing.addEventListener('click', (e) => {
     const a = e.target.closest('a[href]');
     if (!a) return;
@@ -375,6 +500,42 @@ import { ICONS } from './icons.js';
   });
 
   mainReader.addEventListener('click', (e) => {
+    const copyBtn = e.target.closest('.code-block__copy');
+    if (copyBtn) {
+      e.preventDefault();
+      void copyCodeFromButton(copyBtn).then((ok) => {
+        if (!ok) return;
+        copyBtn.classList.add('is-copied');
+        copyBtn.setAttribute('aria-label', 'Copied');
+        window.setTimeout(() => {
+          copyBtn.classList.remove('is-copied');
+          copyBtn.setAttribute('aria-label', 'Copy code');
+        }, 2000);
+      });
+      return;
+    }
+
+    const exportBtn = e.target.closest('[data-poster-export]');
+    if (exportBtn) {
+      e.preventDefault();
+      const card =
+        exportBtn.closest('.post-card-wrap')?.querySelector('.post-card') ??
+        exportBtn.closest('.post-card');
+      if (!card || exportBtn.disabled) return;
+      exportBtn.disabled = true;
+      exportBtn.setAttribute('aria-busy', 'true');
+      void exportPosterAsPdf(card, posterExportName(card))
+        .catch((err) => {
+          console.error(err);
+          alert('Could not export this poster as PDF.');
+        })
+        .finally(() => {
+          exportBtn.disabled = false;
+          exportBtn.removeAttribute('aria-busy');
+        });
+      return;
+    }
+
     const a = e.target.closest('a[href]');
     if (!a) return;
     const href = a.getAttribute('href');
@@ -452,6 +613,7 @@ import { ICONS } from './icons.js';
         body.innerHTML = html;
       }
     });
+    enhanceReaderContent();
     schedulePosterTitleFit();
   }
 
@@ -477,16 +639,11 @@ import { ICONS } from './icons.js';
 
     const collected = await collectMarkdownFilesFromDrop(e.dataTransfer);
     if (collected.size > 1) {
-      droppedFileMap = collected;
-      rootDirHandle = null;
-      const initial = chooseInitialMarkdown(collected, e.dataTransfer?.files?.[0]);
-      if (initial) {
-        try {
-          await openMarkdownFromFile(initial.file, initial.path);
-        } catch (err) {
-          console.error(err);
-          alert('Could not read this file. See console for details.');
-        }
+      try {
+        await showLandingGallery(collected);
+      } catch (err) {
+        console.error(err);
+        alert('Could not read these files. See console for details.');
       }
       return;
     }

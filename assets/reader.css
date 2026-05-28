@@ -13,9 +13,69 @@ body.page-collection #main-reader {
 .page-landing .landing-main {
   flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: var(--pad);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.page-landing .landing-main.landing-main--gallery {
+  align-items: stretch;
+  justify-content: flex-start;
+  padding-top: clamp(1rem, 3vw, 2rem);
+}
+
+.landing-gallery {
+  width: min(100%, 1400px);
+  margin: 0 auto;
+}
+
+.landing-gallery__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  max-width: 1400px;
+  margin: 0 auto 1.25rem;
+  padding: 0 var(--pad);
+}
+
+.landing-gallery__count {
+  margin: 0;
+}
+
+.landing-gallery__grid {
+  padding-bottom: clamp(2rem, 5vw, 3rem);
+}
+
+button.landing-pick-card.collection-card {
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  aspect-ratio: 250 / 353;
+  min-height: unset;
+}
+
+button.landing-pick-card.collection-card:hover,
+button.landing-pick-card.collection-card:focus-visible {
+  box-shadow: var(--card-shadow-hover);
+  transform: translateY(-2px);
+}
+
+button.landing-pick-card.collection-card:focus-visible {
+  outline: 2px solid var(--on-ground-focus, var(--ink));
+  outline-offset: 3px;
+}
+
+button.landing-pick-card .poster__title {
+  margin: 0;
 }
 
 .page-reader {
@@ -426,6 +486,10 @@ html[data-theme='dark'] .app-chrome-actions {
 }
 
 .post-card.is-filtered-out {
+  display: none;
+}
+
+.post-card-wrap:has(.post-card.is-filtered-out) {
   display: none;
 }
 

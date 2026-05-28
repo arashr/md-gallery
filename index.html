@@ -34,8 +34,15 @@
       <label class="drop-zone" id="drop-zone">
         <input type="file" id="file-input" accept=".md,.markdown,.txt,text/markdown,text/plain">
         <h1 class="drop-zone__title">Drop a Markdown file</h1>
-        <p class="drop-zone__hint">or click to browse · stays on your device · drop a folder to follow links</p>
+        <p class="drop-zone__hint">or click to browse · stays on your device · drop a folder to pick a file</p>
       </label>
+      <div id="landing-gallery" class="landing-gallery" hidden>
+        <div class="landing-gallery__head">
+          <p class="landing-gallery__count mono-label" id="landing-gallery-count"></p>
+          <button type="button" class="btn-ghost landing-gallery__back" id="landing-gallery-back">Drop another file</button>
+        </div>
+        <div id="landing-gallery-grid" class="landing-gallery__grid collections-grid" role="list"></div>
+      </div>
     </main>
     <footer class="landing-foot mono-label">
       Posters split on <code>##</code> headings (see <a href="docs/POSTER_LOGIC.md">POSTER_LOGIC.md</a>)
@@ -86,12 +93,14 @@
     <button type="button" id="back-to-top" class="back-to-top" aria-label="Back to top">↑</button>
   </section>
 
+  <script src="node_modules/jspdf/dist/jspdf.umd.min.js"></script>
   <script type="importmap">
   {
     "imports": {
       "marked": "./node_modules/marked/lib/marked.esm.js",
       "dompurify": "./node_modules/dompurify/dist/purify.es.mjs",
-      "isomorphic-dompurify": "./node_modules/isomorphic-dompurify/dist/browser.mjs"
+      "isomorphic-dompurify": "./node_modules/isomorphic-dompurify/dist/browser.mjs",
+      "html2canvas": "./node_modules/html2canvas/dist/html2canvas.esm.js"
     }
   }
   </script>
