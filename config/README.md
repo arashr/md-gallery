@@ -70,13 +70,15 @@ Semantic names: `paper`, `ink`, `inkSoft`, `inkMute`, `red`, `redBright`.
 | `shutterDuration` | Shutter intro duration |
 | `shutterEase` | Shutter intro easing |
 
-### `theme.grain`
+### `theme.graphics` — poster type patterns
+
+Canvas glyph mosaics on each poster (`lib/type-pattern-mosaic.js`, driven from `assets/reader.js`). Not a CSS background tile.
 
 | Key | Role |
 |-----|------|
-| `opacity` | Default paper grain overlay on posters |
-| `opacityOnDarkGrounds` | Fallback when a ground omits `grainOpacity` |
-| `tileSize` | Fixed repeat size for grain tile (e.g. `"96px"`) — same on every poster |
+| `glyphPatternColor` | `"display"` (use each ground’s `foreground.display`) or a semantic/hex color → `--config-glyph-pattern-color` / per-ground `--on-ground-glyph-pattern-color` |
+| `glyphPatternOpacity` | Canvas layer opacity (default `0.07`) → `--glyph-pattern-opacity` on `.post-card__glyph-canvas` |
+| `typePattern` | Random layout knobs: `patternTypes`, `targetTileSize`, font/repeat/padding ranges, wave/grid angles, `symbolPool`, `noneProbability`, empty-space thresholds, etc. See defaults in `gallery.config.json`. |
 
 ### `theme.code`
 
@@ -89,9 +91,14 @@ Code blocks (`pre`) and inline `` `code` `` on posters and page prose.
 | `blockStepMix` | Target mix toward black for `referenceSteps` (default `0.36` at 2 steps) |
 | `referenceSteps` | Steps `blockStepMix` is calibrated for when `autoCompensateMix` is on (default `2`) |
 | `autoCompensateMix` | When `true` (default), scales per-step mix so total darkness stays constant as `blockSteps` changes — e.g. 1 step uses ~`0.59` to match 2×`0.36`. Set `false` to use literal `blockStepMix` per step. |
-| `inlineSurfaceMix` | Inline code tint: mix of code-block bg + surface (e.g. `"35%"`) |
+| `inlineSurfaceMix` | Chip tint: mix of darkened block bg back toward surface (e.g. `"35%"`) — used for both inline and block code |
+| `chipDarkBodyLift` | Dark poster body (`ink`): code chips this much **lighter than the ground** — `color-mix` from `surface` toward `paper` (default `"20%"`) |
+| `chipLightSurfaceShade` | **White** ground (≈ page paper) and **carmine** (white body): chips this much **darker** — mix from `surface` toward black (default `"10%"`) |
+| `chipPaperMix` | Optional extra lift toward `paper` on lighten grounds only |
 
-Injected CSS (`#gallery-config-code`) sets `--on-ground-code-bg` per ground and `--code-block-bg` on `:root`.
+Per-ground `codeChipPaperMix` overrides `chipPaperMix` when one ground needs more lift.
+
+Injected CSS (`#gallery-config-code`) sets `--on-ground-code-chip-bg` per ground, `--code-chip-bg` on `:root`, and `--on-ground-code-bg` (darken expression for export).
 
 ---
 
@@ -123,8 +130,7 @@ Each ground is an object (or a **string** hex for surface only — then default 
     "muted": "#363b40",
     "accent": "red",
     "focus": "redBright"
-  },
-  "grainOpacity": 0.55
+  }
 }
 ```
 

@@ -13,6 +13,7 @@ import {
 import { fetchBundledMarkdown } from '../lib/bundled-md.js';
 import { exportPosterAsPdf } from '../lib/poster-export.js';
 import { copyCodeFromButton, enhanceCodeBlocks } from '../lib/code-blocks.js';
+import { renderTypePatternMosaic } from '../lib/type-pattern-mosaic.js';
 import { ICONS } from './icons.js';
 
 (function () {
@@ -223,6 +224,234 @@ import { ICONS } from './icons.js';
     injectIcons();
   }
 
+  function renderPosterGlyphPatterns() {
+    if (!posterEls.length) return;
+    const cfg = getGalleryConfig();
+    const patternCfg = {
+      patternTypes: ['wave', 'grid', 'line'],
+      targetTileSize: 128,
+      fontSizeMin: 24,
+      fontSizeMax: 68,
+      repeatsMin: 18,
+      repeatsMax: 38,
+      paddingMin: 6,
+      paddingMax: 18,
+      lineAngleMin: -25,
+      lineAngleMax: 25,
+      waveCyclesMin: 2,
+      waveCyclesMax: 6,
+      waveAmplitudeMin: 0.16,
+      waveAmplitudeMax: 0.34,
+      gridColumnsMin: 3,
+      gridColumnsMax: 7,
+      gridStaggerProbability: 0.6,
+      flipAlternateVertical: true,
+      flipAlternateHorizontal: true,
+      emptySpaceMinPx: 72,
+      emptySpaceMinRatio: 0.14,
+      fallbackBandWidth: 96,
+      fallbackSide: 'auto',
+      edgeOverflowPx: 40,
+      symbolPool: '+*-´`=/|',
+      symbolProbability: 0.55,
+      noneProbability: 0.18,
+      ...(cfg.theme?.graphics?.typePattern || {})
+    };
+    const patternTypes =
+      Array.isArray(patternCfg.patternTypes) && patternCfg.patternTypes.length
+        ? patternCfg.patternTypes
+        : ['wave', 'grid', 'line'];
+    const clampInt = (n, fallback) => {
+      const v = Number.parseInt(String(n), 10);
+      return Number.isFinite(v) ? v : fallback;
+    };
+    const clampNum = (n, fallback) => {
+      const v = Number.parseFloat(String(n));
+      return Number.isFinite(v) ? v : fallback;
+    };
+    const computeGlyphRegion = (card, rand) => {
+      const cardH = card.clientHeight;
+      const cardW = card.clientWidth;
+      if (!cardH || !cardW) return { x: 0, y: 0, width: cardW, height: cardH };
+
+      const s = getComputedStyle(card);
+      const padTop = clampNum(s.paddingTop, 0);
+      const padBottom = clampNum(s.paddingBottom, 0);
+      const padLeft = clampNum(s.paddingLeft, 0);
+      const padRight = clampNum(s.paddingRight, 0);
+      const contentTop = padTop;
+      const contentBottom = cardH - padBottom;
+      const contentLeft = padLeft;
+      const contentRight = cardW - padRight;
+      const contentWidth = Math.max(1, contentRight - contentLeft);
+      const contentHeight = Math.max(1, contentBottom - contentTop);
+
+      const header = card.querySelector('.post-header');
+      const body = card.querySelector('.post-body');
+      const cardRect = card.getBoundingClientRect();
+      const headerRect = header instanceof HTMLElement ? header.getBoundingClientRect() : null;
+      const bodyRect = body instanceof HTMLElement ? body.getBoundingClientRect() : null;
+      const headerTop = headerRect ? headerRect.top - cardRect.top : contentTop;
+      const headerBottom = headerRect ? headerRect.bottom - cardRect.top : contentTop;
+      const bodyTop = bodyRect ? bodyRect.top - cardRect.top : contentBottom;
+      const bodyBottom = bodyRect ? bodyRect.bottom - cardRect.top : contentBottom;
+
+      const regions = [
+        {
+          key: 'top',
+          x: contentLeft,
+          y: contentTop,
+          width: contentWidth,
+          height: Math.max(0, headerTop - contentTop)
+        },
+        {
+          key: 'middle',
+          x: contentLeft,
+          y: headerBottom,
+          width: contentWidth,
+          height: Math.max(0, bodyTop - headerBottom)
+        },
+        {
+          key: 'bottom',
+          x: contentLeft,
+          y: bodyBottom,
+          width: contentWidth,
+          height: Math.max(0, contentBottom - bodyBottom)
+        }
+      ].sort((a, b) => b.height - a.height);
+
+      const minGapPx = clampInt(patternCfg.emptySpaceMinPx, 72);
+      const minGapRatio = Math.min(0.9, Math.max(0, clampNum(patternCfg.emptySpaceMinRatio, 0.14)));
+      const minGapFromRatio = Math.round(contentHeight * minGapRatio);
+      const minGap = Math.max(minGapPx, minGapFromRatio);
+      const roomy = regions[0];
+      if (roomy && roomy.height >= minGap) {
+        return roomy;
+      }
+
+      const bandW = Math.min(
+        Math.max(24, clampInt(patternCfg.fallbackBandWidth, 96)),
+        Math.floor(contentWidth * 0.45)
+      );
+      const sidePref = String(patternCfg.fallbackSide || 'auto').toLowerCase();
+      const useLeft = sidePref === 'left' || (sidePref !== 'right' && rand() < 0.5);
+      return {
+        x: useLeft ? contentLeft : contentRight - bandW,
+        y: contentTop,
+        width: bandW,
+        height: contentHeight
+      };
+    };
+    for (const card of posterEls) {
+      const canvas = card.querySelector('[data-glyph-canvas]');
+      if (!(canvas instanceof HTMLCanvasElement)) continue;
+      const layer = card.querySelector('.post-card__glyph-layer');
+      if (!(layer instanceof HTMLElement)) continue;
+      const title = (card.querySelector('.post-title')?.textContent || card.dataset.slug || 'A').trim();
+      const titleLetter = (title.match(/[A-Za-z0-9]/)?.[0] || 'A').toUpperCase();
+      const titleEl = card.querySelector('.post-title a, .post-title');
+      const cs = getComputedStyle(card);
+      const titleStyle = titleEl ? getComputedStyle(titleEl) : cs;
+      const foregroundColor = cs.getPropertyValue('--glyph-pattern-color').trim() || cs.color || '#111';
+      const seedBase = (card.dataset.slug || title).split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+      const rand = (() => {
+        let s = seedBase >>> 0;
+        return () => {
+          s = (s * 1664525 + 1013904223) >>> 0;
+          return s / 4294967296;
+        };
+      })();
+      const pick = (arr) => arr[Math.floor(rand() * arr.length)];
+      const int = (min, max) => Math.floor(rand() * (max - min + 1)) + min;
+      const repeatsMin = clampInt(patternCfg.repeatsMin, 18);
+      const repeatsMax = Math.max(repeatsMin, clampInt(patternCfg.repeatsMax, 38));
+      const fontSizeMin = clampInt(patternCfg.fontSizeMin, 24);
+      const fontSizeMax = Math.max(fontSizeMin, clampInt(patternCfg.fontSizeMax, 68));
+      const paddingMin = clampInt(patternCfg.paddingMin, 6);
+      const paddingMax = Math.max(paddingMin, clampInt(patternCfg.paddingMax, 18));
+      const lineAngleMin = clampInt(patternCfg.lineAngleMin, -25);
+      const lineAngleMax = Math.max(lineAngleMin, clampInt(patternCfg.lineAngleMax, 25));
+      const waveCyclesMin = clampInt(patternCfg.waveCyclesMin, 2);
+      const waveCyclesMax = Math.max(waveCyclesMin, clampInt(patternCfg.waveCyclesMax, 6));
+      const waveAmpMin = clampNum(patternCfg.waveAmplitudeMin, 0.16);
+      const waveAmpMax = Math.max(waveAmpMin, clampNum(patternCfg.waveAmplitudeMax, 0.34));
+      const gridColsMin = clampInt(patternCfg.gridColumnsMin, 3);
+      const gridColsMax = Math.max(gridColsMin, clampInt(patternCfg.gridColumnsMax, 7));
+      const staggerProb = Math.min(1, Math.max(0, clampNum(patternCfg.gridStaggerProbability, 0.6)));
+      const symbolProb = Math.min(1, Math.max(0, clampNum(patternCfg.symbolProbability, 0.55)));
+      const noneProb = Math.min(1, Math.max(0, clampNum(patternCfg.noneProbability, 0.18)));
+      const edgeOverflow = Math.max(0, clampInt(patternCfg.edgeOverflowPx, 40));
+      if (rand() < noneProb) {
+        const ctx = canvas.getContext('2d');
+        ctx?.clearRect(0, 0, canvas.width, canvas.height);
+        canvas.style.display = 'none';
+        continue;
+      }
+      canvas.style.display = 'block';
+      const symbolPool = String(patternCfg.symbolPool || '');
+      const symbolChars = [...symbolPool].filter((ch) => ch.trim().length > 0);
+      const patternLetter =
+        symbolChars.length && rand() < symbolProb
+          ? pick(symbolChars)
+          : titleLetter;
+      const patternType = pick(patternTypes);
+      const region = computeGlyphRegion(card, rand);
+      const usingFallbackBand = region.width <= Math.max(24, clampInt(patternCfg.fallbackBandWidth, 96));
+      let x = region.x;
+      let w = region.width;
+      if (usingFallbackBand && edgeOverflow > 0) {
+        const sidePref = String(patternCfg.fallbackSide || 'auto').toLowerCase();
+        const onLeft = sidePref === 'left' || (sidePref !== 'right' && x <= card.clientWidth / 2);
+        if (onLeft) {
+          x -= edgeOverflow;
+        } else {
+          w += edgeOverflow;
+        }
+      }
+      layer.style.setProperty('--glyph-y', `${Math.round(region.y)}px`);
+      layer.style.setProperty('--glyph-x', `${Math.round(x)}px`);
+      layer.style.setProperty('--glyph-w', `${Math.max(1, Math.round(w))}px`);
+      layer.style.setProperty('--glyph-h', `${Math.max(1, Math.round(region.height))}px`);
+      const tilePattern = {
+        type: patternType,
+        repeats: int(repeatsMin, repeatsMax),
+        fontSize: int(fontSizeMin, fontSizeMax),
+        followPath: true,
+        flipReadable: true,
+        flipAlternateVertical: Boolean(patternCfg.flipAlternateVertical),
+        flipAlternateHorizontal: Boolean(patternCfg.flipAlternateHorizontal),
+        opticalTight: true,
+        padding: int(paddingMin, paddingMax),
+        lineAngle: int(lineAngleMin, lineAngleMax),
+        waveCycles: int(waveCyclesMin, waveCyclesMax),
+        waveAmplitude: waveAmpMin + rand() * (waveAmpMax - waveAmpMin),
+        gridColumns: int(gridColsMin, gridColsMax),
+        gridStagger: rand() < staggerProb
+      };
+      renderTypePatternMosaic(canvas, patternLetter, {
+        autoFill: true,
+        targetTileSize: Math.min(
+          clampInt(patternCfg.targetTileSize, 128),
+          Math.max(32, Math.floor(Math.min(region.width, region.height) * 0.75))
+        ),
+        gap: 0,
+        randomize: false,
+        sameTilePattern: true,
+        seed: seedBase,
+        backgroundColor: 'rgba(0,0,0,0)',
+        tilePattern,
+        sharedOptions: {
+          foregroundColor,
+          backgroundColor: 'rgba(0,0,0,0)',
+          opacity: 1,
+          fontFamily: titleStyle.fontFamily,
+          fontWeight: titleStyle.fontWeight,
+          opticalTight: true
+        }
+      });
+    }
+  }
+
   function posterExportName(card) {
     const title = card.querySelector('.post-title')?.textContent?.trim();
     return card.getAttribute('data-slug') || title || 'poster';
@@ -248,11 +477,18 @@ import { ICONS } from './icons.js';
     applySearch();
     setupTitleFitObserver();
     schedulePosterTitleFit();
+    requestAnimationFrame(renderPosterGlyphPatterns);
     if (document.fonts?.ready) {
-      document.fonts.ready.then(schedulePosterTitleFit);
+      document.fonts.ready.then(() => {
+        schedulePosterTitleFit();
+        renderPosterGlyphPatterns();
+      });
     }
     if (document.fonts?.addEventListener) {
-      document.fonts.addEventListener('loadingdone', schedulePosterTitleFit);
+      document.fonts.addEventListener('loadingdone', () => {
+        schedulePosterTitleFit();
+        renderPosterGlyphPatterns();
+      });
     }
     if (updateHistory) pushReadState(relativePath);
     window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
@@ -731,7 +967,10 @@ import { ICONS } from './icons.js';
 
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(schedulePosterTitleFit, 120);
+    resizeTimer = setTimeout(() => {
+      schedulePosterTitleFit();
+      renderPosterGlyphPatterns();
+    }, 120);
   });
 
   document.addEventListener('keydown', (e) => {

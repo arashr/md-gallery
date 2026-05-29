@@ -22,6 +22,25 @@ Body.
     assert.equal(plainTextFromMarkdown('**Hello** world'), 'Hello world');
     assert.equal(inlineMarkdownToHtml('**Hi**'), '<strong>Hi</strong>');
   });
+
+  it('forTitle strips code markup so display font is uniform', () => {
+    assert.equal(inlineMarkdownToHtml('`mosaic.js`', { forTitle: true }), 'mosaic.js');
+    assert.match(inlineMarkdownToHtml('**Bold** `code`', { forTitle: true }), /<strong>Bold<\/strong> code/);
+    assert.match(inlineMarkdownToHtml('`code`'), /<code>code<\/code>/);
+  });
+
+  it('renders backtick filenames in poster titles without code styling', () => {
+    const md = `# Doc
+
+## Layer 2: \`type-pattern-mosaic.js\`
+
+Body.
+`;
+    const doc = parseDocument(md, 't.md');
+    const html = renderDocument(doc, 't.md');
+    assert.match(html, /<h2[^>]*>[\s\S]*type-pattern-mosaic\.js/);
+    assert.doesNotMatch(html, /<h2[^>]*>[\s\S]*<code>/);
+  });
 });
 
 describe('substantial intro promotion', () => {

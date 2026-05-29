@@ -14,7 +14,7 @@ These are non‑negotiable defaults for new work.
 
 ### Tokens & config
 
-4. **Config before CSS** — theme colors, grounds, typography, spacing, grain, and dark chrome live in `config/gallery.config.json`. CSS consumes `--config-*` custom properties. Avoid hardcoding theme values in stylesheets unless layout logic requires it.
+4. **Config before CSS** — theme colors, grounds, typography, spacing, decorative graphics, and dark chrome live in `config/gallery.config.json`. CSS consumes `--config-*` custom properties. Avoid hardcoding theme values in stylesheets unless layout logic requires it.
 5. **Semantic colors over one‑off hex** — prefer named tokens (`ink`, `inkSoft`, `red`, `redBright`) in config; use raw hex only for ground‑specific overrides (e.g. muted text on a light ground).
 6. **Every ground is a pair, not a color** — each ground defines `surface` plus a full `foreground` set (`display`, `body`, `muted`, `accent`, `focus`). Never ship a surface without a tested text pair. Set **surface first**; tune `foreground.*` until APCA passes.
 7. **Dark mode is chrome‑only** — `darkTheme` affects the reader shell (header, drop zone, TOC). Poster grounds keep their configured light‑theme pairs; do not re‑tint posters in dark mode.
@@ -35,7 +35,7 @@ These are non‑negotiable defaults for new work.
 
 ### Surface & texture
 
-16. **Grain is uniform, opacity varies** — same tile (`assets/poster-grain.svg`, fixed repeat size from `theme.grain.tileSize`); per‑ground `grainOpacity` only, not different textures.
+16. **Texture overlays are optional** — decorative layers (like upcoming glyph patterns) are token-driven and can be turned off without affecting layout or contrast.
 17. **Edges derive from surface** — hairline/edge colors come from OKLCH `color-mix` on `--surface`, not hand‑picked per ground. Posters use no border (`border: none`).
 18. **Grounds are assigned, not chosen** — poster ground comes from slug hash (`lib/grounds.js`), keeping distribution stable across reloads.
 
@@ -44,7 +44,7 @@ These are non‑negotiable defaults for new work.
 19. **Motion has named tokens** — card hover uses config `cardHoverEase` + `cardHoverDuration`; avoid ad‑hoc transition values in component CSS.
 20. **Hover enhances, never required** — all interactive states must work without hover (keyboard, touch, reduced motion).
 21. **Respect `prefers-reduced-motion`** — disable scroll smoothing, reveals, and hover transforms when the user asks for reduced motion.
-22. **Respect `prefers-reduced-transparency`** — disable poster grain overlay when transparency is reduced.
+22. **Respect `prefers-reduced-transparency`** — reduce or disable decorative transparency layers.
 
 ### Focus & input
 
@@ -92,7 +92,8 @@ When a pair fails APCA: **change foreground in config** (semantic token or hex).
 | **Display** | Poster titles, in‑post `h2`–`h4` | **60** | Large display faces (Ultra, Monoton, …); size reduces required Lc |
 | **Accent / focus** | Tags, focus rings | **60** | Focus ring must remain visible on ground *and* on hover states |
 | **Chrome (dark UI)** | Header, TOC, drop zone on `--config-dark-paper` | **75** body, **60** muted | Test `darkTheme.colors.*` on dark paper |
-| **Code blocks** | `pre` / inline on ground | **75** | `theme.code.text` on `--on-ground-code-bg` |
+| **Code (inline)** | `` `code` `` on ground | **75** | `foreground.body` on `--on-ground-code-chip-bg` (see `theme.code.chipDarkBodyLift` / `chipLightSurfaceShade` in `config/README.md`) |
+| **Code (block `pre`)** | Fenced blocks | **75** | Same text color as body; bg transparent, border uses edge tokens — APCA is for text on ground, not chip fill |
 
 ### Other a11y requirements
 
@@ -147,7 +148,7 @@ On each ground, CSS maps `foreground.*` → `--on-ground-display`, `--on-ground-
 | Token / element | Value | Grid |
 |-----------------|-------|------|
 | `theme.layout.pad` | `clamp(16px, 4vw, 56px)` | 16, 56 = 2×8, 7×8 |
-| `theme.grain.tileSize` | `96px` | 12×8 |
+| `theme.graphics.typePattern.targetTileSize` | `128` (example) | 16×8 |
 | Card shadow | `-4px 4px` | half‑step (exception) |
 | Focus outline | `3px` + `3px` offset | exception for visibility |
 | Gallery gap | `clamp(1.25rem, 3vw, 2rem)` | rem‑based fluid |
@@ -164,7 +165,7 @@ Prefer **rem** for typography and **ch** for measure; use **px** only where the 
 | Layout | `theme.layout` | `--config-measure`, `--config-poster-width`, `--config-pad`, … |
 | Typography | `theme.typography`, `fonts.*.lineHeight`, `fonts.titleFaces[]` | `--config-body-size`, `--config-prose-line-height`, `--config-title-line-height`, … |
 | Motion | `theme.motion` | `--config-card-hover-ease`, `--config-card-hover-duration` |
-| Grain | `theme.grain` + per‑ground `grainOpacity` | `--config-grain-*`, `--poster-grain-opacity` |
+| Decorative graphics | `theme.graphics` | `--config-glyph-pattern-*`, `--on-ground-glyph-pattern-*` |
 | Code blocks | `theme.code` | `--config-code-text`, `--code-block-bg`, `--on-ground-code-bg` |
 | Dark chrome | `darkTheme` | `--config-dark-*`, `--chrome-*` in `reader.css` |
 | Ground surface | `grounds.*.surface` | `--ground-{name}` |

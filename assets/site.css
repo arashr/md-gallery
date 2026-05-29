@@ -24,6 +24,8 @@
   --reveal-ease: var(--config-reveal-ease, ease);
   --shutter-duration: var(--config-shutter-duration, 0.9s);
   --shutter-ease: var(--config-shutter-ease, cubic-bezier(0.77, 0, 0.18, 1));
+  --glyph-pattern-color: var(--config-glyph-pattern-color, var(--red));
+  --glyph-pattern-opacity: var(--config-glyph-pattern-opacity, 0.07);
   --code-text: var(--config-code-text, #eff1f3);
   --code-step-mix: var(--config-code-block-step-mix, var(--edge-mix));
   --code-block-bg: var(--config-code-block-bg, var(--ink));
@@ -127,8 +129,10 @@ body {
 
 /* Ground surface + foreground tokens come from config (lib/gallery-config.js → #gallery-config-grounds) */
 [class*='ground-'] {
-  --on-ground-edge-1: color-mix(in oklch, var(--surface) calc(100% - var(--edge-mix)), black);
-  --on-ground-edge: color-mix(in oklch, var(--on-ground-edge-1) calc(100% - var(--edge-mix)), black);
+  --on-ground-edge-1: var(--on-ground-body);
+  --on-ground-edge: var(--on-ground-body);
+  --glyph-pattern-color: var(--on-ground-glyph-pattern-color, var(--on-ground-display));
+  --glyph-pattern-opacity: var(--on-ground-glyph-pattern-opacity, var(--config-glyph-pattern-opacity, 0.07));
 }
 
 /* Colored posters and post cards */
@@ -565,36 +569,6 @@ h1.poster__title {
   }
 }
 
-/* Paper grain — assets/poster-grain.svg (your Figma export), blended over .ground-* */
-.post-card[class*='ground-'] {
-  position: relative;
-}
-
-.post-card[class*='ground-']::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background-image: url('poster-grain.svg');
-  background-repeat: repeat;
-  background-size: var(--config-grain-tile-size, 96px);
-  background-position: 0 0;
-  opacity: var(--poster-grain-opacity);
-  mix-blend-mode: overlay;
-}
-
-.post-card[class*='ground-'] > * {
-  position: relative;
-  z-index: 1;
-}
-
-@media (prefers-reduced-transparency: reduce) {
-  .post-card[class*='ground-']::before {
-    content: none;
-  }
-}
-
 /* Default: height hugs content. B-size min height only on .post-card--roomy (short posters). */
 .post-card {
   container-type: inline-size;
@@ -637,6 +611,29 @@ h1.poster__title {
   max-width: min(var(--measure), 100%);
   margin-left: 0;
   margin-right: 0;
+}
+
+.post-card__glyph-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.post-card__glyph-canvas {
+  position: absolute;
+  left: var(--glyph-x, 0);
+  top: var(--glyph-y, 0);
+  width: var(--glyph-w, 100%);
+  height: var(--glyph-h, 100%);
+  display: block;
+  opacity: var(--glyph-pattern-opacity, 0.07);
+}
+
+.post-card > *:not(.post-card__glyph-layer) {
+  position: relative;
+  z-index: 1;
 }
 
 .post-card > .post-header {
@@ -766,7 +763,7 @@ h1.poster__title {
 
 @media (prefers-reduced-motion: reduce) {
   .post-card__toolbar,
-  .code-block__copy {
+  .code-block__toolbar {
     transition: none;
     visibility: visible;
   }
@@ -1062,7 +1059,7 @@ h2.poster__title.post-title,
 .prose code {
   font-family: var(--font-mono);
   font-size: 0.9em;
-  background: color-mix(in oklch, var(--code-block-bg) var(--config-code-inline-mix, 35%), transparent);
+  background: var(--code-chip-bg, var(--code-block-bg));
   color: inherit;
   padding: 0.1em 0.35em;
 }
@@ -1070,45 +1067,72 @@ h2.poster__title.post-title,
   max-width: 100%;
   overflow-x: auto;
   padding: 1rem;
-  background: var(--code-block-bg);
+  background: transparent;
   color: var(--code-text);
   font-family: var(--font-mono);
   font-size: 0.85rem;
   line-height: var(--config-mono-line-height, 1.45);
+  border: 2px solid var(--hair);
 }
 
-.code-block {
+.code-block-wrap {
   position: relative;
   max-width: 100%;
 }
 
-.code-block pre {
-  padding-top: 2.5rem;
+.code-block-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 100%;
+  width: 3rem;
+  height: 100%;
+  pointer-events: none;
 }
 
-.code-block__copy {
+.code-block-wrap:hover::after,
+.code-block-wrap:focus-within::after {
+  pointer-events: auto;
+}
+
+.code-block {
+  max-width: 100%;
+}
+
+.code-block__toolbar {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  z-index: 1;
-  min-width: 32px;
-  min-height: 32px;
-  padding: 4px;
+  top: 0;
+  left: 100%;
+  right: auto;
+  margin-left: 0.5rem;
+  z-index: 3;
+  display: flex;
+  gap: 0.35rem;
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
-  background: color-mix(in oklch, var(--code-text) 12%, transparent);
-  color: var(--code-text);
-  border-color: color-mix(in oklch, var(--code-text) 28%, transparent);
   transition:
     opacity var(--card-hover-duration) var(--card-hover-ease),
-    color var(--card-hover-duration) var(--card-hover-ease),
-    border-color var(--card-hover-duration) var(--card-hover-ease);
+    visibility 0s linear 0.32s;
 }
 
-.code-block:hover .code-block__copy,
-.code-block:focus-within .code-block__copy {
+.code-block-wrap:hover .code-block__toolbar,
+.code-block-wrap:focus-within .code-block__toolbar {
   opacity: 1;
+  visibility: visible;
   pointer-events: auto;
+  transition-delay: 0s;
+}
+
+.post-card[class*='ground-'] .code-block__copy {
+  background: color-mix(in oklch, var(--surface) 90%, transparent);
+  color: var(--on-ground-body);
+  border-color: var(--on-ground-edge);
+}
+
+.post-card[class*='ground-'] .code-block__copy:hover {
+  color: var(--on-ground-display);
+  border-color: var(--on-ground-accent);
 }
 
 .code-block__copy.is-copied {
@@ -1116,9 +1140,23 @@ h2.poster__title.post-title,
   border-color: currentColor;
 }
 
+@media (max-width: 899px) {
+  .code-block-wrap::after {
+    content: none;
+  }
+
+  .code-block__toolbar {
+    top: 0.5rem;
+    right: 0.5rem;
+    left: auto;
+    margin-left: 0;
+  }
+}
+
 @media (hover: none) {
-  .code-block__copy {
+  .code-block__toolbar {
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
   }
 }
@@ -1133,6 +1171,30 @@ h2.poster__title.post-title,
 
 .post-card[class*='ground-'] .prose :not(pre) > code {
   color: var(--on-ground-body);
+  background: var(--on-ground-code-chip-bg, var(--on-ground-code-bg));
+}
+
+/* Poster titles: backticks are plain text in the display face (no mono chip) */
+.post-card .poster__title :is(code, strong, em),
+.post-card .post-title :is(code, strong, em),
+.collection-card .poster__title :is(code, strong, em),
+.collection-hero .poster__title :is(code, strong, em) {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  font-style: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+  background: none;
+  box-shadow: none;
+  padding: 0;
+  color: inherit;
+}
+
+.post-card[class*='ground-'] .prose pre {
+  background: transparent;
+  color: var(--on-ground-body);
+  border-color: var(--on-ground-edge);
 }
 .prose a {
   color: var(--ink-soft);

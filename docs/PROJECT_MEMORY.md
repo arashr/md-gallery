@@ -2,7 +2,7 @@
 
 **Purpose:** Durable context for humans and agents continuing this repo. Update when architecture, workflows, or conventions change.
 
-**Last updated:** 2026-05-23
+**Last updated:** 2026-05-28
 
 ---
 
@@ -31,6 +31,9 @@ npm start          # npx serve . → http://localhost:3000
 - **Post cards:** Default height hugs content. Short posters (`.post-card--roomy`): B-min height, body `margin-top: auto`. **All** poster titles: `lib/fit-poster-title.js` binary-searches pixel `font-size` against live DOM width/height in `.post-title-bounds` (any font, any text).
 - **Cursor:** system default (custom crosshair CSS removed from `site.css`).
 - **Open file** returns to landing (file picker).
+- **Folder drop:** multiple `.md` files → landing gallery (`#gallery`); browser **Back** restores gallery (`history` + cached file map).
+- **Poster PDF:** export button in external toolbar beside card (`lib/poster-export.js`); clone-only color pinning (no live DOM mutation).
+- **Code blocks:** `lib/code-blocks.js` adds copy button in external toolbar (same pattern as export). Block `pre` = **transparent** + 2px border (table edge color); inline `` `code` `` keeps chip background.
 
 ---
 
@@ -48,6 +51,14 @@ npm start          # npx serve . → http://localhost:3000
 | `lib/title-faces.js` | Display font rotation + Google Fonts URL |
 | `lib/stagger.js` | `--poster-shift` rem per poster |
 | `lib/sanitize.js` | DOMPurify allowlist for user MD |
+| `lib/gallery-config.js` | Load `gallery.config.json` → CSS vars, grounds, code chips, fonts |
+| `lib/apca-check.js` | APCA audit helpers (`npm test`) |
+| `lib/code-blocks.js` | Wrap `pre` + external copy toolbar |
+| `lib/poster-export.js` | Per-poster PDF via html2canvas + jsPDF |
+| `lib/render-landing-gallery.js` | Folder-drop thumbnail grid |
+| `lib/type-pattern.js`, `lib/type-pattern-mosaic.js` | Decorative glyph patterns on posters |
+| `lib/bundled-md.js`, `lib/local-md-links.js` | Same-origin `.md` links |
+| `config/gallery.config.json` | Grounds, theme, code, fonts, title scale |
 | `docs/PROJECT_MEMORY.md` | This file |
 | `docs/DECISION_LOG.md` | Product/architecture decisions (not CSS trivia) |
 | `docs/POSTER_LOGIC.md` | How posters are split from a file |
@@ -88,6 +99,29 @@ Code fences are respected when detecting splits.
 
 To change fonts/colors: edit `config/gallery.config.json` (preferred) or matching CSS in `assets/site.css` (search “Post title poster fonts” for per-face line-height tweaks).
 
+### Code appearance (`theme.code` in config)
+
+| Piece | Behavior |
+|-------|----------|
+| **Inline `` `code` ``** | Chip bg via `--on-ground-code-chip-bg` (injected per ground in `#gallery-config-code`) |
+| **Block `pre`** | Transparent bg; border matches tables (`--hair` / `--on-ground-edge`) |
+| **Dark ink body** | Chip **20% lighter than ground**: `color-mix(in oklch, surface, var(--config-paper))` — uses **`--config-paper`**, not `var(--paper)`, so dark mode chrome does not re-tint poster code |
+| **White ground, carmine** | Chip **10% darker** (`chipLightSurfaceShade` toward black) — page paper is already neutral / carmine uses white body |
+| **Titles** | `inlineMarkdownToHtml(..., { forTitle: true })` strips `<code>` so `` `file.js` `` stays in the display face (no mono chip) |
+
+APCA: `test/apca-grounds.test.js` + `auditGroundForegrounds()`; code role uses `codeChipBgFromSurface()` (matches chip, not raw `pre`).
+
+### Dark mode
+
+- `data-theme="dark"` retints **chrome only** (`assets/reader.css`, `darkTheme` in config).
+- Poster grounds, edges, prose, **code chips**, and export/copy controls on cards keep **on-ground** tokens.
+- Collection hero prose follows chrome tokens.
+
+### Glyph patterns
+
+- Canvas layer on each poster (`.post-card__glyph-layer`); config under `theme.graphics.typePattern`.
+- Driven from `assets/reader.js` after render; first letter of title, seeded layout.
+
 ---
 
 ## TOC & heading IDs
@@ -123,7 +157,7 @@ User Markdown is untrusted. All rendered HTML goes through `lib/sanitize.js` (`i
 
 ## Handoff checklist
 
-- [ ] Run `npm start`, drop `content/md-themed.md` or any large `##`-sectioned file  
+- [ ] Run `npm start`, drop any large `##`-sectioned `.md` (or a folder for the landing gallery)  
 - [ ] Verify TOC links scroll to posters and in-body headings  
 - [ ] Verify search filters and highlight  
 - [x] `npm test` — parser + TOC/render id alignment  
@@ -141,6 +175,9 @@ npm test
 
 - `test/parse-document.test.js` — poster split modes (`h2` / `hr` / `single`), intro, YAML, fences, slug/TOC dedupe.
 - `test/toc-render-alignment.test.js` — in-body TOC `id`s match `marked` heading `id`s in `renderDocument()` (poster slugs reserved before body parse).
+- `test/apca-grounds.test.js` — configured ground foreground + code chip pairs vs `docs/DESIGN.md` Lc targets.
+- `test/gallery-config.test.js` — config merge, injected ground/code CSS.
+- `test/landing-gallery.test.js`, `test/inline-markdown.test.js` — folder gallery, title markdown.
 
 ## Intro vs posters (2026-05-21)
 
@@ -148,7 +185,7 @@ npm test
 - **Long or structured intro** (>4 non-fence lines, >400 chars, or a real `##`/`###` before the first poster split) becomes the first gallery poster (“Overview”), not hero copy.
 - **No `##` in file:** Body after the `#` title goes to a single poster, not the hero (fixed split-at bug).
 
-Poster titles, doc `h1`, and TOC labels run through `lib/inline-markdown.js` so `**bold**` in a `##` line is not shown literally.
+Poster titles and doc `h1` use `inlineMarkdownToHtml(..., { forTitle: true })` (bold/italic OK; backticks render as plain text, no mono chip). TOC labels still allow inline code markup where needed.
 
 ## Rendering quirks (investigated 2026-05-21)
 

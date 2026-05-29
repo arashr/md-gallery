@@ -83,3 +83,35 @@ Format: **Date · Decision · Why**
 **Decision:** `h2`–`h6` inside `.prose` inherit the same `title-face-*` display family as the poster title (smaller scale).
 
 **Why:** One cohesive “poster” per section; avoids Ultra-only subheads clashing with Monoton/Limelight titles.
+
+---
+
+## 2026-05-28 — Poster code colors ignore dark-mode `--paper`
+
+**Decision:** Per-ground code chip mixes use `var(--config-paper)` (fixed light theme paper from config), not `var(--paper)`, which dark mode retints for UI chrome.
+
+**Why:** Poster grounds stay on their configured palette in dark mode; mixing chips toward dark `--paper` made code blocks look washed or wrong.
+
+---
+
+## 2026-05-28 — Block code: border only, inline code: chip
+
+**Decision:** Fenced `pre` blocks use a transparent background and the same 2px edge border as tables. Inline `` `code` `` keeps a tinted chip background derived from `theme.code` (`chipDarkBodyLift` / `chipLightSurfaceShade`).
+
+**Why:** Border separates blocks without a second “panel” color on the ground; inline code still needs a readable chip on saturated surfaces.
+
+---
+
+## 2026-05-28 — Paper grain removed; type patterns only
+
+**Decision:** Drop `theme.grain`, per-ground `grainOpacity`, `assets/poster-grain.svg`, and the poster `::before` grain overlay. Decorative texture is **type patterns** only (`theme.graphics`: `glyphPatternColor`, `glyphPatternOpacity`, `typePattern`).
+
+**Why:** Grain and glyph patterns were separate systems; grain had no remaining CSS consumer after the SVG overlay was removed. One graphics config path avoids dead tokens (`--poster-grain-opacity`, `--config-grain-*`).
+
+---
+
+## 2026-05-28 — No code styling in poster titles
+
+**Decision:** `inlineMarkdownToHtml` with `{ forTitle: true }` strips `<code>` wrappers in poster titles (and collection `h1`); backticks render as plain display text.
+
+**Why:** Filename-style titles (`type-pattern-mosaic.js`) should stay in one display face, not switch to mono + chip.
