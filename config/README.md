@@ -166,7 +166,16 @@ Per-face typography is injected as `#gallery-config-title-faces` (same pattern a
 
 ## `titleScale`
 
-DOM title fitting (`lib/fit-poster-title.js`): `minPx`, `maxPx`, `maxWidthRatio`, tall-title caps, B-aspect slack for short posters.
+DOM title fitting (`lib/fit-poster-title.js`):
+
+| Field | Role |
+|-------|------|
+| `minPx`, `maxPx`, `maxWidthRatio` | Defaults for the shortest tier (and fallback when `tiers` is omitted) |
+| `floorPx` | Lowest px the fitter may use when `maxLines` still fails at tier `minPx` (default 14) |
+| `slackMinPx`, `bAspect` | When header+body slack is large enough, add `.post-card--roomy` and B-aspect `--poster-min-height` |
+| `tiers[]` | Upper bounds on **plain** title length (`data-title-chars` on the card). First matching tier wins (`maxChars: null` = catch-all). Per tier: optional `minPx`, `maxWidthRatio`, `maxLines`, `maxPxRatio`, `floorPx`. |
+
+Binary search picks the largest `--poster-title-size` up to the width-derived cap, within `maxLines` (measured via block height ÷ line-height). Config reload refits open posters (refocus tab). Re-open a file after code changes so `data-title-chars` is present. No CSS height clip on the title box.
 
 ---
 

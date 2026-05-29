@@ -28,7 +28,7 @@ npm start          # npx serve . → http://localhost:3000
 - **Search** filters posters and highlights matches in visible bodies (no poster count label in the header).
 - **View controls:** theme toggle on landing + reader headers (synced); zoom −/+ in reader only; **serif/sans** toggle for poster body text (`data-prose-font`, persisted). Toolbar uses inline SVG icons. Dark mode uses `--chrome-*` / `--chrome-red*` on UI only; `:root` `--red` stays `#c8102e` on poster grounds.
 - **Design system:** ground rules in `docs/DESIGN.md` (APCA, OKLCH, 8px grid). Config in `config/gallery.config.json`; field reference in `config/README.md`. Applied via `lib/gallery-config.js`. Refocus tab after save to reload.
-- **Post cards:** Default height hugs content. Short posters (`.post-card--roomy`): B-min height, body `margin-top: auto`. **All** poster titles: `lib/fit-poster-title.js` binary-searches pixel `font-size` to fit card **width** only; title block height is natural (no `max-height` clip on `.post-title-bounds`). See **Title fitting** below for checkpoint tag and planned long-title tiers.
+- **Post cards:** Default height hugs content. Short posters (`.post-card--roomy`): B-min height, body `margin-top: auto`. **All** poster titles: `lib/fit-poster-title.js` fits width + per-tier line count from `titleScale.tiers` (natural height, no clip). See **Title fitting** below.
 - **Cursor:** system default (custom crosshair CSS removed from `site.css`).
 - **Open file** returns to landing (file picker).
 - **Folder drop:** multiple `.md` files → landing gallery (`#gallery`); browser **Back** restores gallery (`history` + cached file map).
@@ -197,16 +197,15 @@ Poster titles, doc `h1`, and TOC poster rows use `forTitle` (bold/italic OK; bac
 
 ## Title fitting (`lib/fit-poster-title.js`)
 
-**Current (checkpoint):** Largest px in `[minPx, maxPx]` with `maxPx = min(titleScale.maxPx, floor(innerWidth × maxWidthRatio))` and no horizontal overflow on `.post-title-bounds a`. No vertical budget. Config defaults: `minPx` 64, `maxPx` 280, `maxWidthRatio` 0.45. Re-run on render, resize, zoom, `document.fonts.ready` (`assets/reader.js`).
+**Current:** `resolveTitleScaleTier(titleScale, titleCharLength)` picks limits. Binary search from `floorPx` to width-derived `maxPx`; if `maxLines > 0`, `titleLineCount` uses block height ÷ computed line-height (not `getClientRects`). Search may go below tier `minPx` down to `floorPx` when lines still exceed the cap. Cards carry `data-title-chars` (`render-document.js`); fitter falls back to link text if missing. Re-run on render, resize, zoom, fonts ready, **config reload** (`assets/reader.js`).
 
-**Checkpoint tag:** `checkpoint/pre-title-tier-fit` — revert long-title experiments to this commit if tier/line-count tuning regresses short posters or readability.
+**Tuning:** `config/gallery.config.json` → `titleScale.tiers` (see `config/README.md`).
 
-**Next (approved, not implemented):** `titleScale.tiers` from `poster.plainTitle.length` + binary search with **max line count** per tier (still no CSS clip). Illustrative tiers: ≤24 chars → current behavior; 25–55 → lower ratio/floor; >55 → `maxLines` ~4–5, `minPx` ~32. Measure lines via DOM during search (`getClientRects` or line-height). Config keys `tallTitleMaxPx` / `tallTitleHeightRatio` are legacy (unused by fitter); fold into tiers or delete when shipping.
+**Revert:** `git checkout checkpoint/pre-title-tier-fit` for width-only baseline before tiers.
 
 **Pitfall:** Do not restore `--poster-title-max-h` + `overflow: hidden` on `.post-title-bounds` without a strong reason — caused clipping bugs on long titles.
 
 ## Known gaps / follow-ups  
-- **Title tiers + line-count fit** — approved; see above.  
 - TOC does not include intro-only headings before first `##`.  
 - No persistence (reload loses file); no URL load from hash/blob.  
 - Optional: link from figlets-blog index footer to MD Gallery deploy URL.  

@@ -962,7 +962,10 @@ import { ICONS } from './icons.js';
   let configReloadTimer;
   window.addEventListener('focus', () => {
     clearTimeout(configReloadTimer);
-    configReloadTimer = setTimeout(() => void reloadGalleryConfig(), 250);
+    configReloadTimer = setTimeout(async () => {
+      await reloadGalleryConfig();
+      schedulePosterTitleFit();
+    }, 250);
   });
 
   window.addEventListener('resize', () => {

@@ -128,10 +128,10 @@ Format: **Date · Decision · Why**
 
 ---
 
-## 2026-05-29 — Long titles: length tiers + line-count fit (approved, not yet shipped)
+## 2026-05-29 — Long titles: length tiers + line-count fit
 
-**Decision (planned):** Extend `titleScale` with **length tiers** from `plainTitle` (plain text, no markdown) and binary-search the largest px that fits **width** and **max line count** per tier — without reintroducing CSS height clipping. Short titles keep a high search floor (`minPx` ~64); long titles get lower `maxWidthRatio`, lower `minPx` floor, and a `maxLines` cap. Optional mild length-based discount on `maxPx` for the longest tier.
+**Decision:** `titleScale.tiers` select limits from `data-title-chars` (`plainTitle.length`). Binary search finds the largest px with no horizontal overflow and `titleLineCount(link) ≤ maxLines` when the tier sets `maxLines`. Default tiers: ≤24 chars → base (`minPx` 64, no line cap); ≤55 → lower ratio/floor, `maxLines` 6; longer → `minPx` 32, `maxLines` 4, `maxPxRatio` 0.88. Removed unused `tallTitleMaxPx`, `tallTitleHeightRatio`, `targetSlack*`.
 
-**Why:** Width-only fit leaves a high `minPx` (64) so long titles on narrow viewports still render huge one-word-per-line stacks. Line count targets the visual problem directly while keeping `word-break: keep-all` and `text-wrap: balance`.
+**Why:** Width-only fit left long titles huge on narrow cards (high `minPx` floor). Line count targets tall word-stacks without CSS `max-height` clip.
 
-**Status:** Approved after checkpoint commit; implement in a follow-up commit. Tune thresholds in `gallery.config.json` (`titleScale.tiers`). Remove or repurpose stale `tallTitleMaxPx` / `tallTitleHeightRatio` when tiers land.
+**Revert baseline:** tag `checkpoint/pre-title-tier-fit` (width-only, pre-tiers).
