@@ -22,6 +22,7 @@ describe('title overflow helpers', () => {
       false
     );
   });
+
 });
 
 describe('fitPosterTitles', () => {

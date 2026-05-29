@@ -2,7 +2,7 @@
 
 **Purpose:** Durable context for humans and agents continuing this repo. Update when architecture, workflows, or conventions change.
 
-**Last updated:** 2026-05-28
+**Last updated:** 2026-05-29
 
 ---
 
@@ -28,12 +28,12 @@ npm start          # npx serve . → http://localhost:3000
 - **Search** filters posters and highlights matches in visible bodies (no poster count label in the header).
 - **View controls:** theme toggle on landing + reader headers (synced); zoom −/+ in reader only; **serif/sans** toggle for poster body text (`data-prose-font`, persisted). Toolbar uses inline SVG icons. Dark mode uses `--chrome-*` / `--chrome-red*` on UI only; `:root` `--red` stays `#c8102e` on poster grounds.
 - **Design system:** ground rules in `docs/DESIGN.md` (APCA, OKLCH, 8px grid). Config in `config/gallery.config.json`; field reference in `config/README.md`. Applied via `lib/gallery-config.js`. Refocus tab after save to reload.
-- **Post cards:** Default height hugs content. Short posters (`.post-card--roomy`): B-min height, body `margin-top: auto`. **All** poster titles: `lib/fit-poster-title.js` binary-searches pixel `font-size` against live DOM width/height in `.post-title-bounds` (any font, any text).
+- **Post cards:** Default height hugs content. Short posters (`.post-card--roomy`): B-min height, body `margin-top: auto`. **All** poster titles: `lib/fit-poster-title.js` binary-searches pixel `font-size` to fit card **width** only; title block height is natural (no `max-height` clip on `.post-title-bounds`). See **Title fitting** below for checkpoint tag and planned long-title tiers.
 - **Cursor:** system default (custom crosshair CSS removed from `site.css`).
 - **Open file** returns to landing (file picker).
 - **Folder drop:** multiple `.md` files → landing gallery (`#gallery`); browser **Back** restores gallery (`history` + cached file map).
 - **Poster PDF:** export button in external toolbar beside card (`lib/poster-export.js`); clone-only color pinning (no live DOM mutation).
-- **Code blocks:** `lib/code-blocks.js` adds copy button in external toolbar (same pattern as export). Block `pre` = **transparent** + 2px border (table edge color); inline `` `code` `` keeps chip background.
+- **Code blocks:** `lib/code-blocks.js` adds copy button in external toolbar (same pattern as export). Block `pre` and **tables** use **poster surface** bg + 2px border (opaque; no pattern bleed). Inline `` `code` `` uses tinted chip background only (**no border**).
 
 ---
 
@@ -92,7 +92,7 @@ Code fences are respected when detecting splits.
 
 ## Typography & styling
 
-- Body/UI: **Inter Tight**; code: **Inter Mono** (from `site.css`).  
+- Body/UI and inline code: **Inconsolata** (`fonts.uiSans` → `--font-ui-sans`). Display titles use **title-face-*** (Ultra, Monoton, …). `fonts.mono` matches uiSans for legacy `--font-mono` tokens.  
 - Poster titles + in-post `h2`–`h6`: **title-face-*** (Ultra, Monoton, Limelight, Jersey 25, Black Ops One, Notable) cycled by poster index.  
 - Collection hero on reader view: sits on **page paper** with `theme.hero` tokens (not a ground poster); doc title uses default Ultra styling (not per-file title face).  
 - Wide screens: `width: fit-content` posters + `--poster-shift` from `lib/stagger.js`.
@@ -103,11 +103,11 @@ To change fonts/colors: edit `config/gallery.config.json` (preferred) or matchin
 
 | Piece | Behavior |
 |-------|----------|
-| **Inline `` `code` ``** | Chip bg via `--on-ground-code-chip-bg` (injected per ground in `#gallery-config-code`) |
-| **Block `pre`** | Transparent bg; border matches tables (`--hair` / `--on-ground-edge`) |
+| **Inline `` `code` ``** | Chip bg via `--on-ground-code-chip-bg` (no border) |
+| **Block `pre` / tables** | Poster surface bg (`var(--surface)`); border matches `--hair` / `--on-ground-edge` |
 | **Dark ink body** | Chip **20% lighter than ground**: `color-mix(in oklch, surface, var(--config-paper))` — uses **`--config-paper`**, not `var(--paper)`, so dark mode chrome does not re-tint poster code |
 | **White ground, carmine** | Chip **10% darker** (`chipLightSurfaceShade` toward black) — page paper is already neutral / carmine uses white body |
-| **Titles** | `inlineMarkdownToHtml(..., { forTitle: true })` strips `<code>` so `` `file.js` `` stays in the display face (no mono chip) |
+| **Titles / display headings** | `forTitle` on poster titles + TOC poster rows; `render-document` strips `<code>` in body `h2`–`h4` (same as titles); CSS backup + dark-mode chip exclusion |
 
 APCA: `test/apca-grounds.test.js` + `auditGroundForegrounds()`; code role uses `codeChipBgFromSurface()` (matches chip, not raw `pre`).
 
@@ -185,7 +185,7 @@ npm test
 - **Long or structured intro** (>4 non-fence lines, >400 chars, or a real `##`/`###` before the first poster split) becomes the first gallery poster (“Overview”), not hero copy.
 - **No `##` in file:** Body after the `#` title goes to a single poster, not the hero (fixed split-at bug).
 
-Poster titles and doc `h1` use `inlineMarkdownToHtml(..., { forTitle: true })` (bold/italic OK; backticks render as plain text, no mono chip). TOC labels still allow inline code markup where needed.
+Poster titles, doc `h1`, and TOC poster rows use `forTitle` (bold/italic OK; backticks = plain display text). In-post `h2`–`h4` get the same via CSS. Deeper TOC entries (h3+) may still render `` `code` `` chips in the UI font.
 
 ## Rendering quirks (investigated 2026-05-21)
 
@@ -195,7 +195,18 @@ Poster titles and doc `h1` use `inlineMarkdownToHtml(..., { forTitle: true })` (
 - **Task lists:** GFM checkboxes need `input` in the DOMPurify allowlist (`lib/sanitize.js`).
 - **`<details>` / HTML widgets:** Stripped by sanitize unless tags are allowlisted.
 
+## Title fitting (`lib/fit-poster-title.js`)
+
+**Current (checkpoint):** Largest px in `[minPx, maxPx]` with `maxPx = min(titleScale.maxPx, floor(innerWidth × maxWidthRatio))` and no horizontal overflow on `.post-title-bounds a`. No vertical budget. Config defaults: `minPx` 64, `maxPx` 280, `maxWidthRatio` 0.45. Re-run on render, resize, zoom, `document.fonts.ready` (`assets/reader.js`).
+
+**Checkpoint tag:** `checkpoint/pre-title-tier-fit` — revert long-title experiments to this commit if tier/line-count tuning regresses short posters or readability.
+
+**Next (approved, not implemented):** `titleScale.tiers` from `poster.plainTitle.length` + binary search with **max line count** per tier (still no CSS clip). Illustrative tiers: ≤24 chars → current behavior; 25–55 → lower ratio/floor; >55 → `maxLines` ~4–5, `minPx` ~32. Measure lines via DOM during search (`getClientRects` or line-height). Config keys `tallTitleMaxPx` / `tallTitleHeightRatio` are legacy (unused by fitter); fold into tiers or delete when shipping.
+
+**Pitfall:** Do not restore `--poster-title-max-h` + `overflow: hidden` on `.post-title-bounds` without a strong reason — caused clipping bugs on long titles.
+
 ## Known gaps / follow-ups  
+- **Title tiers + line-count fit** — approved; see above.  
 - TOC does not include intro-only headings before first `##`.  
 - No persistence (reload loses file); no URL load from hash/blob.  
 - Optional: link from figlets-blog index footer to MD Gallery deploy URL.  

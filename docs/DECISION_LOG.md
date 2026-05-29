@@ -94,11 +94,11 @@ Format: **Date · Decision · Why**
 
 ---
 
-## 2026-05-28 — Block code: border only, inline code: chip
+## 2026-05-28 — Block code & tables: surface fill; inline code: chip, no border
 
-**Decision:** Fenced `pre` blocks use a transparent background and the same 2px edge border as tables. Inline `` `code` `` keeps a tinted chip background derived from `theme.code` (`chipDarkBodyLift` / `chipLightSurfaceShade`).
+**Decision:** Fenced `pre` blocks and tables use the poster **surface** background (`var(--surface)`) and a 2px edge border. Inline `` `code` `` keeps a tinted chip from `theme.code` (`chipDarkBodyLift` / `chipLightSurfaceShade`) with **no border**.
 
-**Why:** Border separates blocks without a second “panel” color on the ground; inline code still needs a readable chip on saturated surfaces.
+**Why:** Opaque surface on large blocks stops glyph patterns showing through; inline chips stay visually distinct from the ground without boxing every backtick.
 
 ---
 
@@ -110,8 +110,28 @@ Format: **Date · Decision · Why**
 
 ---
 
-## 2026-05-28 — No code styling in poster titles
+## 2026-05-28 — No code styling in display-type lines
 
-**Decision:** `inlineMarkdownToHtml` with `{ forTitle: true }` strips `<code>` wrappers in poster titles (and collection `h1`); backticks render as plain display text.
+**Decision:** `inlineMarkdownToHtml` with `{ forTitle: true }` strips `<code>` in poster titles, collection `h1`, and TOC poster rows (depth 2). In-post `h2`–`h4` use the same CSS reset (inherit display face, no chip). Body `` `code` `` and `pre` use `--font-ui-sans` (Inconsolata in default config), not a separate Inter Mono stack.
 
-**Why:** Filename-style titles (`type-pattern-mosaic.js`) should stay in one display face, not switch to mono + chip.
+**Why:** Backticks in display lines (`type-pattern-mosaic.js`, headings) should not switch to a chip or second font; the UI body font is already monospaced.
+
+---
+
+## 2026-05-29 — Poster title fit: width only, no height clip
+
+**Decision:** `lib/fit-poster-title.js` binary-searches the largest `--poster-title-size` that avoids **horizontal** overflow on the title link. Remove `--poster-title-max-h`, `max-height`, and `overflow: hidden` on `.post-title-bounds`. Roomy posters (`.post-card--roomy`) still get B-aspect `--poster-min-height` when header+body slack is large enough; the title block grows naturally with wrapped lines.
+
+**Why:** Height-budget fitting caused intermittent clipping and overlap on long or multi-line titles; width-only fitting with natural height is more reliable. Trade-off: very long titles on narrow cards can stack many large lines until the next tuning pass.
+
+**Revert:** `git checkout checkpoint/pre-title-tier-fit` (or reset to the commit tagged at that name) to restore this baseline before length/line-count tiers.
+
+---
+
+## 2026-05-29 — Long titles: length tiers + line-count fit (approved, not yet shipped)
+
+**Decision (planned):** Extend `titleScale` with **length tiers** from `plainTitle` (plain text, no markdown) and binary-search the largest px that fits **width** and **max line count** per tier — without reintroducing CSS height clipping. Short titles keep a high search floor (`minPx` ~64); long titles get lower `maxWidthRatio`, lower `minPx` floor, and a `maxLines` cap. Optional mild length-based discount on `maxPx` for the longest tier.
+
+**Why:** Width-only fit leaves a high `minPx` (64) so long titles on narrow viewports still render huge one-word-per-line stacks. Line count targets the visual problem directly while keeping `word-break: keep-all` and `text-wrap: balance`.
+
+**Status:** Approved after checkpoint commit; implement in a follow-up commit. Tune thresholds in `gallery.config.json` (`titleScale.tiers`). Remove or repurpose stale `tallTitleMaxPx` / `tallTitleHeightRatio` when tiers land.

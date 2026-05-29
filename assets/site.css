@@ -801,18 +801,15 @@ h2.poster__title.post-title,
   -webkit-font-smoothing: antialiased;
 }
 
-/* Title box — JS sets --poster-title-size and --poster-title-max-h from live layout */
+/* Title box — JS sets --poster-title-size; height grows with wrapped lines (no max-height clip) */
 .post-title-bounds {
   display: block;
   width: 100%;
   max-width: 100%;
-  max-height: var(--poster-title-max-h, none);
-  overflow: hidden;
   box-sizing: border-box;
 }
 
 .post-card[class*='title-face-'] .post-header {
-  overflow: hidden;
   width: 100%;
 }
 
@@ -824,7 +821,7 @@ h2.poster__title.post-title,
   max-width: 100%;
   box-sizing: border-box;
   font-size: var(--poster-title-size, 2.5rem);
-  padding-block: 0.04em;
+  padding: 0.06em 0 0.1em;
   white-space: normal;
   overflow-wrap: normal;
   word-break: keep-all;
@@ -1041,9 +1038,15 @@ h2.poster__title.post-title,
   border: 2px solid var(--hair);
 }
 
+.post-card[class*='ground-'] .prose .table-wrap,
+.post-card[class*='ground-'] .prose table {
+  background: var(--surface);
+}
+
 .post-card[class*='ground-'] .prose th,
 .post-card[class*='ground-'] .prose td {
   border-color: var(--on-ground-edge);
+  background: var(--surface);
 }
 .prose blockquote {
   margin: 1.5em 0;
@@ -1057,11 +1060,16 @@ h2.poster__title.post-title,
   border-left-color: var(--on-ground-edge);
 }
 .prose code {
-  font-family: var(--font-mono);
+  font-family: var(--font-ui-sans, ui-monospace, monospace);
   font-size: 0.9em;
   background: var(--code-chip-bg, var(--code-block-bg));
   color: inherit;
   padding: 0.1em 0.35em;
+}
+
+/* Page / non-ground prose: never use block darken as inline chip fallback */
+.prose :not(pre) > code {
+  background: var(--code-chip-bg, var(--paper));
 }
 .prose pre {
   max-width: 100%;
@@ -1069,7 +1077,7 @@ h2.poster__title.post-title,
   padding: 1rem;
   background: transparent;
   color: var(--code-text);
-  font-family: var(--font-mono);
+  font-family: var(--font-ui-sans, ui-monospace, monospace);
   font-size: 0.85rem;
   line-height: var(--config-mono-line-height, 1.45);
   border: 2px solid var(--hair);
@@ -1171,12 +1179,13 @@ h2.poster__title.post-title,
 
 .post-card[class*='ground-'] .prose :not(pre) > code {
   color: var(--on-ground-body);
-  background: var(--on-ground-code-chip-bg, var(--on-ground-code-bg));
+  background: var(--on-ground-code-chip-bg, var(--surface));
 }
 
-/* Poster titles: backticks are plain text in the display face (no mono chip) */
+/* Display-type lines (poster titles, in-post h2–h4): backticks stay in the title face, no chip */
 .post-card .poster__title :is(code, strong, em),
 .post-card .post-title :is(code, strong, em),
+.post-card[class*='ground-'] .prose :is(h2, h3, h4) code,
 .collection-card .poster__title :is(code, strong, em),
 .collection-hero .poster__title :is(code, strong, em) {
   font-family: inherit;
@@ -1192,7 +1201,7 @@ h2.poster__title.post-title,
 }
 
 .post-card[class*='ground-'] .prose pre {
-  background: transparent;
+  background: var(--surface);
   color: var(--on-ground-body);
   border-color: var(--on-ground-edge);
 }

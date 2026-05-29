@@ -218,8 +218,8 @@
       "google": "Libre+Baskerville:ital,wght@0,400;0,700;1,400"
     },
     "mono": {
-      "family": "Inter Mono",
-      "google": "Inter+Mono:ital,wght@0,400;0,500;1,400",
+      "family": "Inconsolata",
+      "google": "Inconsolata:ital,wght@0,500;0,700;0,900;1,400",
       "lineHeight": "1.45"
     },
     "titleFaces": [

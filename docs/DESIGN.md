@@ -93,7 +93,7 @@ When a pair fails APCA: **change foreground in config** (semantic token or hex).
 | **Accent / focus** | Tags, focus rings | **60** | Focus ring must remain visible on ground *and* on hover states |
 | **Chrome (dark UI)** | Header, TOC, drop zone on `--config-dark-paper` | **75** body, **60** muted | Test `darkTheme.colors.*` on dark paper |
 | **Code (inline)** | `` `code` `` on ground | **75** | `foreground.body` on `--on-ground-code-chip-bg` (see `theme.code.chipDarkBodyLift` / `chipLightSurfaceShade` in `config/README.md`) |
-| **Code (block `pre`)** | Fenced blocks | **75** | Same text color as body; bg transparent, border uses edge tokens — APCA is for text on ground, not chip fill |
+| **Code (block `pre`)** | Fenced blocks | **75** | Same text color as body; bg matches poster surface, border uses edge tokens — APCA is for text on ground, not chip fill |
 
 ### Other a11y requirements
 

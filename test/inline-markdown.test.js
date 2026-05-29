@@ -23,10 +23,25 @@ Body.
     assert.equal(inlineMarkdownToHtml('**Hi**'), '<strong>Hi</strong>');
   });
 
-  it('forTitle strips code markup so display font is uniform', () => {
+  it('forTitle strips code markup for display-type lines', () => {
     assert.equal(inlineMarkdownToHtml('`mosaic.js`', { forTitle: true }), 'mosaic.js');
     assert.match(inlineMarkdownToHtml('**Bold** `code`', { forTitle: true }), /<strong>Bold<\/strong> code/);
     assert.match(inlineMarkdownToHtml('`code`'), /<code>code<\/code>/);
+  });
+
+  it('renders backticks in in-post h3 without a code element', () => {
+    const md = `# Doc
+
+## Poster
+
+### What works today (verified live against \`local_mozwkg5o_ufp0x3jo\`)
+
+Body.
+`;
+    const doc = parseDocument(md, 't.md');
+    const html = renderDocument(doc, 't.md');
+    assert.match(html, /<h3[^>]*>[\s\S]*local_mozwkg5o_ufp0x3jo/);
+    assert.doesNotMatch(html, /<h3[^>]*>[\s\S]*<code>/);
   });
 
   it('renders backtick filenames in poster titles without code styling', () => {

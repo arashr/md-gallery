@@ -472,20 +472,35 @@ html[data-theme='dark'] .post-card[class*='ground-'] .prose blockquote {
   border-left-color: var(--on-ground-accent);
 }
 
+html[data-theme='dark'] .post-card[class*='ground-'] .prose .table-wrap,
+html[data-theme='dark'] .post-card[class*='ground-'] .prose table,
+html[data-theme='dark'] .post-card[class*='ground-'] .prose th,
+html[data-theme='dark'] .post-card[class*='ground-'] .prose td {
+  background: var(--surface);
+}
+
 html[data-theme='dark'] .post-card[class*='ground-'] .prose th,
 html[data-theme='dark'] .post-card[class*='ground-'] .prose td {
   border-color: var(--on-ground-edge);
 }
 
 html[data-theme='dark'] .post-card[class*='ground-'] .prose pre {
-  background: transparent;
+  background: var(--surface);
   color: var(--on-ground-body);
   border-color: var(--on-ground-edge);
 }
 
 html[data-theme='dark'] .post-card[class*='ground-'] .prose :not(pre) > code {
-  background: var(--on-ground-code-chip-bg, var(--on-ground-code-bg));
+  background: var(--on-ground-code-chip-bg, var(--surface));
   color: var(--on-ground-body);
+}
+
+html[data-theme='dark'] .post-card[class*='ground-'] .prose :is(h2, h3, h4) code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
 }
 
 html[data-theme='dark'] .search-highlight {
