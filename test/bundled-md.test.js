@@ -9,4 +9,13 @@ describe('bundled markdown', () => {
     assert.equal(url.href, 'http://localhost:3000/docs/POSTER_LOGIC.md');
     assert.equal(url.origin, 'http://localhost:3000');
   });
+
+  it('resolves the bundled gallery showcase demo', () => {
+    const url = resolveBundledMarkdownUrl(
+      'docs/demo/gallery-showcase.md',
+      'http://localhost:3000/'
+    );
+    assert.ok(url);
+    assert.equal(url.pathname, '/docs/demo/gallery-showcase.md');
+  });
 });

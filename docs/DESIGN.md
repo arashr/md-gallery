@@ -148,7 +148,7 @@ On each ground, CSS maps `foreground.*` → `--on-ground-display`, `--on-ground-
 | Token / element | Value | Grid |
 |-----------------|-------|------|
 | `theme.layout.pad` | `clamp(16px, 4vw, 56px)` | 16, 56 = 2×8, 7×8 |
-| `theme.graphics.typePattern.targetTileSize` | `128` (example) | 16×8 |
+| `theme.graphics.typePattern.fillRowGap` | `1.15` (example) | fluid typography grid |
 | Card shadow | `-4px 4px` | half‑step (exception) |
 | Focus outline | `3px` + `3px` offset | exception for visibility |
 | Gallery gap | `clamp(1.25rem, 3vw, 2rem)` | rem‑based fluid |

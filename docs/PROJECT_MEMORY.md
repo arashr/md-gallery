@@ -120,7 +120,7 @@ APCA: `test/apca-grounds.test.js` + `auditGroundForegrounds()`; code role uses `
 ### Glyph patterns
 
 - Canvas layer on each poster (`.post-card__glyph-layer`); config under `theme.graphics.typePattern`.
-- Driven from `assets/reader.js` after render; first letter of title, seeded layout.
+- Driven from `assets/reader.js` after render and after title fit. Placement: `lib/glyph-region.js` (`bottom` / `between` / `top` / side fallback). Pattern options: flat `typePattern` via `lib/type-pattern-poster.js`. Sync `lib/type-pattern.js` from the `type_pattern` repo when the library changes.
 
 ---
 
@@ -129,6 +129,7 @@ APCA: `test/apca-grounds.test.js` + `auditGroundForegrounds()`; code role uses `
 - TOC entries: each **poster title** (links to `#poster.slug`) plus **h3–h6** parsed from poster bodies.  
 - IDs: `slugify` + dedupe; poster slugs assigned in `parse-document.js`; in-body headings use `marked` custom renderer with `tokens[].raw` for stable IDs.  
 - TOC toggle: `#toc-toggle` / `#toc-panel` in header (hidden until opened).
+- Scroll: `assets/reader.js` sets `--scroll-offset` from measured `.site-header--reader` height; `scrollIntoView` + `scroll-margin-top` on `.post-header` and in-body `h3–h6`. Poster TOC targets scroll to `.post-header`, not card padding. Re-aligns after title fit when a hash is active.
 
 ---
 

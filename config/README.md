@@ -2,6 +2,25 @@
 
 Single source of truth for theme, poster grounds, typography, spacing, and title fitting. Loaded at startup by `lib/gallery-config.js` and applied as CSS custom properties + a small injected stylesheet for per-ground tokens.
 
+## Applying edits
+
+1. Run the app with **`npm start`** and open **http://localhost:3000** (not `file://` — the config is loaded via `fetch`).
+2. **Save** `config/gallery.config.json`.
+3. **Switch away from the browser tab and back** (or change to another app and return). The tab refocus reloads config and redraws poster patterns.
+4. Have a **`.md` file open in the reader** — landing page alone does not show posters or glyph patterns.
+
+**Quick checks**
+
+| Change | What you should see |
+|--------|---------------------|
+| `theme.graphics.glyphPatternOpacity` → `0.2` | Much stronger background letters |
+| `theme.graphics.typePattern.noneProbability` → `0` | Every poster gets a pattern (none were skipped before) |
+| `theme.graphics.typePattern.patternTypes` → `["line"]` only | Only straight-line letter paths |
+| `theme.graphics.typePattern.repeatsMin` / `Max` → `4` / `4` | Fewer, larger gaps between letters |
+| `grounds.*.surface` | Poster card background color |
+
+If nothing changes: hard-refresh the page (Cmd+Shift+R), re-drop your `.md` file, and confirm the JSON is valid (a parse error keeps the previous config).
+
 **Ground rules, APCA targets, OKLCH usage:** [`docs/DESIGN.md`](../docs/DESIGN.md).
 
 **Reload:** save the file, then refocus the browser tab (or refresh). Changes apply without rebuilding.
@@ -72,13 +91,37 @@ Semantic names: `paper`, `ink`, `inkSoft`, `inkMute`, `red`, `redBright`.
 
 ### `theme.graphics` — poster type patterns
 
-Canvas glyph mosaics on each poster (`lib/type-pattern-mosaic.js`, driven from `assets/reader.js`). Not a CSS background tile.
+Canvas glyph patterns on each poster (`lib/type-pattern.js`, driven from `assets/reader.js`). Not a CSS background tile.
 
 | Key | Role |
 |-----|------|
 | `glyphPatternColor` | `"display"` (use each ground’s `foreground.display`) or a semantic/hex color → `--config-glyph-pattern-color` / per-ground `--on-ground-glyph-pattern-color` |
 | `glyphPatternOpacity` | Canvas layer opacity (default `0.07`) → `--glyph-pattern-opacity` on `.post-card__glyph-canvas` |
-| `typePattern` | Random layout knobs: `patternTypes`, `targetTileSize`, font/repeat/padding ranges, wave/grid angles, `symbolPool`, `noneProbability`, empty-space thresholds, etc. See defaults in `gallery.config.json`. |
+| `typePattern` | Flat object — one `renderTypePattern` per poster empty region (`lib/type-pattern-poster.js`). |
+
+#### `typePattern` keys
+
+**Pattern type:** `patternTypes` — array of `line` | `circle` | `arc` | `spiral` | `wave` | `grid` | `fill`; one picked at random per poster.
+
+**Fixed booleans:** `fillSpace`, `opticalTight`, `followPath`, `flipReadable`, `flipAlternateVertical`, `flipAlternateHorizontal`.
+
+**Random ranges** (`Min` / `Max`, inclusive per poster): `repeats`, `padding`, `tightTracking`, `lineAngle` (deg), `startAngleDeg`, `arcSweepDeg`, `spiralTurns`, `waveAmplitude`, `waveCycles`, `gridColumns`, `fillAngle` (deg), `fillRowGap`, `opacity`. Optional `fontSizeMin` / `fontSizeMax` — omit both for library auto size.
+
+**Random probability:** `gridStaggerProbability` (`0–1`).
+
+**Placement** (where on the card):
+
+| Key | Role |
+|-----|------|
+| `regionPreference` | Order to try: `bottom` (below body), `between` (header–body gap), `top` (above title) |
+| `emptySpaceMinPx` / `emptySpaceMinRatio` | Minimum empty band height before trying the next slot |
+| `regionInsetPx` | Shrink chosen region on all sides (keeps pattern off text). Use **`0`** with edge align. |
+| `alignToCardEdge` | **`true`** — pattern band spans the full poster (edge to edge in the padding margins). **`false`** — band stays inside the content box only. |
+| `fallbackBandWidth` / `fallbackSide` | Narrow side column when no slot is tall enough (`left` / `right` / `auto`) |
+| `edgeOverflowPx` | Side band only (when `alignToCardEdge` is false): pixels to extend past the content box toward the card edge. Omit to auto-use the poster’s horizontal padding. Ignored when `alignToCardEdge` is true. |
+| `symbolPool`, `symbolProbability`, `noneProbability` | Letter source and skip chance |
+
+Patterns re-measure after poster title fitting so bands track the final title height.
 
 ### `theme.code`
 

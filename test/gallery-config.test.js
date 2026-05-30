@@ -27,6 +27,7 @@ describe('gallery config', () => {
     assert.equal(cfg.theme.graphics.glyphPatternColor, 'display');
     assert.equal(cfg.theme.graphics.glyphPatternOpacity, 0.07);
     assert.deepEqual(cfg.theme.graphics.typePattern.patternTypes, ['wave', 'grid', 'line']);
+    assert.equal(cfg.theme.graphics.typePattern.fillSpace, false);
     assert.ok(cfg.fonts.titleFaces.length >= 1);
   });
 
