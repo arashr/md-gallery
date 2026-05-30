@@ -16,6 +16,7 @@ import { copyCodeFromButton, enhanceCodeBlocks } from '../lib/code-blocks.js';
 import { renderTypePattern } from '../lib/type-pattern.js';
 import { computePosterGlyphRegion } from '../lib/glyph-region.js';
 import { buildPosterTypePatternOptions, TYPE_PATTERN_DEFAULTS } from '../lib/type-pattern-poster.js';
+import { enhancePosterImageHalftone } from '../lib/image-halftone.js';
 import { ICONS } from './icons.js';
 
 (function () {
@@ -270,6 +271,7 @@ import { ICONS } from './icons.js';
   function enhanceReaderContent() {
     enhanceCodeBlocks(mainReader, { copyIcon: ICONS.copy });
     injectIcons();
+    enhancePosterImageHalftone(mainReader, getGalleryConfig());
   }
 
   function renderPosterGlyphPatterns() {
@@ -371,10 +373,12 @@ import { ICONS } from './icons.js';
     updateScrollOffset();
     schedulePosterTitleFit();
     requestAnimationFrame(renderPosterGlyphPatterns);
+    requestAnimationFrame(() => enhancePosterImageHalftone(mainReader, getGalleryConfig()));
     if (document.fonts?.ready) {
       document.fonts.ready.then(() => {
         schedulePosterTitleFit();
         renderPosterGlyphPatterns();
+        enhancePosterImageHalftone(mainReader, getGalleryConfig());
       });
     }
     if (document.fonts?.addEventListener) {
@@ -845,6 +849,7 @@ import { ICONS } from './icons.js';
 
   async function reloadConfigAndRefresh() {
     await reloadGalleryConfig();
+    enhancePosterImageHalftone(mainReader, getGalleryConfig());
     schedulePosterTitleFit();
     renderPosterGlyphPatterns();
   }
@@ -866,6 +871,7 @@ import { ICONS } from './icons.js';
       updateScrollOffset();
       schedulePosterTitleFit();
       renderPosterGlyphPatterns();
+      enhancePosterImageHalftone(mainReader, getGalleryConfig());
       if (location.hash) realignScrollToHash();
     }, 120);
   });

@@ -97,7 +97,33 @@ Canvas glyph patterns on each poster (`lib/type-pattern.js`, driven from `assets
 |-----|------|
 | `glyphPatternColor` | `"display"` (use each ground’s `foreground.display`) or a semantic/hex color → `--config-glyph-pattern-color` / per-ground `--on-ground-glyph-pattern-color` |
 | `glyphPatternOpacity` | Canvas layer opacity (default `0.07`) → `--glyph-pattern-opacity` on `.post-card__glyph-canvas` |
+| `imageHalftone` | Poster image halftone subgroup (object below). Set `{ "enabled": false }` or legacy `false` for plain photos. **Independent** of glyph `typePattern`. |
 | `typePattern` | Flat object — one `renderTypePattern` per poster empty region (`lib/type-pattern-poster.js`). |
+
+#### `imageHalftone` keys
+
+Object under `theme.graphics.imageHalftone`. Defaults in `lib/image-halftone-config.js`.
+
+| Key | Default | Role |
+|-----|---------|------|
+| `enabled` | `true` | Master toggle |
+| `dotPx` | `5` | Dot spacing in CSS px (lower = finer) |
+| `contrast` | `1.2` | Tone punch / dot density (higher = less washed out) |
+| `saturation` | `1.35` | Color boost per dot |
+| `paper` | `"surface"` | Solid fill behind dots: `surface` (poster ground), `paper` (page bg), or hex — blocks glyph bleed-through |
+| `angleDeg` | `15` | Screen angle in degrees (`0` = upright grid; classic newsprint ≈ `15`–`45`) |
+| `pattern` | `"stagger"` | Dot layout: `stagger` (hex offset rows), `grid` (square), `line` (square rows, no hex offset) |
+
+Legacy flat keys (`imageHalftoneDotPx`, `imageHalftoneContrast`, etc.) still merge if present.
+
+**Quick checks**
+
+| Change | What you should see |
+|--------|---------------------|
+| `imageHalftone.angleDeg` → `45` | Diagonal ruling across the photo |
+| `imageHalftone.pattern` → `"grid"` | Square dot matrix (no row offset) |
+| `imageHalftone.pattern` → `"line"` | Visible scan-line rows |
+| `imageHalftone.enabled` → `false` | Plain photograph |
 
 #### `typePattern` keys
 

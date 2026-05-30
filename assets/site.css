@@ -983,8 +983,40 @@ h2.poster__title.post-title,
   object-fit: contain;
 }
 
-.post-card[class*='ground-'] .prose :is(img, picture, video) {
-  border: 1px solid var(--on-ground-edge);
+.post-card[class*='ground-'] .prose .halftone--active {
+  background: var(--surface);
+  isolation: isolate;
+}
+
+.halftone {
+  display: block;
+  position: relative;
+  max-width: 100%;
+  width: 100%;
+}
+
+.halftone__canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  vertical-align: top;
+}
+
+.halftone--active .halftone__source {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.halftone:not(.halftone--active) .halftone__canvas {
+  display: none;
 }
 
 .post-card .prose hr {
