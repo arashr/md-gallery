@@ -23,7 +23,7 @@ npm install
 npm start
 ```
 
-Open http://localhost:3000 (or the port `serve` prints). Drop a Markdown file, or a folder of `.md` files.
+Open http://localhost:3000 (or the port `serve` prints). Drop a Markdown file, a folder of `.md` files, or use **Open the gallery demo** in the landing footer to load the built-in showcase.
 
 ```bash
 npm test

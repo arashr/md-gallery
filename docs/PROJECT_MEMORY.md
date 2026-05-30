@@ -2,7 +2,7 @@
 
 **Purpose:** Durable context for humans and agents continuing this repo. Update when architecture, workflows, or conventions change.
 
-**Last updated:** 2026-05-29
+**Last updated:** 2026-05-30
 
 ---
 
@@ -23,7 +23,7 @@ npm install
 npm start          # npx serve . → http://localhost:3000
 ```
 
-- Drop a `.md` file on the landing page.
+- Drop a `.md` file on the landing page, or click **Open the gallery demo** in the footer (`docs/demo/gallery-showcase.md`).
 - **Contents** in the nav opens the TOC drawer.
 - **Search** filters posters and highlights matches in visible bodies (no poster count label in the header).
 - **View controls:** theme toggle on landing + reader headers (synced); zoom −/+ in reader only; **serif/sans** toggle for poster body text (`data-prose-font`, persisted). Toolbar uses inline SVG icons. Dark mode uses `--chrome-*` / `--chrome-red*` on UI only; `:root` `--red` stays `#c8102e` on poster grounds.
@@ -56,8 +56,13 @@ npm start          # npx serve . → http://localhost:3000
 | `lib/code-blocks.js` | Wrap `pre` + external copy toolbar |
 | `lib/poster-export.js` | Per-poster PDF via html2canvas + jsPDF |
 | `lib/render-landing-gallery.js` | Folder-drop thumbnail grid |
-| `lib/type-pattern.js`, `lib/type-pattern-mosaic.js` | Decorative glyph patterns on posters |
-| `lib/bundled-md.js`, `lib/local-md-links.js` | Same-origin `.md` links |
+| `lib/type-pattern.js`, `lib/type-pattern-mosaic.js` | Type-pattern library (mosaic unused in reader) |
+| `lib/type-pattern-poster.js` | Flat `typePattern` defaults + `buildPosterTypePatternOptions()` |
+| `lib/glyph-region.js` | Poster glyph canvas placement (`bottom` / `between` / `top` / side) |
+| `lib/fit-poster-title.js` | Title size tiers + line-count fit |
+| `lib/bundled-md.js`, `lib/local-md-links.js` | Same-origin `.md` links + bundled docs |
+| `docs/demo/gallery-showcase.md` | Built-in capability demo (footer link) |
+| `assets/demo/nebula-universtock.jpg` | Sample photo for image poster (Unsplash / Universtock) |
 | `config/gallery.config.json` | Grounds, theme, code, fonts, title scale |
 | `docs/PROJECT_MEMORY.md` | This file |
 | `docs/DECISION_LOG.md` | Product/architecture decisions (not CSS trivia) |
@@ -119,8 +124,13 @@ APCA: `test/apca-grounds.test.js` + `auditGroundForegrounds()`; code role uses `
 
 ### Glyph patterns
 
-- Canvas layer on each poster (`.post-card__glyph-layer`); config under `theme.graphics.typePattern`.
-- Driven from `assets/reader.js` after render and after title fit. Placement: `lib/glyph-region.js` (`bottom` / `between` / `top` / side fallback). Pattern options: flat `typePattern` via `lib/type-pattern-poster.js`. Sync `lib/type-pattern.js` from the `type_pattern` repo when the library changes.
+- Canvas layer on each poster (`.post-card__glyph-layer`); color/opacity from `theme.graphics` (`glyphPatternColor`, `glyphPatternOpacity`).
+- **One** `renderTypePattern()` per poster into `[data-glyph-canvas]` — not mosaic tiling.
+- **When:** `assets/reader.js` → `renderPosterGlyphPatterns()` after render, after `fitPosterTitles()`, on resize/zoom/fonts, and on **config reload** (tab refocus).
+- **Where:** `lib/glyph-region.js` measures header/body slack → region slot; keys include `emptySpaceMinPx`, `regionInsetPx`, `alignToCardEdge`, `regionPreference`, `fallbackBandWidth`, `edgeOverflowPx`.
+- **What:** flat `theme.graphics.typePattern` merged with `TYPE_PATTERN_DEFAULTS` in `lib/type-pattern-poster.js` (`patternTypes`, `repeatsMin`/`Max`, `fillSpace`, path/fill ranges, `symbolPool`, etc.). Optional `fontSizeMin`/`Max` only apply when **both** are set in config.
+- **Library sync:** copy `lib/type-pattern.js` (and mosaic if needed) from sibling repo `type_pattern` when the library changes; reader does not call mosaic.
+- **Pitfall:** `fillSpace: true` fills the grid; `repeatsMin`/`Max` mainly influence sizing, not a hard glyph cap. Cap glyphs with `fillSpace: false` + lower repeats (and `fill` in `patternTypes` if desired).
 
 ---
 
@@ -129,7 +139,7 @@ APCA: `test/apca-grounds.test.js` + `auditGroundForegrounds()`; code role uses `
 - TOC entries: each **poster title** (links to `#poster.slug`) plus **h3–h6** parsed from poster bodies.  
 - IDs: `slugify` + dedupe; poster slugs assigned in `parse-document.js`; in-body headings use `marked` custom renderer with `tokens[].raw` for stable IDs.  
 - TOC toggle: `#toc-toggle` / `#toc-panel` in header (hidden until opened).
-- Scroll: `assets/reader.js` sets `--scroll-offset` from measured `.site-header--reader` height; `scrollIntoView` + `scroll-margin-top` on `.post-header` and in-body `h3–h6`. Poster TOC targets scroll to `.post-header`, not card padding. Re-aligns after title fit when a hash is active.
+- Scroll: `assets/reader.js` sets `--scroll-offset` from measured `.site-header--reader` height (+ `SCROLL_GAP_PX` in `reader.js`); `scrollIntoView({ block: 'start' })` + `scroll-margin-top` on `.post-header` and in-body `h3–h6`. Poster TOC targets resolve to `.post-header`, not card padding. Re-aligns after title fit when a hash is active.
 
 ---
 
@@ -179,6 +189,15 @@ npm test
 - `test/apca-grounds.test.js` — configured ground foreground + code chip pairs vs `docs/DESIGN.md` Lc targets.
 - `test/gallery-config.test.js` — config merge, injected ground/code CSS.
 - `test/landing-gallery.test.js`, `test/inline-markdown.test.js` — folder gallery, title markdown.
+- `test/bundled-md.test.js` — bundled showcase path resolution.
+- `test/glyph-region.test.js`, `test/type-pattern-poster.test.js` — placement + flat pattern options.
+
+## Bundled markdown & images
+
+- Footer / in-app links to `docs/*.md` use `openBundledMarkdown()` (`appDocsMode`); requires **`npm start`** (same origin).
+- Relative image paths in bundled docs: prefer **root-absolute** paths (`/assets/demo/…`) so they resolve when the page URL is `/` or `#read`, not the `.md` path.
+- Remote `https://` images in markdown **display** in the reader (sanitize allows `src`); **poster PDF export** may omit them if CORS blocks canvas inlining (`lib/poster-export.js`).
+- Showcase image: [Universtock on Unsplash](https://unsplash.com/photos/bright-star-with-colorful-nebula-in-dark-space-bsEmH06Ko1w) → `assets/demo/nebula-universtock.jpg`.
 
 ## Intro vs posters (2026-05-21)
 
@@ -198,7 +217,7 @@ Poster titles, doc `h1`, and TOC poster rows use `forTitle` (bold/italic OK; bac
 
 ## Title fitting (`lib/fit-poster-title.js`)
 
-**Current:** `resolveTitleScaleTier(titleScale, titleCharLength)` picks limits. Binary search from `floorPx` to width-derived `maxPx`; if `maxLines > 0`, `titleLineCount` uses block height ÷ computed line-height (not `getClientRects`). Search may go below tier `minPx` down to `floorPx` when lines still exceed the cap. Cards carry `data-title-chars` (`render-document.js`); fitter falls back to link text if missing. Re-run on render, resize, zoom, fonts ready, **config reload** (`assets/reader.js`).
+**Current:** `resolveTitleScaleTier(titleScale, titleCharLength)` picks limits. Binary search from `floorPx` to width-derived `maxPx`; if `maxLines > 0`, `titleLineCount` uses block height ÷ computed line-height (not `getClientRects`). Search may go below tier `minPx` down to `floorPx` when lines still exceed the cap. Cards carry `data-title-chars` (`render-document.js`); fitter falls back to link text if missing. Re-run on render, resize, zoom, fonts ready, **config reload** (`assets/reader.js`). Collection hero / poster `h1.poster__title` use `line-height: 100%` in `site.css`.
 
 **Tuning:** `config/gallery.config.json` → `titleScale.tiers` (see `config/README.md`).
 
@@ -209,6 +228,7 @@ Poster titles, doc `h1`, and TOC poster rows use `forTitle` (bold/italic OK; bac
 ## Known gaps / follow-ups  
 - TOC does not include intro-only headings before first `##`.  
 - No persistence (reload loses file); no URL load from hash/blob.  
+- Dropped-folder `.md` with relative image paths resolve against the **page URL**, not the file path — use absolute `/…` or host from folder root.  
 - Optional: link from figlets-blog index footer to MD Gallery deploy URL.  
 - Optional: split mode UI (user chooses `##` vs `---` vs single).  
 - Optional: sync CSS from figlets-blog via script instead of manual copy.

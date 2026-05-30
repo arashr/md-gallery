@@ -135,3 +135,35 @@ Format: **Date · Decision · Why**
 **Why:** Width-only fit left long titles huge on narrow cards (high `minPx` floor). Line count targets tall word-stacks without CSS `max-height` clip.
 
 **Revert baseline:** tag `checkpoint/pre-title-tier-fit` (width-only, pre-tiers).
+
+---
+
+## 2026-05-30 — Bundled gallery showcase demo
+
+**Decision:** Ship a same-origin showcase at `docs/demo/gallery-showcase.md` (grounds, typography, prose samples, search keywords, one poster with a bundled photograph). Homepage footer link **Open the gallery demo** opens it via `fetchBundledMarkdown` (`lib/bundled-md.js`); no separate nebula-only doc.
+
+**Why:** One-click onboarding without dropping a file; demonstrates real poster imagery offline. Unsplash photo (`assets/demo/nebula-universtock.jpg`) is resized and bundled; one-line photographer credit on the poster only (no license block in the reader).
+
+---
+
+## 2026-05-30 — Flat `typePattern` config + glyph region placement
+
+**Decision:** All mini-pattern options live as flat keys under `theme.graphics.typePattern` in `gallery.config.json` (`*Min`/`*Max`, `patternTypes`, placement keys). Defaults in `lib/type-pattern-poster.js` (`TYPE_PATTERN_DEFAULTS`). Placement (when/where on the card) is `lib/glyph-region.js`; options merge in `buildPosterTypePatternOptions()`.
+
+**Why:** Matches prior config ergonomics; avoids nested `pattern` / `random` shapes. Placement and pattern generation stay separate so title-fit layout can drive regions.
+
+---
+
+## 2026-05-30 — One `renderTypePattern` per poster (not mosaic)
+
+**Decision:** Each poster gets a single `renderTypePattern()` call into its glyph canvas (`assets/reader.js` → `renderPosterGlyphPatterns`). Do not tile multiple pattern instances (mosaic) in the reader.
+
+**Why:** Mosaic was experimental in the type_pattern library; product intent is one decorative band per empty region. `lib/type-pattern-mosaic.js` remains for library parity but is unused by the reader.
+
+---
+
+## 2026-05-30 — Config reload redraws glyph patterns
+
+**Decision:** On `window` `focus` and `visibilitychange`, debounced `reloadGalleryConfig()` runs `fitPosterTitles()` and **`renderPosterGlyphPatterns()`** (not title fit alone).
+
+**Why:** Editing `gallery.config.json` while the tab stayed focused left patterns stale; users expect refocus-after-save to refresh graphics as well as CSS vars.
