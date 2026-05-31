@@ -13,10 +13,10 @@ Single source of truth for theme, poster grounds, typography, spacing, and title
 
 | Change | What you should see |
 |--------|---------------------|
-| `theme.graphics.glyphPatternOpacity` → `0.2` | Much stronger background letters |
-| `theme.graphics.typePattern.noneProbability` → `0` | Every poster gets a pattern (none were skipped before) |
-| `theme.graphics.typePattern.patternTypes` → `["line"]` only | Only straight-line letter paths |
-| `theme.graphics.typePattern.repeatsMin` / `Max` → `4` / `4` | Fewer, larger gaps between letters |
+| `theme.graphics.glyph.opacity` → `0.2` | Much stronger background letters |
+| `theme.graphics.typePattern.roll.noneProbability` → `0` | Every poster gets a pattern (none were skipped before) |
+| `theme.graphics.typePattern.shape.patternTypes` → `["line"]` only | Only straight-line letter paths |
+| `theme.graphics.typePattern.geometry.repeatsMin` / `Max` → `4` / `4` | Fewer, larger gaps between letters |
 | `grounds.*.surface` | Poster card background color |
 
 If nothing changes: hard-refresh the page (Cmd+Shift+R), re-drop your `.md` file, and confirm the JSON is valid (a parse error keeps the previous config).
@@ -89,20 +89,42 @@ Semantic names: `paper`, `ink`, `inkSoft`, `inkMute`, `red`, `redBright`.
 | `shutterDuration` | Shutter intro duration |
 | `shutterEase` | Shutter intro easing |
 
-### `theme.graphics` — poster type patterns
+### `theme.graphics` — poster decoration
 
-Canvas glyph patterns on each poster (`lib/type-pattern.js`, driven from `assets/reader.js`). Not a CSS background tile.
+Poster graphics are grouped by feature. **`lib/resolve-graphics-config.js`** flattens groups at runtime; legacy flat keys still work.
 
-| Key | Role |
-|-----|------|
-| `glyphPatternColor` | `"display"` (use each ground’s `foreground.display`) or a semantic/hex color → `--config-glyph-pattern-color` / per-ground `--on-ground-glyph-pattern-color` |
-| `glyphPatternOpacity` | Canvas layer opacity (default `0.07`) → `--glyph-pattern-opacity` on `.post-card__glyph-canvas` |
-| `imageHalftone` | Poster image halftone subgroup (object below). Set `{ "enabled": false }` or legacy `false` for plain photos. **Independent** of glyph `typePattern`. |
-| `typePattern` | Flat object — one `renderTypePattern` per poster empty region (`lib/type-pattern-poster.js`). |
+```
+theme.graphics
+├── glyph              … shared pattern ink (CSS tokens)
+├── imageHalftone      … prose photo halftone (independent)
+├── heroGlyph          … mega background glyph (one per poster roll)
+│   ├── roll
+│   ├── text
+│   ├── layout
+│   ├── appearance
+│   └── accessibility
+└── typePattern        … mini canvas patterns
+    ├── roll
+    ├── symbol
+    ├── blend
+    ├── shape
+    ├── geometry
+    ├── placement
+    └── appearance
+```
 
-#### `imageHalftone` keys
+#### `glyph` — shared pattern ink
 
-Object under `theme.graphics.imageHalftone`. Defaults in `lib/image-halftone-config.js`.
+| Key | Default | Role |
+|-----|---------|------|
+| `color` | `"display"` | Pattern letter color — semantic or hex → `--config-glyph-pattern-color` / per-ground `--on-ground-glyph-pattern-color` |
+| `opacity` | `0.07` | Default pattern strength; used when `typePattern.appearance` omits `opacityMin`/`opacityMax`. Also `--glyph-pattern-opacity` for legacy CSS-only faintness. |
+
+Legacy flat keys `glyphPatternColor` / `glyphPatternOpacity` still merge.
+
+#### `imageHalftone` — prose photos
+
+Independent of glyph patterns. Object under `theme.graphics.imageHalftone`. Defaults in `lib/image-halftone-config.js`.
 
 | Key | Default | Role |
 |-----|---------|------|
@@ -110,44 +132,55 @@ Object under `theme.graphics.imageHalftone`. Defaults in `lib/image-halftone-con
 | `dotPx` | `5` | Dot spacing in CSS px (lower = finer) |
 | `contrast` | `1.2` | Tone punch / dot density (higher = less washed out) |
 | `saturation` | `1.35` | Color boost per dot |
-| `paper` | `"surface"` | Solid fill behind dots: `surface` (poster ground), `paper` (page bg), or hex — blocks glyph bleed-through |
-| `angleDeg` | `15` | Screen angle in degrees (`0` = upright grid; classic newsprint ≈ `15`–`45`) |
-| `pattern` | `"stagger"` | Dot layout: `stagger` (hex offset rows), `grid` (square), `line` (square rows, no hex offset) |
+| `paper` | `"surface"` | Solid fill behind dots: `surface` (poster ground), `paper` (page bg), or hex |
+| `angleDeg` | `15` | Screen angle in degrees |
+| `pattern` | `"stagger"` | `stagger` \| `grid` \| `line` |
 
-Legacy flat keys (`imageHalftoneDotPx`, `imageHalftoneContrast`, etc.) still merge if present.
+Legacy flat keys (`imageHalftoneDotPx`, etc.) still merge if present.
+
+#### `heroGlyph` — mega background glyph
+
+Random alternative to mini `typePattern` on a poster. Defaults in `lib/poster-hero-glyph.js`. Uses **`typePattern.symbol`** + **`typePattern.blend`**.
+
+| Group | Keys | Role |
+|-------|------|------|
+| **`roll`** | `probability` (`0.22`) | Chance per poster (`0`–`1`) |
+| **`text`** | `lengthMin` / `lengthMax`, `glyphColor` | Glyph string + fill before blend |
+| **`layout`** | `sizeRatio`, `offsetXRatioMin` / `offsetXRatioMax` | Width fraction; random horizontal shift (clipping OK) |
+| **`appearance`** | `opacity` | Glyph strength after blend (`0`–`1`) |
+| **`blend`** | `modes`, `mode` | Hero-only composite pool (`modes` → `blendModes`); independent of `typePattern.blend` |
+| **`accessibility`** | `excludeTitleFaces`, `respectReducedTransparency`, `respectHighContrast` | Face blocklist; OS preference gates |
+
+Symbol source uses **`typePattern.symbol`** (not hero). Blend uses **`heroGlyph.blend`** (not pattern).
 
 **Quick checks**
 
 | Change | What you should see |
 |--------|---------------------|
-| `imageHalftone.angleDeg` → `45` | Diagonal ruling across the photo |
-| `imageHalftone.pattern` → `"grid"` | Square dot matrix (no row offset) |
-| `imageHalftone.pattern` → `"line"` | Visible scan-line rows |
-| `imageHalftone.enabled` → `false` | Plain photograph |
+| `heroGlyph.roll.probability` → `1` | Every eligible poster uses a mega-glyph |
+| `heroGlyph.blend.modes` → `["exclusion", "overlay"]` | Hero composite pool only |
+| `typePattern.blend.modes` → `["multiply", "screen"]` | Mini-pattern composite pool only |
+| `heroGlyph.roll.probability` → `0` | Only mini patterns / none |
 
-#### `typePattern` keys
+#### `typePattern` — mini canvas patterns
 
-**Pattern type:** `patternTypes` — array of `line` | `circle` | `arc` | `spiral` | `wave` | `grid` | `fill`; one picked at random per poster.
+One `renderTypePattern` per poster empty region (`lib/type-pattern-poster.js`, `lib/glyph-region.js`).
 
-**Fixed booleans:** `fillSpace`, `opticalTight`, `followPath`, `flipReadable`, `flipAlternateVertical`, `flipAlternateHorizontal`.
+| Group | Keys | Role |
+|-------|------|------|
+| **`roll`** | `noneProbability` (`0.18`) | Skip pattern entirely on this poster |
+| **`symbol`** | `pool`, `probability` | Character source (`pool` → `symbolPool`). Digits ignored. |
+| **`blend`** | `modes`, `mode` | Pattern-only composite pool (`modes` → `blendModes`); independent of `heroGlyph.blend` |
+| **`shape`** | `patternTypes`, `fillSpace`, `opticalTight`, `followPath`, `flipReadable`, `flipAlternateVertical`, `flipAlternateHorizontal` | Pattern geometry + letter behavior |
+| **`geometry`** | `*Min` / `*Max` ranges | `repeats`, `padding`, `tightTracking`, `lineAngle`, `startAngleDeg`, `arcSweepDeg`, `spiralTurns`, `waveAmplitude`, `waveCycles`, `gridColumns`, `gridStaggerProbability`, `fillAngle`, `fillRowGap`, optional `fontSizeMin` / `fontSizeMax` |
+| **`placement`** | `regionPreference`, `emptySpaceMinPx`, `emptySpaceMinRatio`, `regionInsetPx`, `alignToCardEdge`, `fallbackBandWidth`, `sideBandWidthRatio`, `fallbackSide`, `edgeOverflowPx` | Where on the card |
+| **`appearance`** | `opacityMin`, `opacityMax` | Pattern strength after blend (`0`–`1`). Omit both to inherit `glyph.opacity`. Blend applies to the **whole pattern layer** once (letters overlap without stacking blend). |
 
-**Random ranges** (`Min` / `Max`, inclusive per poster): `repeats`, `padding`, `tightTracking`, `lineAngle` (deg), `startAngleDeg`, `arcSweepDeg`, `spiralTurns`, `waveAmplitude`, `waveCycles`, `gridColumns`, `fillAngle` (deg), `fillRowGap`, `opacity`. Optional `fontSizeMin` / `fontSizeMax` — omit both for library auto size.
-
-**Random probability:** `gridStaggerProbability` (`0–1`).
-
-**Placement** (where on the card):
-
-| Key | Role |
-|-----|------|
-| `regionPreference` | Order to try: `bottom` (below body), `between` (header–body gap), `top` (above title) |
-| `emptySpaceMinPx` / `emptySpaceMinRatio` | Minimum empty band height before trying the next slot |
-| `regionInsetPx` | Shrink chosen region on all sides (keeps pattern off text). Use **`0`** with edge align. |
-| `alignToCardEdge` | **`true`** — pattern band spans the full poster (edge to edge in the padding margins). **`false`** — band stays inside the content box only. |
-| `fallbackBandWidth` / `fallbackSide` | Narrow side column when no slot is tall enough (`left` / `right` / `auto`) |
-| `edgeOverflowPx` | Side band only (when `alignToCardEdge` is false): pixels to extend past the content box toward the card edge. Omit to auto-use the poster’s horizontal padding. Ignored when `alignToCardEdge` is true. |
-| `symbolPool`, `symbolProbability`, `noneProbability` | Letter source and skip chance |
+**Blend modes allowed:** `difference`, `exclusion`, `multiply`, `screen`, `overlay`, `darken`, `lighten`, `color-dodge`, `color-burn`, `hard-light`, `soft-light`.
 
 Patterns re-measure after poster title fitting so bands track the final title height.
+
+**Legacy flat keys** (e.g. `symbolPool`, `blendModes`, `patternTypes` at the top level of `typePattern`) still merge; grouped keys win on conflict.
 
 ### `theme.code`
 

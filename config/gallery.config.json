@@ -42,8 +42,10 @@
       "shutterEase": "cubic-bezier(0.77, 0, 0.18, 1)"
     },
     "graphics": {
-      "glyphPatternColor": "display",
-      "glyphPatternOpacity": 0.07,
+      "glyph": {
+        "color": "#C8102E",
+        "opacity": 0.07
+      },
       "imageHalftone": {
         "enabled": false,
         "dotPx": 4,
@@ -53,54 +55,110 @@
         "angleDeg": 0,
         "pattern": "grid"
       },
+      "heroGlyph": {
+        "roll": {
+          "probability": 0.4
+        },
+        "text": {
+          "lengthMin": 1,
+          "lengthMax": 1,
+          "glyphColor": "#C8102E"
+        },
+        "layout": {
+          "sizeRatio": 1.2,
+          "offsetXRatioMin": -0.35,
+          "offsetXRatioMax": 0.35
+        },
+        "appearance": {
+          "opacityMin": 0.15,
+          "opacityMax": 0.25
+        },
+        "blend": {
+          "modes": ["difference", "exclusion", "screen", "overlay", "color-dodge"],
+          "opacity": {
+            "difference": { "min": 0.2, "max": 0.4 },
+            "exclusion": { "min": 0.2, "max": 0.4 },
+            "screen": { "min": 0.4, "max": 0.6 },
+            "overlay": { "min": 0.5, "max": 0.8 },
+            "color-dodge": { "min": 0.5, "max": 0.7 }
+          }
+        },
+        "accessibility": {
+          "excludeTitleFaces": ["monoton", "jersey25"]
+        }
+      },
       "typePattern": {
-        "patternTypes": ["wave", "grid", "line", "fill"],
-        "fontSizeMin": 32,
-        "fontSizeMax": 64,
-        "fillSpace": false,
-        "opticalTight": true,
-        "followPath": true,
-        "flipReadable": true,
-        "flipAlternateVertical": true,
-        "flipAlternateHorizontal": true,
-        "repeatsMin": 16,
-        "repeatsMax": 128,
-        "paddingMin": 0,
-        "paddingMax": 0,
-        "tightTrackingMin": 0.92,
-        "tightTrackingMax": 0.98,
-        "lineAngleMin": -180,
-        "lineAngleMax": 180,
-        "startAngleDegMin": 0,
-        "startAngleDegMax": 180,
-        "arcSweepDegMin": 63,
-        "arcSweepDegMax": 360,
-        "spiralTurnsMin": 1,
-        "spiralTurnsMax": 4.5,
-        "waveAmplitudeMin": 0.99,
-        "waveAmplitudeMax": 0.99,
-        "waveCyclesMin": 10,
-        "waveCyclesMax": 10,
-        "gridColumnsMin": 2,
-        "gridColumnsMax": 6,
-        "gridStaggerProbability": 0.3,
-        "fillAngleMin": -18,
-        "fillAngleMax": 18,
-        "fillRowGapMin": 1.3,
-        "fillRowGapMax": 1.6,
-        "opacityMin": 1,
-        "opacityMax": 1,
-        "emptySpaceMinPx": 56,
-        "emptySpaceMinRatio": 0.1,
-        "regionInsetPx": 0,
-        "alignToCardEdge": true,
-        "regionPreference": ["bottom", "top", "between", "right"],
-        "fallbackBandWidth": 88,
-        "fallbackSide": "auto",
-        "edgeOverflowPx": 0,
-        "symbolPool": "+*-´`=/|",
-        "symbolProbability": 0.7,
-        "noneProbability": 0.18
+        "roll": {
+          "noneProbability": 0.06
+        },
+        "symbol": {
+          "pool": "+*-´`=/|#.°^<>",
+          "probability": 0.7
+        },
+        "blend": {
+          "modes": ["exclusion", "screen", "multiply", "overlay", "color-dodge"],
+          "opacity": {
+            "plain": { "min": 0.05, "max": 0.12 },
+            "exclusion": { "min": 0.7, "max": 0.7 },
+            "screen": { "min": 0.4, "max": 0.6 },
+            "multiply": { "min": 0.01, "max": 0.08 },
+            "overlay": { "min": 0.5, "max": 0.8 },
+            "color-dodge": { "min": 0.5, "max": 0.99 }
+          }
+        },
+        "shape": {
+          "patternTypes": ["wave", "grid", "fill"],
+          "fillSpace": false,
+          "opticalTight": false,
+          "followPath": true,
+          "flipReadable": true,
+          "flipAlternateVertical": true,
+          "flipAlternateHorizontal": true
+        },
+        "geometry": {
+          "fontSizeMin": 56,
+          "fontSizeMax": 160,
+          "repeatsMin": 6,
+          "repeatsMax": 38,
+          "paddingMin": 0,
+          "paddingMax": 0,
+          "tightTrackingMin": 0.92,
+          "tightTrackingMax": 0.98,
+          "lineAngleMin": 0,
+          "lineAngleMax": 180,
+          "startAngleDegMin": 0,
+          "startAngleDegMax": 180,
+          "arcSweepDegMin": 63,
+          "arcSweepDegMax": 360,
+          "spiralTurnsMin": 1,
+          "spiralTurnsMax": 4.5,
+          "waveAmplitudeMin": 0.16,
+          "waveAmplitudeMax": 0.34,
+          "waveCyclesMin": 2,
+          "waveCyclesMax": 6,
+          "gridColumnsMin": 2,
+          "gridColumnsMax": 12,
+          "gridStaggerProbability": 0.6,
+          "fillAngleMin": -18,
+          "fillAngleMax": 18,
+          "fillRowGapMin": 2,
+          "fillRowGapMax": 2.4
+        },
+        "placement": {
+          "emptySpaceMinPx": 84,
+          "emptySpaceMinRatio": 0.18,
+          "regionInsetPx": 12,
+          "alignToCardEdge": true,
+          "regionPreference": ["bottom", "between", "top", "right","left"],
+          "fallbackBandWidth": 88,
+          "fallbackSide": "right",
+          "sideBandWidthRatio": 2,
+          "edgeOverflowPx": 40
+        },
+        "appearance": {
+          "opacityMin": 0.1,
+          "opacityMax": 0.2
+        }
       }
     },
     "code": {

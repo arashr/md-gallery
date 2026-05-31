@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Config lab — MD Gallery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link id="fonts-link" rel="stylesheet" href="">
+  <link rel="stylesheet" href="assets/site.css">
+  <link rel="stylesheet" href="assets/reader.css">
+  <link rel="stylesheet" href="assets/config-lab.css">
+</head>
+<body class="config-lab page-collection">
+  <aside class="config-lab__panel" aria-label="Config controls">
+    <header class="config-lab__head">
+      <p class="config-lab__eyebrow mono-label">Secret · not linked</p>
+      <h1 class="config-lab__title">Config lab</h1>
+      <p class="config-lab__lede">Live preview — changes apply instantly. Values are single settings (no random ranges).</p>
+      <div class="config-lab__actions">
+        <button type="button" class="btn-ghost" id="lab-reload-file">Reload file</button>
+        <a class="btn-ghost" href="index.html">← Gallery</a>
+      </div>
+    </header>
+
+    <form id="lab-form" class="config-lab__form" autocomplete="off">
+      <fieldset class="config-lab__group">
+        <legend>Poster preview</legend>
+        <label class="config-lab__field">
+          <span>Ground</span>
+          <select name="ground" id="lab-ground"></select>
+        </label>
+        <label class="config-lab__field">
+          <span>Display font</span>
+          <select name="titleFace" id="lab-title-face"></select>
+        </label>
+      </fieldset>
+
+      <fieldset class="config-lab__group">
+        <legend>Shared glyph ink</legend>
+        <label class="config-lab__field">
+          <span>Pattern color</span>
+          <input name="glyphColor" type="text" placeholder="display or #hex">
+        </label>
+        <label class="config-lab__field">
+          <span>Pattern CSS opacity</span>
+          <input name="glyphOpacity" type="number" min="0" max="1" step="0.01">
+        </label>
+      </fieldset>
+
+      <fieldset class="config-lab__group">
+        <legend>Type pattern</legend>
+        <label class="config-lab__field">
+          <span>Pattern shape</span>
+          <select name="patternType" id="lab-pattern-type"></select>
+        </label>
+        <label class="config-lab__field">
+          <span>Blend mode</span>
+          <select name="patternBlend" id="lab-pattern-blend"></select>
+        </label>
+        <label class="config-lab__field">
+          <span>Opacity</span>
+          <input name="patternOpacity" type="range" min="0" max="1" step="0.01">
+          <output data-for="patternOpacity">0</output>
+        </label>
+        <label class="config-lab__field">
+          <span>Symbol pool</span>
+          <input name="symbolPool" type="text">
+        </label>
+        <label class="config-lab__field">
+          <span>Symbol probability</span>
+          <input name="symbolProbability" type="number" min="0" max="1" step="0.05">
+        </label>
+        <label class="config-lab__field">
+          <span>Skip probability</span>
+          <input name="noneProbability" type="number" min="0" max="1" step="0.01">
+        </label>
+        <label class="config-lab__field">
+          <span>Font size (px)</span>
+          <input name="fontSize" type="number" min="8" max="160" step="1">
+        </label>
+        <label class="config-lab__field">
+          <span>Repeats</span>
+          <input name="repeats" type="number" min="1" max="200" step="1">
+        </label>
+        <label class="config-lab__check">
+          <input name="fillSpace" type="checkbox"> Fill space
+        </label>
+        <label class="config-lab__check">
+          <input name="opticalTight" type="checkbox"> Optical tight
+        </label>
+        <label class="config-lab__check">
+          <input name="followPath" type="checkbox"> Follow path
+        </label>
+        <label class="config-lab__check">
+          <input name="alignToCardEdge" type="checkbox"> Align to card edge
+        </label>
+      </fieldset>
+
+      <fieldset class="config-lab__group">
+        <legend>Hero glyph</legend>
+        <label class="config-lab__field">
+          <span>Roll probability</span>
+          <input name="heroProbability" type="number" min="0" max="1" step="0.01">
+        </label>
+        <label class="config-lab__field">
+          <span>Glyph color</span>
+          <input name="heroGlyphColor" type="text" placeholder="display, accent, or #hex">
+        </label>
+        <label class="config-lab__field">
+          <span>Blend mode</span>
+          <select name="heroBlend" id="lab-hero-blend"></select>
+        </label>
+        <label class="config-lab__field">
+          <span>Opacity</span>
+          <input name="heroOpacity" type="range" min="0" max="1" step="0.01">
+          <output data-for="heroOpacity">0</output>
+        </label>
+        <label class="config-lab__field">
+          <span>Size ratio</span>
+          <input name="heroSizeRatio" type="number" min="0.4" max="1.2" step="0.02">
+        </label>
+        <label class="config-lab__field">
+          <span>Offset X ratio</span>
+          <input name="heroOffsetX" type="number" min="-1" max="1" step="0.05">
+        </label>
+        <label class="config-lab__field">
+          <span>Text length</span>
+          <input name="heroLength" type="number" min="1" max="3" step="1">
+        </label>
+      </fieldset>
+
+      <fieldset class="config-lab__group">
+        <legend>Image halftone</legend>
+        <label class="config-lab__check">
+          <input name="halftoneEnabled" type="checkbox"> Enabled
+        </label>
+        <label class="config-lab__field">
+          <span>Dot px</span>
+          <input name="halftoneDotPx" type="number" min="2" max="16" step="1">
+        </label>
+        <label class="config-lab__field">
+          <span>Contrast</span>
+          <input name="halftoneContrast" type="number" min="0.5" max="2" step="0.05">
+        </label>
+        <label class="config-lab__field">
+          <span>Saturation</span>
+          <input name="halftoneSaturation" type="number" min="0.5" max="2" step="0.05">
+        </label>
+        <label class="config-lab__field">
+          <span>Angle (deg)</span>
+          <input name="halftoneAngleDeg" type="number" min="0" max="90" step="1">
+        </label>
+        <label class="config-lab__field">
+          <span>Pattern</span>
+          <select name="halftonePattern">
+            <option value="grid">grid</option>
+            <option value="stagger">stagger</option>
+            <option value="line">line</option>
+          </select>
+        </label>
+      </fieldset>
+    </form>
+  </aside>
+
+  <main class="config-lab__preview" aria-label="Live poster preview">
+    <div class="config-lab__preview-grid" id="lab-preview-grid">
+      <section class="config-lab__preview-block">
+        <h2 class="mono-label config-lab__preview-label">Type pattern</h2>
+        <div class="post-card-wrap ground-mint reveal is-visible" data-lab-wrap="pattern">
+          <article class="post-card ground-mint title-face-ultra" data-slug="config-lab-pattern" data-lab-glyph="pattern" data-title-chars="12">
+            <div class="post-card__glyph-layer" aria-hidden="true">
+              <canvas class="post-card__glyph-canvas" data-glyph-canvas></canvas>
+            </div>
+            <header class="post-header">
+              <div class="post-title-bounds">
+                <h2 class="poster__title post-title"><a href="#">Pattern **lab**</a></h2>
+              </div>
+            </header>
+            <div class="prose post-body">
+              <p>Body copy in Inconsolata. Tune pattern shape, blend, and opacity on the left — updates instantly.</p>
+              <p><img src="https://picsum.photos/seed/mdgallery-lab/640/360" alt="Sample photo for halftone" width="640" height="360"></p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="config-lab__preview-block">
+        <h2 class="mono-label config-lab__preview-label">Hero glyph</h2>
+        <div class="post-card-wrap ground-mint reveal is-visible" data-lab-wrap="hero">
+          <article class="post-card ground-mint title-face-ultra" data-slug="config-lab-hero" data-lab-glyph="hero" data-title-chars="10">
+            <div class="post-card__glyph-layer" aria-hidden="true">
+              <canvas class="post-card__glyph-canvas" data-glyph-canvas></canvas>
+            </div>
+            <header class="post-header">
+              <div class="post-title-bounds">
+                <h2 class="poster__title post-title"><a href="#">Hero *glyph*</a></h2>
+              </div>
+            </header>
+            <div class="prose post-body">
+              <p>Mega-glyph behind the title. Same ground and display font as the pattern card.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "marked": "./node_modules/marked/lib/marked.esm.js",
+      "dompurify": "./node_modules/dompurify/dist/purify.es.mjs"
+    }
+  }
+  </script>
+  <script type="module" src="assets/config-lab.js"></script>
+</body>
+</html>

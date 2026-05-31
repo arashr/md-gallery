@@ -110,4 +110,66 @@ describe('computePosterGlyphRegionFromLayout', () => {
     assert.ok(region.height >= 200);
     assert.equal(region.width, 80);
   });
+
+  it('maps regionPreference right to a side band on the right', () => {
+    const layout = {
+      cardWidth: 500,
+      cardHeight: 400,
+      contentLeft: 32,
+      contentTop: 40,
+      contentRight: 468,
+      contentBottom: 400,
+      contentWidth: 436,
+      contentHeight: 360,
+      headerTop: 40,
+      headerBottom: 180,
+      bodyTop: 200,
+      bodyBottom: 390
+    };
+    const region = computePosterGlyphRegionFromLayout(
+      layout,
+      {
+        emptySpaceMinPx: 200,
+        fallbackBandWidth: 80,
+        regionPreference: ['right'],
+        regionInsetPx: 0,
+        edgeOverflowPx: 0
+      },
+      rand
+    );
+    assert.equal(region.slot, 'side');
+    assert.equal(region.x, 468 - 80);
+  });
+
+  it('sideBandWidthRatio multiplies fallbackBandWidth for side bands', () => {
+    const layout = {
+      cardWidth: 500,
+      cardHeight: 400,
+      contentLeft: 32,
+      contentTop: 40,
+      contentRight: 468,
+      contentBottom: 400,
+      contentWidth: 436,
+      contentHeight: 360,
+      headerTop: 40,
+      headerBottom: 180,
+      bodyTop: 200,
+      bodyBottom: 390
+    };
+    const region = computePosterGlyphRegionFromLayout(
+      layout,
+      {
+        emptySpaceMinPx: 200,
+        fallbackBandWidth: 80,
+        sideBandWidthRatio: 2,
+        regionPreference: ['right'],
+        regionInsetPx: 0,
+        edgeOverflowPx: 0
+      },
+      rand
+    );
+    assert.equal(region.slot, 'side');
+    assert.equal(region.width, 160);
+    assert.equal(region.x, 468 - 160);
+  });
 });

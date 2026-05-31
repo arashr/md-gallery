@@ -152,11 +152,13 @@ Format: **Date · Decision · Why**
 
 **Why:** Matches prior config ergonomics; avoids nested `pattern` / `random` shapes. Placement and pattern generation stay separate so title-fit layout can drive regions.
 
+**Note (2026-05-31):** Source JSON is now **grouped** under `theme.graphics.typePattern.*` sub-objects; see grouped graphics decision. Runtime still uses flattened merges.
+
 ---
 
 ## 2026-05-30 — One `renderTypePattern` per poster (not mosaic)
 
-**Decision:** Each poster gets a single `renderTypePattern()` call into its glyph canvas (`assets/reader.js` → `renderPosterGlyphPatterns`). Do not tile multiple pattern instances (mosaic) in the reader.
+**Decision:** Each poster gets a single `renderTypePattern()` call into its glyph canvas (`lib/poster-glyph-render.js` → `renderPosterGlyphPatterns`; reader calls `renderGlyphs()`). Do not tile multiple pattern instances (mosaic) in the reader.
 
 **Why:** Mosaic was experimental in the type_pattern library; product intent is one decorative band per empty region. `lib/type-pattern-mosaic.js` remains for library parity but is unused by the reader.
 
@@ -167,3 +169,27 @@ Format: **Date · Decision · Why**
 **Decision:** On `window` `focus` and `visibilitychange`, debounced `reloadGalleryConfig()` runs `fitPosterTitles()` and **`renderPosterGlyphPatterns()`** (not title fit alone).
 
 **Why:** Editing `gallery.config.json` while the tab stayed focused left patterns stale; users expect refocus-after-save to refresh graphics as well as CSS vars.
+
+---
+
+## 2026-05-31 — Grouped `theme.graphics` config
+
+**Decision:** `gallery.config.json` stores poster graphics in nested groups (`glyph`, `heroGlyph`, `typePattern`, `imageHalftone` with sub-groups `roll`, `blend`, `placement`, etc.). `lib/resolve-graphics-config.js` flattens to the objects used at runtime. Legacy flat keys still merge for backward compatibility.
+
+**Why:** Easier editing and lab UI; avoids one huge flat `typePattern` blob. Runtime code keeps flat merges + defaults (`TYPE_PATTERN_DEFAULTS`, `HERO_GLYPH_DEFAULTS`).
+
+---
+
+## 2026-05-31 — Hero glyph vs mini pattern (one layer)
+
+**Decision:** Each poster gets at most one decorative glyph layer: rolled **hero glyph** (full-card canvas) **or** **type pattern** (region band), never both. Hero uses its own blend pool (`heroGlyph.blend`); patterns use `typePattern.blend`. Implementation: `lib/poster-glyph-render.js`.
+
+**Why:** Competing full-card and band patterns looked noisy; hero is an alternative roll, not an overlay on mini patterns.
+
+---
+
+## 2026-05-31 — Lineicons Basic for toolbar icons
+
+**Decision:** Reader chrome, poster export, and code-block toolbars use **Lineicons Basic** SVGs inlined in `assets/icons.js` ([LineiconsHQ/Lineicons](https://github.com/LineiconsHQ/Lineicons), MIT). Icons use `fill="currentColor"`; no icon-font CDN and no `lineicons` npm dependency at runtime.
+
+**Why:** Consistent line-icon set requested by product; inlined SVG matches existing `injectIcons()` / `[data-icon]` pattern and works offline with `npm start`.

@@ -2,7 +2,7 @@
 
 **Purpose:** Durable context for humans and agents continuing this repo. Update when architecture, workflows, or conventions change.
 
-**Last updated:** 2026-05-30
+**Last updated:** 2026-05-31
 
 ---
 
@@ -26,7 +26,7 @@ npm start          # npx serve . → http://localhost:3000
 - Drop a `.md` file on the landing page, or click **Open the gallery demo** in the footer (`docs/demo/gallery-showcase.md`).
 - **Contents** in the nav opens the TOC drawer.
 - **Search** filters posters and highlights matches in visible bodies (no poster count label in the header).
-- **View controls:** theme toggle on landing + reader headers (synced); zoom −/+ in reader only; **serif/sans** toggle for poster body text (`data-prose-font`, persisted). Toolbar uses inline SVG icons. Dark mode uses `--chrome-*` / `--chrome-red*` on UI only; `:root` `--red` stays `#c8102e` on poster grounds.
+- **View controls:** theme toggle on landing + reader headers (synced); zoom −/+ in reader only; **serif/sans** toggle for poster body text (`data-prose-font`, persisted). Toolbar icons: **Lineicons Basic** inlined in `assets/icons.js` (`currentColor` fills, no npm dep). Dark mode uses `--chrome-*` / `--chrome-red*` on UI only; `:root` `--red` stays `#c8102e` on poster grounds.
 - **Design system:** ground rules in `docs/DESIGN.md` (APCA, OKLCH, 8px grid). Config in `config/gallery.config.json`; field reference in `config/README.md`. Applied via `lib/gallery-config.js`. Refocus tab after save to reload.
 - **Post cards:** Default height hugs content. Short posters (`.post-card--roomy`): B-min height, body `margin-top: auto`. **All** poster titles: `lib/fit-poster-title.js` fits width + per-tier line count from `titleScale.tiers` (natural height, no clip). See **Title fitting** below.
 - **Cursor:** system default (custom crosshair CSS removed from `site.css`).
@@ -42,7 +42,8 @@ npm start          # npx serve . → http://localhost:3000
 | Path | Role |
 |------|------|
 | `index.html` | Landing + reader shell; import map for `marked` / `isomorphic-dompurify` |
-| `assets/reader.js` | App: drop, read file, render, search, TOC toggle, scroll |
+| `assets/reader.js` | App: drop, read file, render, search, TOC toggle, scroll; calls `renderGlyphs()` → `lib/poster-glyph-render.js` |
+| `assets/icons.js` | Toolbar SVG icons ([Lineicons Basic](https://github.com/LineiconsHQ/Lineicons), MIT); injected via `[data-icon]` + theme toggle slots |
 | `assets/reader.css` | Drop zone, TOC panel, reader chrome |
 | `assets/site.css` | Poster/gallery/grounds/title-face styles (copied from figlets-blog; extend carefully) |
 | `lib/parse-document.js` | Split MD → document model (posters, toc, intro) |
@@ -58,12 +59,18 @@ npm start          # npx serve . → http://localhost:3000
 | `lib/render-landing-gallery.js` | Folder-drop thumbnail grid |
 | `lib/type-pattern.js`, `lib/type-pattern-mosaic.js` | Type-pattern library (mosaic unused in reader) |
 | `lib/type-pattern-poster.js` | Flat `typePattern` defaults + `buildPosterTypePatternOptions()` |
+| `lib/resolve-graphics-config.js` | Flattens grouped `theme.graphics` (`glyph`, `heroGlyph`, `typePattern`, …) for runtime |
+| `lib/poster-glyph-render.js` | One pass: hero glyph or mini pattern per poster canvas |
+| `lib/poster-hero-glyph.js` | Mega-glyph roll, canvas blend, face exclusions |
+| `lib/glyph-blend-opacity.js` | Per-blend-mode opacity ranges (`blend.opacity.<mode>`) |
 | `lib/glyph-region.js` | Poster glyph canvas placement (`bottom` / `between` / `top` / side) |
 | `lib/fit-poster-title.js` | Title size tiers + line-count fit |
 | `lib/bundled-md.js`, `lib/local-md-links.js` | Same-origin `.md` links + bundled docs |
 | `docs/demo/gallery-showcase.md` | Built-in capability demo (footer link) |
 | `assets/demo/nebula-universtock.jpg` | Sample photo for image poster (Unsplash / Universtock) |
 | `config/gallery.config.json` | Grounds, theme, code, fonts, title scale |
+| `config-lab.html` | Secret live config preview (`noindex`, not linked); `assets/config-lab.js` |
+| `lib/config-lab-build.js` | Maps lab form state → partial gallery config |
 | `docs/PROJECT_MEMORY.md` | This file |
 | `docs/DECISION_LOG.md` | Product/architecture decisions (not CSS trivia) |
 | `docs/POSTER_LOGIC.md` | How posters are split from a file |
@@ -124,13 +131,28 @@ APCA: `test/apca-grounds.test.js` + `auditGroundForegrounds()`; code role uses `
 
 ### Glyph patterns
 
-- Canvas layer on each poster (`.post-card__glyph-layer`); color/opacity from `theme.graphics` (`glyphPatternColor`, `glyphPatternOpacity`).
-- **One** `renderTypePattern()` per poster into `[data-glyph-canvas]` — not mosaic tiling.
-- **When:** `assets/reader.js` → `renderPosterGlyphPatterns()` after render, after `fitPosterTitles()`, on resize/zoom/fonts, and on **config reload** (tab refocus).
-- **Where:** `lib/glyph-region.js` measures header/body slack → region slot; keys include `emptySpaceMinPx`, `regionInsetPx`, `alignToCardEdge`, `regionPreference`, `fallbackBandWidth`, `edgeOverflowPx`.
-- **What:** flat `theme.graphics.typePattern` merged with `TYPE_PATTERN_DEFAULTS` in `lib/type-pattern-poster.js` (`patternTypes`, `repeatsMin`/`Max`, `fillSpace`, path/fill ranges, `symbolPool`, etc.). Optional `fontSizeMin`/`Max` only apply when **both** are set in config.
-- **Library sync:** copy `lib/type-pattern.js` (and mosaic if needed) from sibling repo `type_pattern` when the library changes; reader does not call mosaic.
-- **Pitfall:** `fillSpace: true` fills the grid; `repeatsMin`/`Max` mainly influence sizing, not a hard glyph cap. Cap glyphs with `fillSpace: false` + lower repeats (and `fill` in `patternTypes` if desired).
+- Canvas layer on each poster (`.post-card__glyph-layer`); shared ink from `theme.graphics.glyph` (`color`, `opacity` → CSS `--glyph-pattern-*`).
+- **One** decorative layer per poster: either **hero glyph** (`theme.graphics.heroGlyph`) or **mini type pattern** (`typePattern`), not both. Roll order in `lib/poster-glyph-render.js`: hero (if allowed) → else pattern (unless `noneProbability`) → else clear.
+- **Render:** `lib/poster-glyph-render.js` → `renderPosterGlyphPatterns(cards, cfg)`; reader wrapper is **`renderGlyphs()`** only — do **not** re-import a local function named `renderPosterGlyphPatterns` that calls `renderGlyphs()` (shadows the module import → stack overflow, blank canvases).
+- **When:** after `fitPosterTitles()`, on resize/zoom/fonts, and on **config reload** (tab refocus).
+- **Config:** grouped JSON in `gallery.config.json` under `theme.graphics` (`glyph`, `heroGlyph`, `typePattern`, `imageHalftone`); flattened by `lib/resolve-graphics-config.js`. Field reference: `config/README.md`.
+- **Placement:** `lib/glyph-region.js` — `regionPreference` (incl. `"right"` → side band), `fallbackBandWidth`, **`sideBandWidthRatio`** (multiplier on side-band width; e.g. `2` when path patterns feel cramped), `alignToCardEdge`, `edgeOverflowPx`, etc.
+- **Blend / opacity:** canvas `globalCompositeOperation` for patterns and hero (CSS mix-blend broken by `.reveal` transform). Opacity primary path: `blend.opacity.<mode>.min/max`; fallback `appearance.opacityMin/Max`.
+- **Whole-pattern blend:** letters drawn to offscreen canvas, one composite (avoids overlap opacity stacking).
+- **Library sync:** copy `lib/type-pattern.js` from sibling `type_pattern` when the library changes; mosaic unused in reader.
+- **Pitfall:** `fillSpace: true` fills the grid; `repeatsMin`/`Max` mainly influence sizing. Side bands at default `fallbackBandWidth` (~88px) look crowded with `fillSpace: false` — widen via `sideBandWidthRatio` or `fallbackBandWidth`.
+
+### Toolbar icons (`assets/icons.js`)
+
+- **[Lineicons Basic](https://github.com/LineiconsHQ/Lineicons)** (MIT), inlined SVG strings — **no** runtime npm package.
+- Paths use `fill="currentColor"` (Lineicons source uses `#323544`; normalized at bake time).
+- **`ICONS` keys → Lineicon names:** `folderOpen` → `folder-1`; `search` → `search-1`; `zoomOut` / `zoomIn` → `search-minus` / `search-plus`; `moon` / `sun` → `moon-half-right-5` / `sun-1`; `list` → `align-text-left`; `copy` → `clipboard`; `pdf` (export) → `download-1`.
+- Injected in `assets/reader.js` → `injectIcons()` on `[data-icon]` and `.theme-toggle__icons`. Same map for code-block copy (`lib/code-blocks.js`) and poster PDF export (`lib/render-document.js` toolbar).
+- To swap icons: install `lineicons` temporarily, pull from `lineicons/src/svg-map.js` → `regular`, normalize width/height 18 + `currentColor`, update `assets/icons.js`. Do not add `lineicons` to `package.json` unless you adopt CDN/web-component usage instead.
+
+### Config lab (dev only)
+
+- **`/config-lab.html`** — live preview of pattern + hero on two forced cards; ground + title-face dropdowns; single-value controls (maps to min=max internally). Not linked from the app; `noindex`. Reload file button re-fetches `gallery.config.json`.
 
 ---
 
@@ -190,7 +212,8 @@ npm test
 - `test/gallery-config.test.js` — config merge, injected ground/code CSS.
 - `test/landing-gallery.test.js`, `test/inline-markdown.test.js` — folder gallery, title markdown.
 - `test/bundled-md.test.js` — bundled showcase path resolution.
-- `test/glyph-region.test.js`, `test/type-pattern-poster.test.js` — placement + flat pattern options.
+- `test/glyph-region.test.js`, `test/type-pattern-poster.test.js` — placement + pattern options.
+- `test/glyph-blend-opacity.test.js`, `test/poster-hero-glyph.test.js`, `test/resolve-graphics-config.test.js`, `test/config-lab-build.test.js` — graphics config flatten + lab.
 
 ## Bundled markdown & images
 

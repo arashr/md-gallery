@@ -13,9 +13,7 @@ import {
 import { fetchBundledMarkdown } from '../lib/bundled-md.js';
 import { exportPosterAsPdf } from '../lib/poster-export.js';
 import { copyCodeFromButton, enhanceCodeBlocks } from '../lib/code-blocks.js';
-import { renderTypePattern } from '../lib/type-pattern.js';
-import { computePosterGlyphRegion } from '../lib/glyph-region.js';
-import { buildPosterTypePatternOptions, TYPE_PATTERN_DEFAULTS } from '../lib/type-pattern-poster.js';
+import { renderPosterGlyphPatterns } from '../lib/poster-glyph-render.js';
 import { enhancePosterImageHalftone } from '../lib/image-halftone.js';
 import { ICONS } from './icons.js';
 
@@ -111,12 +109,16 @@ import { ICONS } from './icons.js';
     scrollToEl(el, { behavior: 'auto' });
   }
 
+  function renderGlyphs() {
+    renderPosterGlyphPatterns(posterEls, getGalleryConfig());
+  }
+
   function schedulePosterTitleFit() {
     cancelAnimationFrame(titleScaleFrame);
     titleScaleFrame = requestAnimationFrame(() => {
       void mainReader.offsetHeight;
       fitPosterTitles(posterEls, getGalleryConfig().titleScale);
-      renderPosterGlyphPatterns();
+      renderGlyphs();
       if (location.hash) realignScrollToHash();
     });
   }
@@ -274,78 +276,6 @@ import { ICONS } from './icons.js';
     enhancePosterImageHalftone(mainReader, getGalleryConfig());
   }
 
-  function renderPosterGlyphPatterns() {
-    if (!posterEls.length) return;
-    const cfg = getGalleryConfig();
-    const patternCfg = {
-      ...TYPE_PATTERN_DEFAULTS,
-      ...(cfg.theme?.graphics?.typePattern || {})
-    };
-    const clampNum = (n, fallback) => {
-      const v = Number.parseFloat(String(n));
-      return Number.isFinite(v) ? v : fallback;
-    };
-    for (const card of posterEls) {
-      const canvas = card.querySelector('[data-glyph-canvas]');
-      if (!(canvas instanceof HTMLCanvasElement)) continue;
-      const layer = card.querySelector('.post-card__glyph-layer');
-      if (!(layer instanceof HTMLElement)) continue;
-      const title = (card.querySelector('.post-title')?.textContent || card.dataset.slug || 'A').trim();
-      const titleLetter = (title.match(/[A-Za-z0-9]/)?.[0] || 'A').toUpperCase();
-      const titleEl = card.querySelector('.post-title a, .post-title');
-      const cs = getComputedStyle(card);
-      const titleStyle = titleEl ? getComputedStyle(titleEl) : cs;
-      const foregroundColor = cs.getPropertyValue('--glyph-pattern-color').trim() || cs.color || '#111';
-      const seedBase = (card.dataset.slug || title).split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
-      const rand = (() => {
-        let s = seedBase >>> 0;
-        return () => {
-          s = (s * 1664525 + 1013904223) >>> 0;
-          return s / 4294967296;
-        };
-      })();
-      const pick = (arr) => arr[Math.floor(rand() * arr.length)];
-      const int = (min, max) => Math.floor(rand() * (max - min + 1)) + min;
-      const symbolProb = Math.min(1, Math.max(0, clampNum(patternCfg.symbolProbability, 0.55)));
-      const noneProb = Math.min(1, Math.max(0, clampNum(patternCfg.noneProbability, 0.18)));
-      if (rand() < noneProb) {
-        const ctx = canvas.getContext('2d');
-        ctx?.clearRect(0, 0, canvas.width, canvas.height);
-        canvas.style.display = 'none';
-        continue;
-      }
-      canvas.style.display = 'block';
-      const symbolPool = String(patternCfg.symbolPool || '');
-      const symbolChars = [...symbolPool].filter((ch) => ch.trim().length > 0);
-      const patternLetter =
-        symbolChars.length && rand() < symbolProb
-          ? pick(symbolChars)
-          : titleLetter;
-      const region = computePosterGlyphRegion(card, patternCfg, rand);
-      layer.style.setProperty('--glyph-y', `${Math.round(region.y)}px`);
-      layer.style.setProperty('--glyph-x', `${Math.round(region.x)}px`);
-      layer.style.setProperty('--glyph-w', `${Math.max(1, Math.round(region.width))}px`);
-      layer.style.setProperty('--glyph-h', `${Math.max(1, Math.round(region.height))}px`);
-      const glyphW = Math.max(1, Math.round(region.width));
-      const glyphH = Math.max(1, Math.round(region.height));
-      renderTypePattern(
-        canvas,
-        buildPosterTypePatternOptions(patternCfg, {
-          rand,
-          pick,
-          int,
-          float: (min, max) => min + rand() * (max - min),
-          letter: patternLetter,
-          foregroundColor,
-          fontFamily: titleStyle.fontFamily,
-          fontWeight: titleStyle.fontWeight,
-          width: glyphW,
-          height: glyphH
-        })
-      );
-    }
-  }
-
   function posterExportName(card) {
     const title = card.querySelector('.post-title')?.textContent?.trim();
     return card.getAttribute('data-slug') || title || 'poster';
@@ -372,19 +302,19 @@ import { ICONS } from './icons.js';
     setupTitleFitObserver();
     updateScrollOffset();
     schedulePosterTitleFit();
-    requestAnimationFrame(renderPosterGlyphPatterns);
+    requestAnimationFrame(renderGlyphs);
     requestAnimationFrame(() => enhancePosterImageHalftone(mainReader, getGalleryConfig()));
     if (document.fonts?.ready) {
       document.fonts.ready.then(() => {
         schedulePosterTitleFit();
-        renderPosterGlyphPatterns();
+        renderGlyphs();
         enhancePosterImageHalftone(mainReader, getGalleryConfig());
       });
     }
     if (document.fonts?.addEventListener) {
       document.fonts.addEventListener('loadingdone', () => {
         schedulePosterTitleFit();
-        renderPosterGlyphPatterns();
+        renderGlyphs();
       });
     }
     if (updateHistory) pushReadState(relativePath);
@@ -851,18 +781,19 @@ import { ICONS } from './icons.js';
     await reloadGalleryConfig();
     enhancePosterImageHalftone(mainReader, getGalleryConfig());
     schedulePosterTitleFit();
-    renderPosterGlyphPatterns();
   }
 
-  window.addEventListener('focus', () => {
+  function scheduleConfigReload() {
     clearTimeout(configReloadTimer);
     configReloadTimer = setTimeout(() => void reloadConfigAndRefresh(), 250);
-  });
+  }
+
+  window.addEventListener('focus', scheduleConfigReload);
+  window.addEventListener('pageshow', scheduleConfigReload);
 
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState !== 'visible') return;
-    clearTimeout(configReloadTimer);
-    configReloadTimer = setTimeout(() => void reloadConfigAndRefresh(), 250);
+    scheduleConfigReload();
   });
 
   window.addEventListener('resize', () => {
@@ -870,7 +801,7 @@ import { ICONS } from './icons.js';
     resizeTimer = setTimeout(() => {
       updateScrollOffset();
       schedulePosterTitleFit();
-      renderPosterGlyphPatterns();
+      renderGlyphs();
       enhancePosterImageHalftone(mainReader, getGalleryConfig());
       if (location.hash) realignScrollToHash();
     }, 120);
