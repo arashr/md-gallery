@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Browser-based Markdown reader with the Figlets editorial **poster gallery** layout. Drop a `.md` file (or folder) on the homepage; parsing and rendering stay **entirely in your browser** — nothing is uploaded.
+Browser-based Markdown reader with an editorial **poster gallery** layout. Drop a `.md` file (or folder) on the homepage; parsing and rendering stay **entirely in your browser** — nothing is uploaded.
 
 **Repository:** [github.com/arashr/md-gallery](https://github.com/arashr/md-gallery)
 
