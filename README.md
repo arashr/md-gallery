@@ -68,9 +68,3 @@ Code fences are respected when detecting splits. Details: [docs/POSTER_LOGIC.md]
 
 - **Toolbar icons** — [Lineicons Basic](https://github.com/LineiconsHQ/Lineicons) (MIT), inlined in `assets/icons.js`
 - **Demo photo** — [Universtock on Unsplash](https://unsplash.com/photos/bright-star-with-colorful-nebula-in-dark-space-bsEmH06Ko1w) (`assets/demo/nebula-universtock.jpg`); credited on the showcase poster
-
-
-
-## Sister project
-
-**figlets-blog** is the static editorial site (collections, RSS, Node build). **MD Gallery** is a separate repo for client-side reading only — share ideas and CSS, not a single deploy pipeline.
