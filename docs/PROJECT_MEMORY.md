@@ -25,8 +25,9 @@ npm start          # npx serve . → http://localhost:3000
 
 - Drop a `.md` file on the landing page, or click **Open the gallery demo** in the footer (`docs/demo/gallery-showcase.md`).
 - **Contents** in the nav opens the TOC drawer.
-- **Search** filters posters and highlights matches in visible bodies (no poster count label in the header).
+- **Highlight** (nav field) marks matches in poster body text only; all posters stay visible (no filter/hide).
 - **View controls:** theme toggle on landing + reader headers (synced); zoom −/+ in reader only; **serif/sans** toggle for poster body text (`data-prose-font`, persisted). Toolbar icons: **Lineicons Basic** inlined in `assets/icons.js` (`currentColor` fills, no npm dep). Dark mode uses `--chrome-*` / `--chrome-red*` on UI only; `:root` `--red` stays `#c8102e` on poster grounds.
+- **Solid-ink controls:** header, search, TOC, and header buttons use `--chrome-stroke` / `--chrome-ink-shadow` (page ink). Poster **export** and **copy** use the same 1px + growing hard shadow via `--poster-ink-shadow` (on-ground edge color). No translate on hover. Tokens in `assets/site.css`; header rules in `assets/reader.css`.
 - **Design system:** ground rules in `docs/DESIGN.md` (APCA, OKLCH, 8px grid). Config in `config/gallery.config.json`; field reference in `config/README.md`. Applied via `lib/gallery-config.js`. Refocus tab after save to reload.
 - **Post cards:** Default height hugs content. Short posters (`.post-card--roomy`): B-min height, body `margin-top: auto`. **All** poster titles: `lib/fit-poster-title.js` fits width + per-tier line count from `titleScale.tiers` (natural height, no clip). See **Title fitting** below.
 - **Cursor:** system default (custom crosshair CSS removed from `site.css`).
@@ -146,7 +147,7 @@ APCA: `test/apca-grounds.test.js` + `auditGroundForegrounds()`; code role uses `
 
 - **[Lineicons Basic](https://github.com/LineiconsHQ/Lineicons)** (MIT), inlined SVG strings — **no** runtime npm package.
 - Paths use `fill="currentColor"` (Lineicons source uses `#323544`; normalized at bake time).
-- **`ICONS` keys → Lineicon names:** `folderOpen` → `folder-1`; `search` → `search-1`; `zoomOut` / `zoomIn` → `search-minus` / `search-plus`; `moon` / `sun` → `moon-half-right-5` / `sun-1`; `list` → `align-text-left`; `copy` → `clipboard`; `pdf` (export) → `download-1`.
+- **`ICONS` keys → Lineicon names:** `folderOpen` → `folder-1`; `highlight` → `highlighter-1`; `xmark` → `xmark`; `zoomOut` / `zoomIn` → `search-minus` / `search-plus`; `moon` / `sun` → `moon-half-right-5` / `sun-1`; `list` → `align-text-left`; `copy` → `clipboard`; `pdf` (export) → `download-1`.
 - Injected in `assets/reader.js` → `injectIcons()` on `[data-icon]` and `.theme-toggle__icons`. Same map for code-block copy (`lib/code-blocks.js`) and poster PDF export (`lib/render-document.js` toolbar).
 - To swap icons: install `lineicons` temporarily, pull from `lineicons/src/svg-map.js` → `regular`, normalize width/height 18 + `currentColor`, update `assets/icons.js`. Do not add `lineicons` to `package.json` unless you adopt CDN/web-component usage instead.
 
@@ -168,8 +169,7 @@ APCA: `test/apca-grounds.test.js` + `auditGroundForegrounds()`; code role uses `
 ## Search
 
 - Input: `#search-input` on reader view only.  
-- Hides posters with `.is-filtered-out` when `data-search` lacks query.  
-- Highlights matches in `.post-body` via cached HTML + `search-highlight` class (same pattern as figlets-blog collection search).
+- Highlights matches in `.post-body` via cached HTML + `search-highlight` class (all posters remain visible).
 
 ---
 

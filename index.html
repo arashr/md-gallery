@@ -60,11 +60,14 @@
             <span class="btn-icon-slot" data-icon="folderOpen" aria-hidden="true"></span>
             <span class="btn-label">Open file</span>
           </button>
-          <nav class="nav nav--search" aria-label="Search document">
+          <nav class="nav nav--highlight" aria-label="Highlight in document">
             <label class="nav-search-wrap">
-              <span class="visually-hidden">Search</span>
-              <span class="nav-search-icon" data-icon="search" aria-hidden="true"></span>
-              <input type="search" id="search-input" class="nav-search-input" placeholder="Search…" autocomplete="off">
+              <span class="visually-hidden">Highlight</span>
+              <span class="nav-search-icon" data-icon="highlight" aria-hidden="true"></span>
+              <input type="text" id="search-input" class="nav-search-input" placeholder="Highlight…" autocomplete="off" spellcheck="false">
+              <button type="button" class="nav-highlight-clear btn-icon btn-ghost" id="highlight-clear" aria-label="Clear highlight" hidden>
+                <span data-icon="xmark" aria-hidden="true"></span>
+              </button>
             </label>
           </nav>
           <div class="reader-controls" role="group" aria-label="View options">

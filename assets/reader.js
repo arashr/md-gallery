@@ -35,6 +35,7 @@ import { ICONS } from './icons.js';
   const mainReader = document.getElementById('main-reader');
   const docLabel = document.getElementById('doc-label');
   const searchInput = document.getElementById('search-input');
+  const highlightClear = document.getElementById('highlight-clear');
   const zoomOut = document.getElementById('zoom-out');
   const zoomIn = document.getElementById('zoom-in');
   const themeToggles = document.querySelectorAll('.theme-toggle');
@@ -194,6 +195,7 @@ import { ICONS } from './icons.js';
     document.body.classList.add('page-landing');
     document.body.classList.remove('page-collection');
     searchInput.value = '';
+    syncHighlightClear();
     tocPanel.classList.remove('is-open');
     tocToggle.setAttribute('aria-expanded', 'false');
   }
@@ -651,17 +653,16 @@ import { ICONS } from './icons.js';
     return parts.join('');
   }
 
+  /** Highlight query text in poster bodies only — all posters stay visible. */
   function applySearch() {
-    const q = searchInput.value.trim().toLowerCase();
+    const q = searchInput.value.trim();
     posterEls.forEach((card) => {
-      const data = (card.getAttribute('data-search') || '').toLowerCase();
-      const show = !q || data.includes(q);
-      card.classList.toggle('is-filtered-out', !show);
+      card.classList.remove('is-filtered-out');
 
       const body = card.querySelector('.post-body');
       if (body && bodyCache.has(card.id)) {
         let html = bodyCache.get(card.id);
-        if (q && show) html = highlightHtml(html, searchInput.value.trim());
+        if (q) html = highlightHtml(html, q);
         body.innerHTML = html;
       }
     });
@@ -729,7 +730,22 @@ import { ICONS } from './icons.js';
     fileInput.value = '';
   });
 
-  searchInput.addEventListener('input', applySearch);
+  function syncHighlightClear() {
+    if (!highlightClear) return;
+    highlightClear.hidden = searchInput.value.length === 0;
+  }
+
+  searchInput.addEventListener('input', () => {
+    syncHighlightClear();
+    applySearch();
+  });
+
+  highlightClear?.addEventListener('click', () => {
+    searchInput.value = '';
+    syncHighlightClear();
+    applySearch();
+    searchInput.focus();
+  });
 
   zoomOut.addEventListener('click', () => {
     readerZoom = clampZoom(readerZoom - ZOOM_STEP);

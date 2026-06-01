@@ -54,11 +54,19 @@ Format: **Date · Decision · Why**
 
 ---
 
-## 2026-05-21 — Instant in-document search only
+## 2026-05-21 — Instant in-document highlight only
 
-**Decision:** Search filters posters in the open file and highlights body text. No global index, tags, or cross-file search.
+**Decision:** The reader nav field highlights query text in poster bodies only. All posters stay visible (no hide/filter). No global index, tags, or cross-file search.
 
-**Why:** Single-file reader scope for v1; blog-style global search is out of scope.
+**Why:** Single-file reader scope for v1; blog-style global search is out of scope. Highlight-in-place matches reading a long doc without collapsing the gallery.
+
+---
+
+## 2026-06-01 — Highlight does not filter posters
+
+**Decision:** Remove poster hiding (`is-filtered-out`) from the highlight field. Typing only wraps matches in `.post-body` with `.search-highlight`.
+
+**Why:** UI label is “Highlight”; filtering non-matching posters felt like a different feature and was not desired.
 
 ---
 

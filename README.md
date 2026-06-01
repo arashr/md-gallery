@@ -12,7 +12,7 @@ Browser-based Markdown reader with the Figlets editorial **poster gallery** layo
 - **Structural splits** — posters from `##` headings, `---` rules, or a single card; no dates required ([POSTER_LOGIC.md](docs/POSTER_LOGIC.md))
 - **Decorative glyphs** — per-poster **hero glyph** or **type pattern** band (configurable blends, placement, opacity); optional **image halftone** on photos
 - **Long-title fitting** — `titleScale.tiers` shrink long section titles by length and line count (no clipped title boxes)
-- **Search** — filters posters and highlights matches in body text
+- **Highlight** — marks matches in poster body text (all posters stay visible)
 - **Table of contents** — poster titles + in-document headings; **Contents** in the reader nav
 - **Folder drop** — multiple `.md` files → landing gallery; pick one to read
 - **Local markdown links** — open relative `.md` paths from the same folder when available

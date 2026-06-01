@@ -114,7 +114,7 @@ Hidden keywords for the reader search box (open search in the nav):
 
 `glyph` `pattern` `wave` `grid` `fill` `Inconsolata` `Ultra` `export` `PDF` `stagger` `OKLCH`
 
-Try partial matches, poster titles, and body text. Matching posters stay visible; others fade with `is-filtered-out`.
+Try partial matches in body text — every poster stays on screen; matches are highlighted in place.
 
 ---
 
