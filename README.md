@@ -56,8 +56,6 @@ Most behavior is driven by **`config/gallery.config.json`**:
 
 See [config/README.md](config/README.md) for the full field reference and [docs/DESIGN.md](docs/DESIGN.md) for color and contrast rules.
 
-**Dev preview:** `/config-lab.html` (not linked from the app) — live tweak pattern and hero settings on sample cards.
-
 ## How posters are split
 
 1. **`##` headings** (default) — each level-2 section is one poster
@@ -66,46 +64,12 @@ See [config/README.md](config/README.md) for the full field reference and [docs/
 
 Code fences are respected when detecting splits. Details: [docs/POSTER_LOGIC.md](docs/POSTER_LOGIC.md).
 
-## Documentation
-
-| Doc | Purpose |
-|-----|---------|
-| [docs/POSTER_LOGIC.md](docs/POSTER_LOGIC.md) | How one `.md` file becomes posters |
-| [docs/DESIGN.md](docs/DESIGN.md) | Design system, APCA, OKLCH, tokens |
-| [config/README.md](config/README.md) | Config file reference |
-| [docs/DECISION_LOG.md](docs/DECISION_LOG.md) | Product and architecture decisions |
-| [docs/PROJECT_MEMORY.md](docs/PROJECT_MEMORY.md) | Implementation notes for contributors |
-| [AGENTS.md](AGENTS.md) | Agent handoff checklist |
-
-## Stack
-
-- [marked](https://marked.js.org/) — Markdown → HTML
-- [DOMPurify](https://github.com/cure53/DOMPurify) — sanitize user HTML
-- [html2canvas](https://html2canvas.hertzen.com/) + [jsPDF](https://github.com/parallax/jsPDF) — poster PDF export
-- `assets/site.css` — poster and gallery visual system (shared lineage with **figlets-blog**; sync manually)
-- `lib/gallery-config.js` — loads config, injects ground / code / title-face CSS
-
-No production build step for the app itself (static files + `npx serve`).
-
 ## Third-party assets
 
 - **Toolbar icons** — [Lineicons Basic](https://github.com/LineiconsHQ/Lineicons) (MIT), inlined in `assets/icons.js`
 - **Demo photo** — [Universtock on Unsplash](https://unsplash.com/photos/bright-star-with-colorful-nebula-in-dark-space-bsEmH06Ko1w) (`assets/demo/nebula-universtock.jpg`); credited on the showcase poster
 
-## License
 
-This project is released under the **[MIT License](LICENSE)**.
-
-MIT is a permissive open-source license: you may use, modify, and distribute the code (including in commercial projects) as long as you keep the copyright notice. It does **not** require derivatives to be open source.
-
-If you later want stricter terms, common alternatives are:
-
-| License | When to consider it |
-|---------|-------------------|
-| **Apache 2.0** | Like MIT, plus an explicit patent grant (common for larger orgs) |
-| **GPL-3.0** | You want forks and hosted copies to stay open source (copyleft) |
-
-For a small client-side tool meant to be freely reusable, MIT is the usual fit.
 
 ## Sister project
 
