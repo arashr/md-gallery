@@ -85,7 +85,7 @@ button.mini-poster {
   align-items: stretch;
   width: 100%;
   min-height: clamp(7.5rem, 22vw, 10.5rem);
-  padding: clamp(0.85rem, 2.5vw, 1.15rem) clamp(1rem, 3vw, 1.35rem);
+  padding: clamp(0.85rem, 2.5vw, 1.15rem) 32px;
   margin: 0;
   border: var(--chrome-stroke-width) solid var(--chrome-stroke);
   border-radius: 0;
@@ -203,7 +203,7 @@ button.mini-poster > *:not(.post-card__glyph-layer) {
 .landing-foot {
   width: min(100%, 56rem);
   margin: 0 auto;
-  padding: 1rem var(--pad) 2rem;
+  padding: 1rem 32px 2rem;
   color: var(--ink-mute);
   font-size: 0.75rem;
   letter-spacing: 0.04em;
