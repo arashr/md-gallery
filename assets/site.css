@@ -146,7 +146,8 @@ body {
 /* Colored posters and post cards */
 .post-card[class*='ground-'],
 .poster[class*='ground-'],
-.collection-card[class*='ground-'] {
+.collection-card[class*='ground-'],
+.mini-poster[class*='ground-'] {
   color: var(--on-ground-body);
 }
 
@@ -156,12 +157,16 @@ body {
 .poster[class*='ground-'] .poster__title,
 .poster[class*='ground-'] .kicker,
 .collection-card[class*='ground-'] .poster__title,
-.collection-card[class*='ground-'] .card-cta {
+.collection-card[class*='ground-'] .card-cta,
+.mini-poster[class*='ground-'] .poster__title,
+.mini-poster[class*='ground-'] .post-title {
   color: var(--on-ground-display);
 }
 
 .collection-card[class*='ground-'] .kicker,
-.collection-card[class*='ground-'] .card-lede {
+.collection-card[class*='ground-'] .card-lede,
+.mini-poster[class*='ground-'] .card-lede,
+.mini-poster[class*='ground-'] .mini-poster__lede {
   color: var(--on-ground-muted);
 }
 
@@ -202,7 +207,8 @@ body {
 
 .post-card[class*='ground-'] :focus-visible,
 .poster[class*='ground-'] :focus-visible,
-.collection-card[class*='ground-']:focus-visible {
+.collection-card[class*='ground-']:focus-visible,
+.mini-poster[class*='ground-']:focus-visible {
   outline-color: var(--on-ground-focus);
 }
 
@@ -838,7 +844,9 @@ h2.poster__title.post-title,
 .post-card[class*='title-face-'] .poster__title,
 .post-card[class*='title-face-'] .post-title,
 .post-card[class*='title-face-'] .post-title a,
-.collection-card[class*='title-face-'] .poster__title {
+.collection-card[class*='title-face-'] .poster__title,
+.mini-poster[class*='title-face-'] .poster__title,
+.mini-poster[class*='title-face-'] .post-title {
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
 }
@@ -899,6 +907,8 @@ h2.poster__title.post-title,
 .post-card.title-face-ultra .post-title a,
 .post-card.title-face-ultra .prose :is(h2, h3, h4),
 .collection-card.title-face-ultra .poster__title,
+.mini-poster.title-face-ultra .poster__title,
+.mini-poster.title-face-ultra .post-title,
 .legend-sample.title-face-ultra {
   font-family: Ultra, serif;
   font-weight: 400;
@@ -908,6 +918,8 @@ h2.poster__title.post-title,
 .post-card.title-face-monoton .post-title a,
 .post-card.title-face-monoton .prose :is(h2, h3, h4),
 .collection-card.title-face-monoton .poster__title,
+.mini-poster.title-face-monoton .poster__title,
+.mini-poster.title-face-monoton .post-title,
 .legend-sample.title-face-monoton {
   font-family: 'Rubik Dirt', cursive;
   font-weight: 400;
@@ -917,6 +929,8 @@ h2.poster__title.post-title,
 .post-card.title-face-limelight .post-title a,
 .post-card.title-face-limelight .prose :is(h2, h3, h4),
 .collection-card.title-face-limelight .poster__title,
+.mini-poster.title-face-limelight .poster__title,
+.mini-poster.title-face-limelight .post-title,
 .legend-sample.title-face-limelight {
   font-family: 'BBH Bogle', sans-serif;
   font-weight: 400;
@@ -926,6 +940,8 @@ h2.poster__title.post-title,
 .post-card.title-face-jersey25 .post-title a,
 .post-card.title-face-jersey25 .prose :is(h2, h3, h4),
 .collection-card.title-face-jersey25 .poster__title,
+.mini-poster.title-face-jersey25 .poster__title,
+.mini-poster.title-face-jersey25 .post-title,
 .legend-sample.title-face-jersey25 {
   font-family: 'Jersey 25', sans-serif;
   font-weight: 400;
@@ -935,6 +951,8 @@ h2.poster__title.post-title,
 .post-card.title-face-blackops .post-title a,
 .post-card.title-face-blackops .prose :is(h2, h3, h4),
 .collection-card.title-face-blackops .poster__title,
+.mini-poster.title-face-blackops .poster__title,
+.mini-poster.title-face-blackops .post-title,
 .legend-sample.title-face-blackops {
   font-family: 'Black Ops One', sans-serif;
   font-weight: 400;
@@ -944,6 +962,8 @@ h2.poster__title.post-title,
 .post-card.title-face-notable .post-title a,
 .post-card.title-face-notable .prose :is(h2, h3, h4),
 .collection-card.title-face-notable .poster__title,
+.mini-poster.title-face-notable .poster__title,
+.mini-poster.title-face-notable .post-title,
 .legend-sample.title-face-notable {
   font-family: Notable, cursive;
   font-weight: 400;

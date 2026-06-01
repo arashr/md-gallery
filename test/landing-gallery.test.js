@@ -22,7 +22,8 @@ describe('landing folder gallery', () => {
       { path: 'beta.md', title: '**Beta**', index: 1 }
     ]);
     assert.match(html, /data-md-path="docs\/alpha\.md"/);
-    assert.match(html, /class="collection-card ground-\w+ title-face-\w+ landing-pick-card/);
+    assert.match(html, /class="mini-poster ground-\w+ title-face-\w+ landing-pick-card/);
+    assert.match(html, /data-glyph-canvas/);
     assert.match(html, /<strong>Beta<\/strong>/);
     assert.match(html, /poster__title/);
   });

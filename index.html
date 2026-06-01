@@ -31,23 +31,35 @@
       </div>
     </header>
     <main class="landing-main" id="main">
-      <label class="drop-zone" id="drop-zone">
-        <input type="file" id="file-input" accept=".md,.markdown,.txt,text/markdown,text/plain">
-        <h1 class="drop-zone__title">Drop a Markdown file</h1>
-        <p class="drop-zone__hint">or click to browse · stays on your device · drop a folder to pick a file</p>
-      </label>
-      <div id="landing-gallery" class="landing-gallery" hidden>
-        <div class="landing-gallery__head">
-          <p class="landing-gallery__count mono-label" id="landing-gallery-count"></p>
-          <button type="button" class="btn-ghost landing-gallery__back" id="landing-gallery-back">Drop another file</button>
+      <div class="landing-shell">
+        <div class="landing-hero-wrap">
+          <label class="drop-zone" id="drop-zone">
+            <input type="file" id="file-input" accept=".md,.markdown,.txt,text/markdown,text/plain">
+            <h1 class="drop-zone__title">Drop a Markdown file</h1>
+            <p class="drop-zone__hint mono-label">Or click to browse, or drop a folder to pick a file.<br>Stays on your device.</p>
+          </label>
         </div>
-        <div id="landing-gallery-grid" class="landing-gallery__grid collections-grid" role="list"></div>
+        <div class="landing-featured" id="landing-featured" aria-label="Quick start"></div>
+        <div id="landing-gallery" class="landing-gallery" hidden>
+          <div class="landing-gallery__head">
+            <p class="landing-gallery__count mono-label" id="landing-gallery-count"></p>
+            <button type="button" class="btn-ghost landing-gallery__back" id="landing-gallery-back">Drop another file</button>
+          </div>
+          <div id="landing-gallery-grid" class="landing-gallery__grid landing-mini-grid" role="list"></div>
+        </div>
       </div>
     </main>
     <footer class="landing-foot mono-label">
-      <a href="docs/demo/gallery-showcase.md">Open the gallery demo</a>
-      · Posters split on <code>##</code> headings
-      · <a href="docs/POSTER_LOGIC.md">POSTER_LOGIC.md</a>
+      <div class="landing-foot__row">
+        <p class="landing-foot__lead">Posters split on <code>##</code> headings</p>
+        <p class="landing-foot__meta">
+          <a href="https://github.com/arashr/md-gallery" rel="noopener noreferrer">GitHub</a>
+          <span class="landing-foot__sep" aria-hidden="true">·</span>
+          <a href="LICENSE">MIT</a>
+          <span class="landing-foot__sep" aria-hidden="true">·</span>
+          <span class="landing-foot__credit">Arash Ranjbaran</span>
+        </p>
+      </div>
     </footer>
   </section>
 

@@ -1,6 +1,7 @@
 import { parseDocument, peekDocumentTitle } from '../lib/parse-document.js';
 import { renderDocument, renderToc } from '../lib/render-document.js';
 import { renderLandingGallery } from '../lib/render-landing-gallery.js';
+import { renderMiniPoster } from '../lib/render-mini-poster.js';
 import { reloadGalleryConfig, getGalleryConfig } from '../lib/gallery-config.js';
 import { fitPosterTitles } from '../lib/fit-poster-title.js';
 import {
@@ -31,6 +32,22 @@ import { ICONS } from './icons.js';
   const landingGalleryGrid = document.getElementById('landing-gallery-grid');
   const landingGalleryCount = document.getElementById('landing-gallery-count');
   const landingGalleryBack = document.getElementById('landing-gallery-back');
+  const landingFeatured = document.getElementById('landing-featured');
+
+  const LANDING_FEATURED = [
+    {
+      path: 'docs/demo/gallery-showcase.md',
+      slug: 'gallery-demo',
+      title: 'Gallery Demo',
+      subtext: 'See what you can do'
+    },
+    {
+      path: 'docs/POSTER_LOGIC.md',
+      slug: 'poster-logic',
+      title: 'Poster Logic',
+      subtext: 'See how it works'
+    }
+  ];
   const fileInput = document.getElementById('file-input');
   const mainReader = document.getElementById('main-reader');
   const docLabel = document.getElementById('doc-label');
@@ -164,9 +181,41 @@ import { ICONS } from './icons.js';
     localStorage.setItem('md-gallery-theme', dark ? 'dark' : 'light');
   }
 
+  function landingMiniPosterEls() {
+    return Array.from(document.querySelectorAll('#landing .mini-poster[data-slug]'));
+  }
+
+  function scheduleLandingMiniGlyphs() {
+    requestAnimationFrame(() => {
+      renderPosterGlyphPatterns(landingMiniPosterEls(), getGalleryConfig());
+      if (document.fonts?.ready) {
+        document.fonts.ready.then(() => {
+          renderPosterGlyphPatterns(landingMiniPosterEls(), getGalleryConfig());
+        });
+      }
+    });
+  }
+
+  function renderFeaturedLanding() {
+    if (!landingFeatured) return;
+    landingFeatured.innerHTML = LANDING_FEATURED.map((item, index) =>
+      renderMiniPoster({
+        slug: item.slug,
+        title: item.title,
+        subtext: item.subtext,
+        index,
+        tag: 'button',
+        extraClass: 'landing-featured-card reveal is-visible',
+        attrs: { 'data-bundled-md': item.path }
+      })
+    ).join('');
+    scheduleLandingMiniGlyphs();
+  }
+
   async function boot() {
     await reloadGalleryConfig();
     injectIcons();
+    renderFeaturedLanding();
     applyZoom();
     applyTheme(localStorage.getItem('md-gallery-theme') === 'dark' ? 'dark' : 'light');
   }
@@ -208,6 +257,7 @@ import { ICONS } from './icons.js';
   function hideLandingGallery() {
     if (!landingGallery) return;
     dropZone.hidden = false;
+    landingFeatured?.removeAttribute('hidden');
     landingGallery.hidden = true;
     landingGalleryGrid.innerHTML = '';
     landingMain?.classList.remove('landing-main--gallery');
@@ -239,10 +289,12 @@ import { ICONS } from './icons.js';
     landingGalleryItems = items;
 
     dropZone.hidden = true;
+    landingFeatured?.setAttribute('hidden', '');
     landingGallery.hidden = false;
     landingMain?.classList.add('landing-main--gallery');
     landingGalleryCount.textContent = `${items.length} Markdown file${items.length === 1 ? '' : 's'} — choose one`;
     landingGalleryGrid.innerHTML = renderLandingGallery(items);
+    scheduleLandingMiniGlyphs();
     window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
 
     if (updateHistory) pushGalleryState();
@@ -488,7 +540,7 @@ import { ICONS } from './icons.js';
   }
 
   landingGalleryGrid?.addEventListener('click', (e) => {
-    const pick = e.target.closest('.landing-pick-card[data-md-path]');
+    const pick = e.target.closest('.mini-poster[data-md-path]');
     if (!pick || !droppedFileMap) return;
     const path = pick.getAttribute('data-md-path');
     const file = droppedFileMap.get(path);
@@ -531,6 +583,7 @@ import { ICONS } from './icons.js';
           landingMain?.classList.add('landing-main--gallery');
           landingGalleryCount.textContent = `${landingGalleryItems.length} Markdown file${landingGalleryItems.length === 1 ? '' : 's'} — choose one`;
           landingGalleryGrid.innerHTML = renderLandingGallery(landingGalleryItems);
+          scheduleLandingMiniGlyphs();
           return;
         }
         void showLandingGallery(droppedFileMap, { updateHistory: false }).catch((err) => console.error(err));
@@ -542,6 +595,19 @@ import { ICONS } from './icons.js';
   });
 
   landing.addEventListener('click', (e) => {
+    const bundled = e.target.closest('[data-bundled-md]');
+    if (bundled) {
+      e.preventDefault();
+      const path = bundled.getAttribute('data-bundled-md');
+      if (path) {
+        void openBundledMarkdown(path).catch((err) => {
+          console.error(err);
+          alert('Could not open this bundled doc. Run npm start locally to read docs shipped with the app.');
+        });
+      }
+      return;
+    }
+
     const a = e.target.closest('a[href]');
     if (!a) return;
     const href = a.getAttribute('href');
@@ -797,6 +863,9 @@ import { ICONS } from './icons.js';
     await reloadGalleryConfig();
     enhancePosterImageHalftone(mainReader, getGalleryConfig());
     schedulePosterTitleFit();
+    if (!landing.classList.contains('is-hidden')) {
+      scheduleLandingMiniGlyphs();
+    }
   }
 
   function scheduleConfigReload() {
@@ -819,6 +888,9 @@ import { ICONS } from './icons.js';
       schedulePosterTitleFit();
       renderGlyphs();
       enhancePosterImageHalftone(mainReader, getGalleryConfig());
+      if (!landing.classList.contains('is-hidden')) {
+        scheduleLandingMiniGlyphs();
+      }
       if (location.hash) realignScrollToHash();
     }, 120);
   });

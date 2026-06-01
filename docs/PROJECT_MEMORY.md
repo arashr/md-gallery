@@ -23,7 +23,7 @@ npm install
 npm start          # npx serve . → http://localhost:3000
 ```
 
-- Drop a `.md` file on the landing page, or click **Open the gallery demo** in the footer (`docs/demo/gallery-showcase.md`).
+- Drop a `.md` file on the landing page, or open **Gallery Demo** / **Poster Logic** mini posters (`docs/demo/gallery-showcase.md`, `docs/POSTER_LOGIC.md`).
 - **Contents** in the nav opens the TOC drawer.
 - **Highlight** (nav field) marks matches in poster body text only; all posters stay visible (no filter/hide).
 - **View controls:** theme toggle on landing + reader headers (synced); zoom −/+ in reader only; **serif/sans** toggle for poster body text (`data-prose-font`, persisted). Toolbar icons: **Lineicons Basic** inlined in `assets/icons.js` (`currentColor` fills, no npm dep). Dark mode uses `--chrome-*` / `--chrome-red*` on UI only; `:root` `--red` stays `#c8102e` on poster grounds.
@@ -57,7 +57,8 @@ npm start          # npx serve . → http://localhost:3000
 | `lib/apca-check.js` | APCA audit helpers (`npm test`) |
 | `lib/code-blocks.js` | Wrap `pre` + external copy toolbar |
 | `lib/poster-export.js` | Per-poster PDF via html2canvas + jsPDF |
-| `lib/render-landing-gallery.js` | Folder-drop thumbnail grid |
+| `lib/render-mini-poster.js` | Horizontal mini posters (glyph layer + ground/title-face) |
+| `lib/render-landing-gallery.js` | Folder-drop grid via `renderMiniPosterGrid` |
 | `lib/type-pattern.js`, `lib/type-pattern-mosaic.js` | Type-pattern library (mosaic unused in reader) |
 | `lib/type-pattern-poster.js` | Flat `typePattern` defaults + `buildPosterTypePatternOptions()` |
 | `lib/resolve-graphics-config.js` | Flattens grouped `theme.graphics` (`glyph`, `heroGlyph`, `typePattern`, …) for runtime |
