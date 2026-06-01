@@ -2,6 +2,7 @@
   "name": "md-gallery",
   "version": "1.0.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "description": "Browser-based Markdown reader — poster gallery, search, TOC",
   "scripts": {
