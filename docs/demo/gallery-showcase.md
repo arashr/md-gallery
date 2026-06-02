@@ -90,7 +90,7 @@ Code blocks include a copy button.
 
 Images can sit inside a poster with the rest of the section.
 
-![Bright star with colorful nebula in dark space](/assets/demo/nebula-universtock.jpg)
+![Bright star with colorful nebula in dark space](https://images.unsplash.com/photo-1774677783616-7581d4e91ff0?q=80&w=2064&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)
 
 Photo by [Universtock](https://unsplash.com/@universtock) on [Unsplash](https://unsplash.com/photos/bright-star-with-colorful-nebula-in-dark-space-bsEmH06Ko1w).
 
