@@ -1,125 +1,141 @@
-# MD Gallery — **showcase**
+# MD Gallery showcase
 
-Drop your own `.md` anytime; this file is a **built-in tour** of poster grounds, display title fonts, prose, search, and the table of contents. Open **Contents** in the reader nav and try searching for `carmine`, `glyph`, or `Inconsolata`.
+Use this sample to see how one Markdown file becomes a readable poster gallery.
 
----
+Open **Contents** to jump through the file. Use **Highlight** to mark words such as `meeting`, `image`, `table`, or `brief`. Your own files stay on your device while you read them.
 
-## Welcome
+## Start with sections
 
-Each `##` heading becomes its own **poster card**: a ground color from `gallery.config.json`, a rotating **display title face** (Ultra, Rubik Dirt, BBH Bogle, Jersey 25, Black Ops One, Notable), and a decorative **glyph pattern** in the margins.
+Each `##` heading starts a new poster.
 
-This intro stays in the **lilac hero** above the gallery. Everything below scrolls as posters.
+Write one topic per section. Keep the heading short when you can. The poster title will use a large display style, and the body will keep normal Markdown formatting.
 
----
+Use this pattern for notes, plans, reports, workshops, lessons, and personal references.
 
-## Typography on posters
+## Write normal Markdown
 
-Poster titles support *inline* **markdown** — the face still comes from the design system, not from raw asterisks in the UI.
+You can write plain paragraphs.
 
-Body copy uses **Inconsolata** (UI sans / mono). Serif prose uses **Libre Baskerville** where configured. Display lines stay on the poster palette: `display`, body, and muted tokens per ground.
+You can use **bold text**, *italic text*, and `inline code`.
 
-### Heading inside a poster
+You can add links:
 
-Use the **Contents** drawer: this `h3` is a TOC entry. Jump between posters without losing your place.
+[Open the poster split guide](../POSTER_LOGIC.md)
 
-#### Deeper heading
+You can also use lists:
 
-`h4` entries appear in the TOC too — handy for long reference posters.
+- Put related points in one section.
+- Use short bullets for scanability.
+- Add details below the list when needed.
 
----
+## Use headings inside a poster
 
-## All nine grounds
+Use `###` headings for smaller topics inside one poster.
 
-Each poster slug hashes to one ground (you will see these colors rotate as you add sections):
+### Meeting notes
 
-| Ground | Role |
-|--------|------|
-| `pink` | Soft rose surface, indigo display |
-| `white` | Neutral gray-violet paper |
-| `lime` | Acid green field |
-| `tangerine` | Warm yellow-orange |
-| `lilac` | Cool violet (hero uses page paper, not a ground) |
-| `forest` | Sage green |
-| `butter` | Bright yellow |
-| `mint` | Sea-glass teal |
-| `carmine` | Deep red with light type |
+This heading appears in **Contents** under the current poster.
 
-Add or edit grounds in `config/gallery.config.json` — refocus the browser tab after saving to reload.
+### Decisions
 
----
+This heading also appears in **Contents**. Use nested headings when a section is long and readers need quick jumps.
 
-## Code, tables, and chips
+#### Follow-up
 
-Inline `code` uses a tinted chip on each ground. Fenced blocks get a copy button and poster-surface background:
+Deeper headings can also appear in **Contents**.
+
+## Add checklists
+
+Task lists are useful for plans and reviews.
+
+- [x] Draft the outline
+- [x] Share the file with the team
+- [ ] Review open questions
+- [ ] Add final notes
+
+Keep each checklist in the section where it belongs.
+
+## Add a table
+
+Tables are useful for structured information.
+
+| Item | Owner | Status |
+|:---|:---|:---|
+| Research summary | Mina | Done |
+| Launch notes | Sam | In progress |
+| Training guide | Lee | Planned |
+
+Use simple table labels. Long table content is easier to read when it is split across several posters.
+
+## Add a quote
+
+Blockquotes help call out a source, note, or important sentence.
+
+> A good section title tells the reader what this poster is for.
+
+Use quotes for excerpts, customer comments, research notes, or reminders.
+
+## Add code when needed
+
+Technical readers can include fenced code blocks. Non-technical readers can ignore this section.
 
 ```js
-import { parseDocument } from './lib/parse-document.js';
-
-const doc = parseDocument(markdown, 'notes.md');
-console.log(doc.posters.length, 'posters');
+const sectionTitle = "Workshop notes";
+const posterCount = 8;
 ```
 
-| Feature | Try it |
-|---------|--------|
-| Search | `table` or `wave` |
-| TOC | Open **Contents** |
-| Zoom | Reader toolbar − / + |
-| Theme | Toggle dark chrome |
-| PDF | Export icon on each poster |
+Code blocks include a copy button.
 
-- [x] Task lists render when enabled in sanitize
-- [ ] This box is unchecked
+## Add images
 
-> Blockquotes use the same prose rhythm as body text — good for pull quotes on colored cards.
+Images can sit inside a poster with the rest of the section.
 
----
-
-## Image on a poster
-
-Posters can carry photographs and wide media. This one uses a **bundled JPEG** (works offline with `npm start`):
-
-![Bright star with colorful nebula in dark space](https://images.unsplash.com/photo-1774677783616-7581d4e91ff0?q=80&w=2532&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)
+![Bright star with colorful nebula in dark space](/assets/demo/nebula-universtock.jpg)
 
 Photo by [Universtock](https://unsplash.com/@universtock) on [Unsplash](https://unsplash.com/photos/bright-star-with-colorful-nebula-in-dark-space-bsEmH06Ko1w).
 
----
+Use descriptive alt text so the image still has meaning when it cannot be seen.
 
-## Links and navigation
+## Use Highlight while reading
 
-- [Back to landing](#) — use the browser back button or **Open file** after you opened this demo from the homepage.
-- [Poster split rules](../POSTER_LOGIC.md) — how `##` and `---` splits work.
-- External links ask before leaving your device.
+The **Highlight** field marks matches in the poster body.
 
-If you opened this from the footer link, you are reading a **same-origin** bundled file — ideal for trying search and TOC without picking a file from disk.
+All posters stay visible. This makes it useful for reviewing a long file without losing the full reading flow.
 
----
+Try these words:
 
-## Short copy on a **roomy** card
+`meeting` `image` `table` `brief` `poster`
 
-Some posters are intentionally brief so the card keeps a **minimum B-series height** and the title sits high on the field. Glyph patterns fill the lower margin when there is room.
+## Export one poster
 
-Search for **roomy** or **brief** — only this poster should match both words together if you add them here: `roomy brief`.
+Each poster has an export button.
 
----
+Use it when one section should become a PDF for sharing, printing, or saving with project notes.
 
-## Long title stress test — how display type scales down to fit the poster width without clipping
+Export works one poster at a time.
 
-Title fitting uses `titleScale.tiers` in config. Long strings like this one shrink and wrap within the card instead of overflowing.
+## Open a folder
 
----
+You can drop a folder that contains Markdown files.
 
-## Search playground
+The landing view shows the files as a gallery. Choose one file to open it in the reader.
 
-Hidden keywords for the reader search box (open search in the nav):
+Relative links to other Markdown files can open when the linked file is available from the same folder.
 
-`glyph` `pattern` `wave` `grid` `fill` `Inconsolata` `Ultra` `export` `PDF` `stagger` `OKLCH`
+## Short section
 
-Try partial matches in body text — every poster stays on screen; matches are highlighted in place.
+Brief sections are allowed.
 
----
+The poster layout keeps short content readable and gives it enough visual space.
 
-## Fin
+## Long section title that shows how the poster adjusts the title so it stays inside the card
 
-You have seen **hero + intro**, **multiple grounds**, **nested TOC headings**, **code**, **tables**, **lists**, **blockquotes**, **images**, and **short vs long titles**.
+Long headings are supported.
 
-Drop your own Markdown folder on the landing page for the **gallery picker**, or edit `config/gallery.config.json` and refocus the tab to tune colors, type patterns, and title scale.
+For best results, write clear headings and avoid adding full sentences to every `##` title. Move extra detail into the poster body.
+
+## Finish
+
+This sample showed sections, nested headings, lists, checklists, tables, quotes, code, images, highlight, export, and folder reading.
+
+Use `##` headings when you want predictable poster breaks.

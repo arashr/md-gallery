@@ -2,29 +2,31 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Browser-based Markdown reader with an editorial **poster gallery** layout. Drop a `.md` file (or folder) on the homepage; parsing and rendering stay **entirely in your browser** — nothing is uploaded.
+MD Gallery is a browser-based Markdown reader that turns local `.md` files into an editorial poster gallery. Users can drop a file or a folder into the app, read structured sections as poster cards, search within the current document, open a table of contents, and export individual posters as PDFs.
 
-**Repository:** [github.com/arashr/md-gallery](https://github.com/arashr/md-gallery)
+Files remain on the user's device. The app does not upload user Markdown.
 
-## Features
+Repository: [github.com/arashr/md-gallery](https://github.com/arashr/md-gallery)
 
-- **Poster gallery** — colored grounds, rotating display title fonts, staggered cards on wide screens
-- **Structural splits** — posters from `##` headings, `---` rules, or a single card; no dates required ([POSTER_LOGIC.md](docs/POSTER_LOGIC.md))
-- **Decorative glyphs** — per-poster **hero glyph** or **type pattern** band (configurable blends, placement, opacity); optional **image halftone** on photos
-- **Long-title fitting** — `titleScale.tiers` shrink long section titles by length and line count (no clipped title boxes)
-- **Highlight** — marks matches in poster body text (all posters stay visible)
-- **Table of contents** — poster titles + in-document headings; **Contents** in the reader nav
-- **Folder drop** — multiple `.md` files → landing gallery; pick one to read
-- **Local markdown links** — open relative `.md` paths from the same folder when available
-- **Reader controls** — dark mode (chrome only), zoom, serif/sans body text (persisted); toolbar icons from [Lineicons Basic](https://github.com/LineiconsHQ/Lineicons) (MIT)
-- **Poster PDF export** — per-card export via toolbar beside each poster
-- **Copy code** — copy button on fenced blocks
-- **Design system** — grounds, typography, code chips, graphics, and title scale in [config/gallery.config.json](config/gallery.config.json); refocus the tab after editing to reload ([config/README.md](config/README.md))
-- **Bundled demo** — **Open the gallery demo** on the landing footer loads [docs/demo/gallery-showcase.md](docs/demo/gallery-showcase.md) offline
+## Capabilities
+
+- Read a single `.md` file in the browser.
+- Read a folder of `.md` files and show a local gallery picker.
+- Split documents into posters from `##` headings, `---` dividers, or one full-file poster.
+- Show a document title, short introduction, poster cards, and nested table of contents.
+- Highlight matching text in poster bodies while keeping every poster visible.
+- Open relative Markdown links when linked files are available from the same folder.
+- Render common Markdown, including lists, task lists, tables, quotes, images, inline code, and fenced code blocks.
+- Copy fenced code blocks.
+- Export one poster at a time as a PDF.
+- Adjust reader zoom and prose font.
+- Toggle dark reader chrome while poster colors stay stable.
+- Use a configurable visual system for grounds, foreground colors, title faces, code chips, decorative glyphs, and title fitting.
+- Provide a bundled showcase at [docs/demo/gallery-showcase.md](docs/demo/gallery-showcase.md).
 
 ## Quick start
 
-Requires [Node.js](https://nodejs.org/) (for `npm` and the static dev server).
+Requires Node.js and npm.
 
 ```bash
 git clone https://github.com/arashr/md-gallery.git
@@ -33,38 +35,110 @@ npm install
 npm start
 ```
 
-Open http://localhost:3000 (or the port `serve` prints). Use `http://localhost` — not `file://` — so the app can `fetch` [config/gallery.config.json](config/gallery.config.json).
+Open the local URL printed by `serve`, usually:
 
-Drop a Markdown file, a folder of `.md` files, or use **Open the gallery demo** in the landing footer.
+```text
+http://localhost:3000
+```
+
+Use a local HTTP server. Do not open `index.html` with `file://`, because the browser must load local project modules and configuration through normal HTTP requests.
+
+Run tests:
 
 ```bash
 npm test
 ```
 
-Parser, config, APCA, glyph, and render tests (no browser required).
+## How it works
+
+MD Gallery is a static client-side app. There is no production build step for the reader.
+
+The main flow is:
+
+1. `assets/reader.js` reads a dropped or selected file with browser file APIs.
+2. `lib/parse-document.js` converts Markdown text into a document model.
+3. `lib/render-document.js` renders the model to sanitized HTML.
+4. `assets/reader.js` wires the table of contents, highlight, controls, folder gallery, and local Markdown links.
+5. Poster visuals are applied with CSS and configuration from `config/gallery.config.json`.
+
+Markdown rendering uses `marked`. Sanitization uses `isomorphic-dompurify`. Poster PDF export uses `html2canvas` and `jspdf`.
+
+## Poster splitting
+
+The split rules are deterministic:
+
+1. If the file has `##` headings, each `##` starts a poster.
+2. If the file has no `##` headings and has two or more `---` divider lines, each divided segment becomes a poster.
+3. Otherwise the whole file becomes one poster.
+
+Code fences are respected, so `##` or `---` inside fenced code blocks do not split the document.
+
+User-facing details are in [docs/POSTER_LOGIC.md](docs/POSTER_LOGIC.md).
 
 ## Configuration
 
-Most behavior is driven by **`config/gallery.config.json`**:
+Most visual settings live in [config/gallery.config.json](config/gallery.config.json).
 
-| Area | Keys (grouped under `theme.graphics`) |
-|------|----------------------------------------|
-| Pattern ink | `glyph` — color and opacity CSS vars |
-| Hero glyph | `heroGlyph` — full-card decorative letter |
-| Type patterns | `typePattern` — bands, blends, `fillSpace`, `sideBandWidthRatio`, etc. |
-| Photos | `imageHalftone` — colored halftone overlay |
+Important areas:
 
-See [config/README.md](config/README.md) for the full field reference and [docs/DESIGN.md](docs/DESIGN.md) for color and contrast rules.
+- `theme.colors`: page colors and reader surface tokens.
+- `darkTheme`: dark reader chrome.
+- `grounds`: poster background and foreground pairs.
+- `fonts` and `titleFaces`: body, UI, and display type.
+- `titleScale`: poster title fitting tiers.
+- `theme.code`: inline code chips and block code behavior.
+- `theme.graphics`: glyph ink, hero glyphs, type pattern bands, and image halftone settings.
 
-## How posters are split
+See [config/README.md](config/README.md) for the full field reference.
 
-1. **`##` headings** (default) — each level-2 section is one poster
-2. **`---` rules** — if there are no `##` lines but multiple horizontal rules
-3. **Single poster** — whole file when neither applies
+See [docs/DESIGN.md](docs/DESIGN.md) for contrast, OKLCH, APCA, spacing, and design-system rules.
 
-Code fences are respected when detecting splits. Details: [docs/POSTER_LOGIC.md](docs/POSTER_LOGIC.md).
+## Project structure
+
+- [index.html](index.html): app shell and import map.
+- [assets/reader.js](assets/reader.js): file reading, reader controls, highlight, TOC, folder gallery.
+- [assets/reader.css](assets/reader.css): landing page and reader chrome.
+- [assets/site.css](assets/site.css): poster cards, grounds, typography, gallery layout.
+- [lib/parse-document.js](lib/parse-document.js): Markdown split logic and document model.
+- [lib/render-document.js](lib/render-document.js): sanitized document rendering.
+- [lib/sanitize.js](lib/sanitize.js): HTML allowlist for rendered Markdown.
+- [lib/gallery-config.js](lib/gallery-config.js): config loading and CSS variable injection.
+- [lib/poster-export.js](lib/poster-export.js): per-poster PDF export.
+- [docs/POSTER_LOGIC.md](docs/POSTER_LOGIC.md): user-facing poster split guide.
+- [docs/PROJECT_MEMORY.md](docs/PROJECT_MEMORY.md): architecture notes and handoff context.
+- [docs/DECISION_LOG.md](docs/DECISION_LOG.md): product and architecture decisions.
+
+## Development
+
+Install dependencies once:
+
+```bash
+npm install
+```
+
+Start the static server:
+
+```bash
+npm start
+```
+
+Run the test suite:
+
+```bash
+npm test
+```
+
+Tests cover parser behavior, table-of-contents alignment, config merging, APCA checks, local Markdown links, glyph placement, image halftone behavior, poster export helpers, and bundled Markdown paths.
+
+When changing document splitting, update [docs/POSTER_LOGIC.md](docs/POSTER_LOGIC.md) and add a product or architecture note to [docs/DECISION_LOG.md](docs/DECISION_LOG.md) if the behavior changes.
+
+When changing visual rules, update [docs/DESIGN.md](docs/DESIGN.md) or [docs/PROJECT_MEMORY.md](docs/PROJECT_MEMORY.md) as appropriate.
 
 ## Third-party assets
 
-- **Toolbar icons** — [Lineicons Basic](https://github.com/LineiconsHQ/Lineicons) (MIT), inlined in `assets/icons.js`
-- **Demo photo** — [Universtock on Unsplash](https://unsplash.com/photos/bright-star-with-colorful-nebula-in-dark-space-bsEmH06Ko1w) (`assets/demo/nebula-universtock.jpg`); credited on the showcase poster
+- Toolbar icons: [Lineicons Basic](https://github.com/LineiconsHQ/Lineicons), MIT, inlined in [assets/icons.js](assets/icons.js).
+- Demo photo: [Universtock on Unsplash](https://unsplash.com/photos/bright-star-with-colorful-nebula-in-dark-space-bsEmH06Ko1w), credited in the showcase.
+
+## License
+
+MIT. See [LICENSE](LICENSE).

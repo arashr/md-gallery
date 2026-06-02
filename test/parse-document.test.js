@@ -146,6 +146,30 @@ Content.
     assert.equal(doc.posters.length, 1);
     assert.equal(doc.posters[0].title, 'Real Poster');
   });
+
+  it('ignores ## inside nested examples with longer outer fences', () => {
+    const md = `# Doc
+
+## Code examples
+
+\`\`\`\`md
+\`\`\`js
+## This is code text
+---
+\`\`\`
+\`\`\`\`
+
+## Practical tips
+
+Content.
+`;
+    const doc = parseDocument(md, 'fenced.md');
+    assert.equal(doc.splitMode, 'h2');
+    assert.deepEqual(
+      doc.posters.map((p) => p.title),
+      ['Code examples', 'Practical tips']
+    );
+  });
 });
 
 describe('parseDocument — YAML frontmatter', () => {
