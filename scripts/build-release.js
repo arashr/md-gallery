@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
- * Production release build — minified JS/CSS into dist/.
+ * Production release build — bundled + minified JS/CSS into dist/.
  * Source in assets/, lib/, and modular assets/css/ stays readable for dev (`npm start`).
  */
 
 import * as esbuild from 'esbuild';
-import { cpSync, mkdirSync, readdirSync, rmSync } from 'node:fs';
+import { cpSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -22,14 +22,10 @@ const CSS_ENTRIES = [
   'assets/config-lab.css'
 ];
 
-const ASSET_JS = ['assets/reader.js', 'assets/icons.js', 'assets/config-lab.js'];
-
-function jsEntryPoints() {
-  const lib = readdirSync(join(root, 'lib'))
-    .filter((name) => name.endsWith('.js'))
-    .map((name) => join('lib', name));
-  return [...ASSET_JS, ...lib];
-}
+const JS_BUNDLES = [
+  { entry: 'assets/reader.js', outfile: 'assets/reader.js' },
+  { entry: 'assets/config-lab.js', outfile: 'assets/config-lab.js' }
+];
 
 function resetDist() {
   rmSync(dist, { recursive: true, force: true });
@@ -43,20 +39,35 @@ function copyStatic() {
   for (const dir of COPY_DIRS) {
     cpSync(join(root, dir), join(dist, dir), { recursive: true });
   }
-  cpSync(join(root, 'node_modules'), join(dist, 'node_modules'), { recursive: true });
+  mkdirSync(join(dist, 'node_modules'), { recursive: true });
+  cpSync(join(root, 'node_modules/jspdf'), join(dist, 'node_modules/jspdf'), { recursive: true });
 }
 
-async function minifyJs() {
-  await esbuild.build({
-    entryPoints: jsEntryPoints(),
-    outdir: dist,
-    outbase: root,
-    minify: true,
-    format: 'esm',
-    platform: 'browser',
-    target: ['es2020'],
-    logLevel: 'info'
-  });
+function patchHtmlForRelease(filename) {
+  const path = join(dist, filename);
+  let html = readFileSync(path, 'utf8');
+  html = html.replace(/<script type="importmap">[\s\S]*?<\/script>\s*/g, '');
+  if (!html.includes('data-release-build')) {
+    html = html.replace('<body', '<body data-release-build="true"');
+  }
+  writeFileSync(path, html);
+}
+
+async function bundleJs() {
+  await Promise.all(
+    JS_BUNDLES.map(({ entry, outfile }) =>
+      esbuild.build({
+        entryPoints: [join(root, entry)],
+        outfile: join(dist, outfile),
+        bundle: true,
+        minify: true,
+        format: 'esm',
+        platform: 'browser',
+        target: ['es2020'],
+        logLevel: 'info'
+      })
+    )
+  );
 }
 
 async function minifyCss() {
@@ -73,8 +84,10 @@ async function minifyCss() {
 async function main() {
   resetDist();
   copyStatic();
-  await Promise.all([minifyJs(), minifyCss()]);
-  console.log('Release build → dist/ (minified JS + bundled CSS)');
+  await Promise.all([bundleJs(), minifyCss()]);
+  patchHtmlForRelease('index.html');
+  patchHtmlForRelease('config-lab.html');
+  console.log('Release build → dist/ (bundled + minified JS/CSS)');
 }
 
 main().catch((err) => {
