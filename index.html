@@ -22,90 +22,120 @@
 
   <section class="page-landing" id="landing" aria-label="Open a Markdown file">
     <header class="site-header site-header--reader">
-      <div class="header-inner">
-        <span class="brand brand--reader"><span class="brand-mark" aria-hidden="true">◆</span> <span>MD Gallery</span></span>
-        <div class="reader-actions">
-          <div class="reader-controls" role="group" aria-label="View options">
-            <button type="button" class="btn-icon btn-ghost theme-toggle" id="theme-toggle" aria-label="Dark mode" aria-pressed="false">
-              <span class="theme-toggle__icons" aria-hidden="true"></span>
-            </button>
+      <div class="header-inner reader-header">
+        <div class="reader-header__primary">
+          <span class="brand brand--reader site-header__brand"><span class="brand-mark" aria-hidden="true">◆</span> MD Gallery</span>
+          <div class="reader-header__tools">
+            <div class="reader-controls" role="group" aria-label="View options">
+              <button type="button" class="btn-icon btn-ghost theme-toggle" id="theme-toggle" aria-label="Dark mode" aria-pressed="false">
+                <span class="theme-toggle__icons" aria-hidden="true"></span>
+              </button>
+            </div>
           </div>
+        </div>
+        <div class="reader-header__meta mono-label">
+          <p class="reader-header__role">Markdown reader</p>
+          <p class="reader-header__meta-aside">
+            <a class="chrome-link" href="https://github.com/arashr/md-gallery" rel="noopener noreferrer">GitHub</a>
+          </p>
         </div>
       </div>
     </header>
     <main class="landing-main" id="main">
-      <div class="landing-shell">
-        <div class="landing-hero-wrap">
-          <label class="drop-zone" id="drop-zone">
-            <input type="file" id="file-input" accept=".md,.markdown,.txt,text/markdown,text/plain">
-            <h1 class="drop-zone__title">Drop a Markdown file</h1>
-            <p class="drop-zone__hint mono-label">Or click to browse, or drop a folder to pick a file.<br>Stays on your device.</p>
-          </label>
+      <div class="reader-layout">
+        <div class="content-feed landing-feed">
+          <div class="landing-hero-wrap">
+            <label class="drop-zone landing-pick-card" id="drop-zone" data-slug="">
+              <input type="file" id="file-input" accept=".md,.markdown,.txt,text/markdown,text/plain">
+              <div class="post-card__glyph-layer" aria-hidden="true">
+                <canvas class="post-card__glyph-canvas" data-glyph-canvas></canvas>
+              </div>
+              <header class="post-header mini-poster__head">
+                <h1 class="poster__title post-title drop-zone__title">Drop a Markdown file</h1>
+              </header>
+              <div class="mini-poster__body post-body">
+                <p class="card-lede mini-poster__lede drop-zone__hint mono-label">Or click to browse, or drop a folder to pick a file.<br>Stays on your device.</p>
+              </div>
+            </label>
+          </div>
         </div>
-        <div class="landing-featured" id="landing-featured" aria-label="Quick start"></div>
+        <aside class="landing-aside landing-featured" id="landing-featured" aria-label="Quick start"></aside>
         <div id="landing-gallery" class="landing-gallery" hidden>
           <div class="landing-gallery__head">
             <p class="landing-gallery__count mono-label" id="landing-gallery-count"></p>
-            <button type="button" class="btn-ghost landing-gallery__back" id="landing-gallery-back">Drop another file</button>
+            <button type="button" class="btn-ghost landing-gallery__back" id="landing-gallery-back">Open another file</button>
           </div>
           <div id="landing-gallery-grid" class="landing-gallery__grid landing-mini-grid" role="list"></div>
         </div>
+        <footer class="landing-foot mono-label">
+          <div class="landing-foot__row">
+            <p class="landing-foot__lead">Posters split on <code>##</code> headings</p>
+            <p class="landing-foot__meta">
+              <a class="chrome-link" href="https://github.com/arashr/md-gallery" rel="noopener noreferrer">GitHub</a>
+              <span class="landing-foot__sep" aria-hidden="true">·</span>
+              <a class="chrome-link" href="LICENSE">MIT</a>
+              <span class="landing-foot__sep" aria-hidden="true">·</span>
+              <span class="landing-foot__credit">Arash Ranjbaran</span>
+            </p>
+          </div>
+        </footer>
       </div>
     </main>
-    <footer class="landing-foot mono-label">
-      <div class="landing-foot__row">
-        <p class="landing-foot__lead">Posters split on <code>##</code> headings</p>
-        <p class="landing-foot__meta">
-          <a href="https://github.com/arashr/md-gallery" rel="noopener noreferrer">GitHub</a>
-          <span class="landing-foot__sep" aria-hidden="true">·</span>
-          <a href="LICENSE">MIT</a>
-          <span class="landing-foot__sep" aria-hidden="true">·</span>
-          <span class="landing-foot__credit">Arash Ranjbaran</span>
-        </p>
-      </div>
-    </footer>
   </section>
 
   <section class="page-reader" id="reader" hidden aria-label="Document reader">
     <header class="site-header site-header--reader">
-      <div class="header-inner">
-        <span class="brand brand--reader"><button type="button" class="brand-home brand-mark" id="reader-home" aria-label="Home">◆</button> <span id="doc-label">MD Gallery</span></span>
-        <div class="reader-actions">
-          <button type="button" class="btn-ghost btn-with-icon" id="open-another">
-            <span class="btn-icon-slot" data-icon="folderOpen" aria-hidden="true"></span>
-            <span class="btn-label">Open file</span>
-          </button>
-          <nav class="nav nav--highlight" aria-label="Highlight in document">
-            <label class="nav-search-wrap">
-              <span class="visually-hidden">Highlight</span>
-              <span class="nav-search-icon" data-icon="highlight" aria-hidden="true"></span>
-              <input type="text" id="search-input" class="nav-search-input" placeholder="Highlight…" autocomplete="off" spellcheck="false">
-              <button type="button" class="nav-highlight-clear btn-icon btn-ghost" id="highlight-clear" aria-label="Clear highlight" hidden>
-                <span data-icon="xmark" aria-hidden="true"></span>
-              </button>
-            </label>
-          </nav>
-          <div class="reader-controls" role="group" aria-label="View options">
-            <button type="button" class="btn-icon btn-ghost" id="zoom-out" aria-label="Zoom out">
-              <span data-icon="zoomOut" aria-hidden="true"></span>
+      <div class="header-inner reader-header">
+        <div class="reader-header__primary">
+          <div class="reader-header__brand">
+            <button type="button" class="brand-back" id="reader-home" aria-label="Home">
+              <span class="brand-mark" aria-hidden="true">◂</span>
             </button>
-            <button type="button" class="btn-icon btn-ghost" id="zoom-in" aria-label="Zoom in">
-              <span data-icon="zoomIn" aria-hidden="true"></span>
-            </button>
-            <button type="button" class="btn-icon btn-ghost theme-toggle" aria-label="Dark mode" aria-pressed="false">
-              <span class="theme-toggle__icons" aria-hidden="true"></span>
-            </button>
+            <span class="reader-doc-label" id="doc-label">MD Gallery</span>
           </div>
-          <div class="nav-toc-wrap">
-            <button type="button" class="btn-ghost btn-with-icon" id="toc-toggle" aria-expanded="false" aria-controls="toc-panel">
-              <span class="btn-icon-slot" data-icon="list" aria-hidden="true"></span>
-              <span class="btn-label">Contents</span>
+          <div class="reader-header__tools">
+            <button type="button" class="btn-ghost btn-with-icon" id="open-another">
+              <span class="btn-icon-slot" data-icon="folderOpen" aria-hidden="true"></span>
+              <span class="btn-label">Open file</span>
             </button>
-            <div class="toc-panel" id="toc-panel" role="navigation" aria-label="Table of contents">
-              <p class="toc-panel__label">Contents</p>
-              <div id="toc-root"></div>
+            <nav class="nav nav--highlight" aria-label="Highlight in document">
+              <label class="nav-search-wrap">
+                <span class="visually-hidden">Highlight</span>
+                <span class="nav-search-icon" data-icon="highlight" aria-hidden="true"></span>
+                <input type="text" id="search-input" class="nav-search-input" placeholder="Highlight…" autocomplete="off" spellcheck="false">
+                <button type="button" class="nav-highlight-clear btn-icon btn-ghost" id="highlight-clear" aria-label="Clear highlight" hidden>
+                  <span data-icon="xmark" aria-hidden="true"></span>
+                </button>
+              </label>
+            </nav>
+            <div class="reader-controls" role="group" aria-label="View options">
+              <button type="button" class="btn-icon btn-ghost" id="zoom-out" aria-label="Zoom out">
+                <span data-icon="zoomOut" aria-hidden="true"></span>
+              </button>
+              <button type="button" class="btn-icon btn-ghost" id="zoom-in" aria-label="Zoom in">
+                <span data-icon="zoomIn" aria-hidden="true"></span>
+              </button>
+              <button type="button" class="btn-icon btn-ghost theme-toggle" aria-label="Dark mode" aria-pressed="false">
+                <span class="theme-toggle__icons" aria-hidden="true"></span>
+              </button>
+            </div>
+            <div class="nav-toc-wrap">
+              <button type="button" class="btn-ghost btn-with-icon" id="toc-toggle" aria-expanded="false" aria-controls="toc-panel">
+                <span class="btn-icon-slot" data-icon="list" aria-hidden="true"></span>
+                <span class="btn-label">Contents</span>
+              </button>
+              <div class="toc-panel" id="toc-panel" role="navigation" aria-label="Table of contents">
+                <p class="toc-panel__label">Contents</p>
+                <div id="toc-root"></div>
+              </div>
             </div>
           </div>
+        </div>
+        <div class="reader-header__meta mono-label">
+          <p class="reader-header__role" id="reader-site-tagline">Markdown reader</p>
+          <p class="reader-header__meta-aside">
+            <a class="chrome-link" href="https://github.com/arashr/md-gallery" rel="noopener noreferrer">GitHub</a>
+          </p>
         </div>
       </div>
     </header>

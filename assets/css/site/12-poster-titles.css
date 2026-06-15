@@ -23,7 +23,9 @@ h2.poster__title.post-title,
 .post-card[class*='title-face-'] .post-title a,
 .collection-card[class*='title-face-'] .poster__title,
 .mini-poster[class*='title-face-'] .poster__title,
-.mini-poster[class*='title-face-'] .post-title {
+.mini-poster[class*='title-face-'] .post-title,
+.drop-zone[class*='title-face-'] .poster__title,
+.drop-zone[class*='title-face-'] .post-title {
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
 }
@@ -64,6 +66,26 @@ h2.poster__title.post-title,
   text-wrap: balance;
 }
 
+.drop-zone[class*='title-face-'] .drop-zone__title {
+  display: block;
+  width: 100%;
+  max-width: 14ch;
+  box-sizing: border-box;
+  font-size: clamp(2.5rem, 9vw, 4.75rem);
+  line-height: 110%;
+  letter-spacing: 1.1px;
+  padding: 0 0 var(--space-1);
+  white-space: normal;
+  overflow-wrap: normal;
+  word-break: keep-all;
+  hyphens: none;
+  text-wrap: balance;
+}
+
+.drop-zone[class*='title-face-'] .post-header {
+  width: 100%;
+}
+
 .mini-poster[class*='title-face-'] .post-header {
   width: 100%;
 }
@@ -92,6 +114,7 @@ h2.poster__title.post-title,
 .collection-card.title-face-ultra .poster__title,
 .mini-poster.title-face-ultra .poster__title,
 .mini-poster.title-face-ultra .post-title,
+.drop-zone.title-face-ultra .drop-zone__title,
 .legend-sample.title-face-ultra {
   font-family: Ultra, serif;
   font-weight: 400;
@@ -103,6 +126,7 @@ h2.poster__title.post-title,
 .collection-card.title-face-monoton .poster__title,
 .mini-poster.title-face-monoton .poster__title,
 .mini-poster.title-face-monoton .post-title,
+.drop-zone.title-face-monoton .drop-zone__title,
 .legend-sample.title-face-monoton {
   font-family: 'Rubik Dirt', cursive;
   font-weight: 400;
@@ -114,6 +138,7 @@ h2.poster__title.post-title,
 .collection-card.title-face-limelight .poster__title,
 .mini-poster.title-face-limelight .poster__title,
 .mini-poster.title-face-limelight .post-title,
+.drop-zone.title-face-limelight .drop-zone__title,
 .legend-sample.title-face-limelight {
   font-family: 'BBH Bogle', sans-serif;
   font-weight: 400;
@@ -125,6 +150,7 @@ h2.poster__title.post-title,
 .collection-card.title-face-jersey25 .poster__title,
 .mini-poster.title-face-jersey25 .poster__title,
 .mini-poster.title-face-jersey25 .post-title,
+.drop-zone.title-face-jersey25 .drop-zone__title,
 .legend-sample.title-face-jersey25 {
   font-family: 'Jersey 25', sans-serif;
   font-weight: 400;
@@ -136,6 +162,7 @@ h2.poster__title.post-title,
 .collection-card.title-face-blackops .poster__title,
 .mini-poster.title-face-blackops .poster__title,
 .mini-poster.title-face-blackops .post-title,
+.drop-zone.title-face-blackops .drop-zone__title,
 .legend-sample.title-face-blackops {
   font-family: 'Black Ops One', sans-serif;
   font-weight: 400;
@@ -147,6 +174,7 @@ h2.poster__title.post-title,
 .collection-card.title-face-notable .poster__title,
 .mini-poster.title-face-notable .poster__title,
 .mini-poster.title-face-notable .post-title,
+.drop-zone.title-face-notable .drop-zone__title,
 .legend-sample.title-face-notable {
   font-family: Notable, cursive;
   font-weight: 400;
@@ -158,6 +186,7 @@ h2.poster__title.post-title,
 .collection-card.title-face-calsans .poster__title,
 .mini-poster.title-face-calsans .poster__title,
 .mini-poster.title-face-calsans .post-title,
+.drop-zone.title-face-calsans .drop-zone__title,
 .legend-sample.title-face-calsans {
   font-family: 'Cal Sans', sans-serif;
   font-weight: 400;

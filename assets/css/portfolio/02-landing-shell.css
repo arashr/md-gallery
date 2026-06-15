@@ -12,23 +12,13 @@
   flex-direction: column;
   align-items: stretch;
   justify-content: flex-start;
-  padding: var(--space-4) 0 0;
+  padding: 0;
   width: 100%;
   box-sizing: border-box;
 }
 
-.landing-featured,
-.landing-gallery {
-  width: 100%;
-}
-
 .landing-featured {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: var(--space-4);
-  row-gap: var(--space-4);
-  padding-top: var(--space-4);
-  padding-bottom: var(--space-4);
+  width: 100%;
 }
 
 .landing-featured[hidden] {
@@ -91,71 +81,31 @@
 }
 
 @media (max-width: 699px) {
-  .landing-featured {
-    grid-template-columns: 1fr;
+  .page-landing .landing-aside.landing-featured {
+    padding-top: var(--space-4);
   }
 }
 
-/* Mini posters — same surface language as reader post-cards */
+/* Mini posters + drop zone — same pick-card surface as folder grid */
 button.mini-poster {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  width: 100%;
   margin: 0;
-  border: none;
   border-radius: 0;
-  text-align: left;
   font: inherit;
   color: inherit;
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
+}
+
+.landing-pick-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
   box-sizing: border-box;
-}
-
-/* Compact grid tiles (non-home picks) */
-button.mini-poster:not(.landing-pick-card) {
-  justify-content: space-between;
-  min-height: clamp(7.5rem, 22vw, 10.5rem);
-  padding: clamp(var(--space-4), 2.5vw, var(--space-4)) var(--space-8);
-  border: var(--chrome-stroke-width) solid var(--chrome-stroke);
-  box-shadow: var(--chrome-ink-shadow-rest);
-  transition: box-shadow var(--chrome-ink-duration) var(--chrome-ink-ease);
-}
-
-button.mini-poster:not(.landing-pick-card)[class*='ground-'] {
-  border-color: var(--on-ground-edge);
-}
-
-button.mini-poster:not(.landing-pick-card):hover,
-button.mini-poster:not(.landing-pick-card):focus-visible {
-  border-color: var(--chrome-stroke);
-  box-shadow: var(--chrome-ink-shadow);
-}
-
-button.mini-poster:not(.landing-pick-card)[class*='ground-']:hover,
-button.mini-poster:not(.landing-pick-card)[class*='ground-']:focus-visible {
-  border-color: var(--ink);
-  box-shadow: var(--chrome-ink-shadow);
-}
-
-button.mini-poster:not(.landing-pick-card):active {
-  box-shadow: var(--chrome-ink-shadow-rest);
-}
-
-button.mini-poster:not(.landing-pick-card) .poster__title,
-button.mini-poster:not(.landing-pick-card) .mini-poster__title {
-  font-size: var(--poster-title-size, clamp(1.35rem, 4.5cqi, 2.75rem));
-  line-height: 0.95;
-}
-
-/* Homepage case-study picks — compact mini posters in a grid */
-button.mini-poster.landing-pick-card {
   container-type: inline-size;
   container-name: poster-card;
   position: relative;
-  height: 100%;
   min-width: 0;
   overflow: hidden;
   min-height: clamp(8.5rem, 42cqi, 11.5rem);
@@ -165,20 +115,25 @@ button.mini-poster.landing-pick-card {
   transition:
     box-shadow var(--chrome-ink-duration) var(--chrome-ink-ease),
     border-color var(--chrome-ink-duration) var(--chrome-ink-ease);
+  text-align: left;
 }
 
-button.mini-poster.landing-pick-card[class*='ground-'] {
+button.mini-poster.landing-pick-card {
+  height: 100%;
+}
+
+.landing-pick-card[class*='ground-'] {
   border-color: var(--on-ground-edge);
 }
 
-button.mini-poster.landing-pick-card:hover,
-button.mini-poster.landing-pick-card:focus-visible {
+.landing-pick-card:hover,
+.landing-pick-card:focus-visible {
   border-color: var(--chrome-stroke);
   box-shadow: var(--chrome-ink-shadow);
 }
 
-button.mini-poster.landing-pick-card[class*='ground-']:hover,
-button.mini-poster.landing-pick-card[class*='ground-']:focus-visible {
+.landing-pick-card[class*='ground-']:hover,
+.landing-pick-card[class*='ground-']:focus-visible {
   border-color: var(--ink);
   box-shadow: var(--chrome-ink-shadow);
 }
@@ -187,8 +142,8 @@ button.mini-poster.landing-pick-card:active {
   box-shadow: var(--chrome-ink-shadow-rest);
 }
 
-button.mini-poster .poster__title,
-button.mini-poster .mini-poster__title {
+.landing-pick-card .poster__title,
+.landing-pick-card .mini-poster__title {
   margin: 0;
   width: 100%;
   max-width: 100%;
@@ -197,128 +152,127 @@ button.mini-poster .mini-poster__title {
   text-wrap: balance;
 }
 
-button.mini-poster .mini-poster__head {
+.landing-pick-card .mini-poster__head {
   flex: 0 0 auto;
   min-width: 0;
   overflow: hidden;
 }
 
-button.mini-poster.landing-pick-card .post-header {
+.landing-pick-card .post-header {
   margin-bottom: clamp(var(--space-2), 2cqi, var(--space-3));
 }
 
-button.mini-poster .mini-poster__body {
+.landing-pick-card .mini-poster__body {
   margin: 0;
   padding: 0;
   flex: 1 1 auto;
   min-width: 0;
   max-width: min(var(--measure), 100%);
-}
-
-button.mini-poster.landing-pick-card .mini-poster__body {
   display: flex;
   flex-direction: column;
   margin-top: auto;
 }
 
-button.mini-poster .card-lede,
-button.mini-poster .mini-poster__lede {
+.landing-pick-card .card-lede,
+.landing-pick-card .mini-poster__lede {
   margin: 0;
-  font-size: var(--prose-size, 18px);
-  line-height: var(--prose-line-height, 1.2);
-  letter-spacing: normal;
-  text-transform: none;
-}
-
-button.mini-poster.landing-pick-card .mini-poster__lede {
   font-size: clamp(0.8rem, 2.8cqi, 1rem);
   line-height: var(--prose-body-line-height, 1.6);
+  letter-spacing: normal;
+  text-transform: none;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
   overflow: hidden;
 }
 
-button.mini-poster.landing-pick-card .mini-poster__stats {
+.landing-pick-card .mini-poster__stats {
   margin-top: clamp(var(--space-2), 2cqi, var(--space-3));
 }
 
-button.mini-poster.landing-pick-card .mini-poster__stats table {
+.landing-pick-card .mini-poster__stats table {
   font-size: 0.8em;
 }
 
-button.mini-poster.landing-pick-card .mini-poster__stats th,
-button.mini-poster.landing-pick-card .mini-poster__stats td {
+.landing-pick-card .mini-poster__stats th,
+.landing-pick-card .mini-poster__stats td {
   padding: var(--space-scroll-anchor-gap) var(--space-scroll-anchor-gap);
 }
 
-button.mini-poster.landing-pick-card .mini-poster__stats th {
+.landing-pick-card .mini-poster__stats th {
   font-weight: 600;
   font-size: 0.65em;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
-button.mini-poster.landing-pick-card .mini-poster__stats td {
+.landing-pick-card .mini-poster__stats td {
   font-size: 0.8em;
   font-weight: 700;
   line-height: 1.05;
   color: var(--red);
 }
 
-button.mini-poster[class*='ground-'].landing-pick-card .mini-poster__stats td {
+.landing-pick-card[class*='ground-'] .mini-poster__stats td {
   color: var(--on-ground-body);
 }
 
-button.mini-poster.landing-pick-card .mini-poster__credit {
+.landing-pick-card .mini-poster__credit {
   margin: clamp(var(--space-2), 1.5cqi, var(--space-3)) 0 0;
   font-size: 0.8rem;
   letter-spacing: 0.04em;
 }
 
-button.mini-poster .post-title-bounds {
+.landing-pick-card .post-title-bounds {
   overflow: hidden;
   min-width: 0;
 }
 
-button.mini-poster > *:not(.post-card__glyph-layer) {
+.landing-pick-card > *:not(.post-card__glyph-layer) {
   position: relative;
   z-index: 1;
 }
 
-.drop-zone {
-  display: block;
-  width: 100%;
-  padding: clamp(var(--space-10), 8vw, calc(var(--space-12) + var(--space-6))) clamp(var(--space-5), 4vw, var(--space-8));
-  border: 1px solid #000;
-  background: unset;
-  text-align: left;
-  cursor: pointer;
-  transition: border-color 0.15s ease;
+button.mini-poster.landing-pick-card .poster__title,
+button.mini-poster.landing-pick-card .mini-poster__title {
+  font-size: var(--poster-title-size, clamp(3rem, 4.5cqi, 6rem));
+  line-height: 0.95;
 }
 
-.drop-zone:hover,
-.drop-zone.is-dragover {
+label.drop-zone.landing-pick-card {
+  cursor: pointer;
+  border-style: dashed;
+  box-shadow: none;
+}
+
+label.drop-zone.landing-pick-card[class*='ground-'] {
+  border-color: var(--on-ground-edge);
+}
+
+label.drop-zone.landing-pick-card:hover,
+label.drop-zone.landing-pick-card:focus-visible {
+  border-style: dashed;
+  border-color: var(--on-ground-edge, var(--chrome-stroke));
+  box-shadow: none;
+}
+
+label.drop-zone.landing-pick-card.is-dragover {
+  border-style: dashed;
   border-color: var(--chrome-red-bright);
+  box-shadow: none;
 }
 
 .drop-zone__title {
-  font-family: Ultra, Georgia, serif;
   font-size: clamp(2.5rem, 9vw, 4.75rem);
   line-height: 110%;
   letter-spacing: 1.1px;
-  color: var(--ink);
-  margin: 0 0 var(--space-4);
   max-width: 14ch;
-  text-wrap: balance;
 }
 
 .drop-zone__hint {
-  margin: 0;
-  color: var(--ink-mute);
+  max-width: 42ch;
   font-size: 0.75rem;
   letter-spacing: 0.04em;
-  max-width: 42ch;
 }
 
 .drop-zone input[type='file'] {
@@ -327,43 +281,4 @@ button.mini-poster > *:not(.post-card__glyph-layer) {
   height: 1px;
   opacity: 0;
   pointer-events: none;
-}
-
-.landing-foot {
-  position: relative;
-  z-index: 9991;
-  width: min(100%, var(--layout-max));
-  margin: 0 auto;
-  padding: var(--space-4) var(--pad) var(--space-8);
-  box-sizing: border-box;
-  color: var(--ink-mute);
-  font-size: 0.75rem;
-  letter-spacing: 0.04em;
-}
-
-.landing-foot__row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-4);
-}
-
-.landing-foot__lead,
-.landing-foot__meta {
-  margin: 0;
-}
-
-.landing-foot__meta {
-  margin-left: auto;
-  text-align: right;
-}
-
-.landing-foot__sep {
-  margin: 0 var(--space-2);
-}
-
-.landing-foot code {
-  font-family: inherit;
-  font-size: inherit;
 }

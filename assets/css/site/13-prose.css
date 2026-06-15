@@ -375,11 +375,15 @@
 .prose a {
   color: var(--ink-soft);
   text-decoration: underline;
-  text-underline-offset: 0.12em;
   text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
 }
 
-.prose a:hover {
+.prose a:hover,
+.prose a:focus-visible {
   color: var(--paper);
   background: var(--ink);
   text-decoration: none;

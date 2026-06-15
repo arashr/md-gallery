@@ -28,16 +28,16 @@ html[data-theme='dark'] .site-header {
   border-bottom-color: var(--chrome-stroke);
 }
 
-html[data-theme='dark'] .drop-zone:hover,
-html[data-theme='dark'] .drop-zone.is-dragover {
+html[data-theme='dark'] .drop-zone:not([class*='ground-']):hover,
+html[data-theme='dark'] .drop-zone:not([class*='ground-']).is-dragover {
   border-color: var(--chrome-red-bright);
 }
 
-html[data-theme='dark'] .drop-zone__title {
+html[data-theme='dark'] .drop-zone:not([class*='ground-']) .drop-zone__title {
   color: var(--chrome-ink);
 }
 
-html[data-theme='dark'] .drop-zone__hint,
+html[data-theme='dark'] .drop-zone:not([class*='ground-']) .drop-zone__hint,
 html[data-theme='dark'] .landing-foot {
   color: var(--chrome-ink-mute);
 }

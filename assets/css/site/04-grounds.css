@@ -124,7 +124,8 @@
 .post-card[class*='ground-'],
 .poster[class*='ground-'],
 .collection-card[class*='ground-'],
-.mini-poster[class*='ground-'] {
+.mini-poster[class*='ground-'],
+.drop-zone[class*='ground-'] {
   color: var(--on-ground-body);
 }
 
@@ -136,14 +137,20 @@
 .collection-card[class*='ground-'] .poster__title,
 .collection-card[class*='ground-'] .card-cta,
 .mini-poster[class*='ground-'] .poster__title,
-.mini-poster[class*='ground-'] .post-title {
+.mini-poster[class*='ground-'] .post-title,
+.drop-zone[class*='ground-'] .poster__title,
+.drop-zone[class*='ground-'] .post-title,
+.drop-zone[class*='ground-'] .drop-zone__title {
   color: var(--on-ground-display);
 }
 
 .collection-card[class*='ground-'] .kicker,
 .collection-card[class*='ground-'] .card-lede,
 .mini-poster[class*='ground-'] .card-lede,
-.mini-poster[class*='ground-'] .mini-poster__lede {
+.mini-poster[class*='ground-'] .mini-poster__lede,
+.drop-zone[class*='ground-'] .card-lede,
+.drop-zone[class*='ground-'] .mini-poster__lede,
+.drop-zone[class*='ground-'] .drop-zone__hint {
   color: var(--on-ground-muted);
 }
 
@@ -187,6 +194,7 @@
 .post-card[class*='ground-'] :focus-visible,
 .poster[class*='ground-'] :focus-visible,
 .collection-card[class*='ground-']:focus-visible,
-.mini-poster[class*='ground-']:focus-visible {
+.mini-poster[class*='ground-']:focus-visible,
+.drop-zone[class*='ground-']:focus-visible {
   outline-color: var(--on-ground-focus);
 }

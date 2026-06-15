@@ -14,6 +14,8 @@ import {
 import { fetchBundledMarkdown } from '../lib/bundled-md.js';
 import { exportPosterAsPdf } from '../lib/poster-export.js';
 import { copyCodeFromButton, enhanceCodeBlocks } from '../lib/code-blocks.js';
+import { getGrounds } from '../lib/grounds.js';
+import { getTitleFaces } from '../lib/title-faces.js';
 import { renderPosterGlyphPatterns } from '../lib/poster-glyph-render.js';
 import { enhancePosterImageHalftone } from '../lib/image-halftone.js';
 import { applyImageTableLayouts } from '../lib/image-table-layout.js';
@@ -40,13 +42,11 @@ import { ICONS } from './icons.js';
   const LANDING_FEATURED = [
     {
       path: 'docs/demo/gallery-showcase.md',
-      slug: 'gallery-demo',
       title: 'Gallery Demo',
       subtext: 'See what you can do'
     },
     {
       path: 'docs/POSTER_LOGIC.md',
-      slug: 'poster-logic',
       title: 'Poster Logic',
       subtext: 'See how it works'
     }
@@ -307,12 +307,47 @@ import { ICONS } from './icons.js';
     return Array.from(document.querySelectorAll('#landing .mini-poster[data-slug]'));
   }
 
+  function randomLandingSeed(prefix) {
+    return `${prefix}-${typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`}`;
+  }
+
+  function randomGround() {
+    const grounds = getGrounds();
+    return grounds[Math.floor(Math.random() * grounds.length)] || 'ground-white';
+  }
+
+  function randomTitleFace() {
+    const faces = getTitleFaces();
+    return faces[Math.floor(Math.random() * faces.length)] || { id: 'ultra' };
+  }
+
+  function decorateDropZone() {
+    if (!dropZone) return;
+    const face = randomTitleFace();
+    const ground = randomGround();
+    const slug = randomLandingSeed('drop');
+
+    for (const cls of [...dropZone.classList]) {
+      if (cls.startsWith('title-face-') || cls.startsWith('ground-')) {
+        dropZone.classList.remove(cls);
+      }
+    }
+    dropZone.classList.add(ground, `title-face-${face.id}`);
+    dropZone.dataset.slug = slug;
+  }
+
   function scheduleLandingMiniGlyphs() {
     requestAnimationFrame(() => {
-      renderPosterGlyphPatterns(landingMiniPosterEls(), getGalleryConfig());
+      const cards = [
+        ...landingMiniPosterEls(),
+        ...(dropZone ? [dropZone] : [])
+      ];
+      renderPosterGlyphPatterns(cards, getGalleryConfig());
       if (document.fonts?.ready) {
         document.fonts.ready.then(() => {
-          renderPosterGlyphPatterns(landingMiniPosterEls(), getGalleryConfig());
+          renderPosterGlyphPatterns(cards, getGalleryConfig());
         });
       }
     });
@@ -320,14 +355,15 @@ import { ICONS } from './icons.js';
 
   function renderFeaturedLanding() {
     if (!landingFeatured) return;
-    landingFeatured.innerHTML = LANDING_FEATURED.map((item, index) =>
+    landingFeatured.innerHTML = LANDING_FEATURED.map((item) =>
       renderMiniPoster({
-        slug: item.slug,
+        slug: randomLandingSeed('demo'),
         title: item.title,
         subtext: item.subtext,
-        index,
+        ground: randomGround(),
+        titleFaceId: randomTitleFace().id,
         tag: 'button',
-        extraClass: 'landing-featured-card reveal is-visible',
+        extraClass: 'landing-pick-card reveal is-visible',
         attrs: { 'data-bundled-md': item.path }
       })
     ).join('');
@@ -339,6 +375,7 @@ import { ICONS } from './icons.js';
     edgeHalftone.destroy();
     edgeHalftone = mountEdgeHalftone(getGalleryConfig());
     injectIcons();
+    decorateDropZone();
     renderFeaturedLanding();
     applyZoom();
     applyTheme(localStorage.getItem('md-gallery-theme') === 'dark' ? 'dark' : 'light');
@@ -391,7 +428,6 @@ import { ICONS } from './icons.js';
 
   function hideLandingGallery() {
     if (!landingGallery) return;
-    dropZone.hidden = false;
     landingFeatured?.removeAttribute('hidden');
     landingGallery.hidden = true;
     landingGalleryGrid.innerHTML = '';
@@ -423,7 +459,6 @@ import { ICONS } from './icons.js';
     );
     landingGalleryItems = items;
 
-    dropZone.hidden = true;
     landingFeatured?.setAttribute('hidden', '');
     landingGallery.hidden = false;
     landingMain?.classList.add('landing-main--gallery');
@@ -720,7 +755,7 @@ import { ICONS } from './icons.js';
       showLandingShell();
       if (droppedFileMap) {
         if (landingGalleryItems) {
-          dropZone.hidden = true;
+          landingFeatured?.setAttribute('hidden', '');
           landingGallery.hidden = false;
           landingMain?.classList.add('landing-main--gallery');
           landingGalleryCount.textContent = `${landingGalleryItems.length} Markdown file${landingGalleryItems.length === 1 ? '' : 's'} — choose one`;

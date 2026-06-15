@@ -1,30 +1,60 @@
 /* Reader-only header overrides */
 
-.site-header--reader .brand-mark {
+.reader-header__brand {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-scroll-anchor-gap);
+  min-width: 0;
+  flex-shrink: 1;
+}
+
+.site-header--reader .brand-back {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   box-sizing: border-box;
   min-width: 2.75rem;
   min-height: 2.75rem;
   margin-block: calc((2.75rem - 1em) / -2);
-  margin-inline: calc((2.75rem - 1ch) / -2) var(--space-scroll-anchor-gap);
+  margin-inline: calc((2.75rem - 1ch) / -2) 0;
   padding: 0;
   font: inherit;
-  color: var(--red);
   line-height: 1;
+  color: var(--red);
+  background: none;
+  border: none;
+  cursor: pointer;
   vertical-align: baseline;
 }
 
-.site-header--reader button.brand-mark {
-  border: 0;
-  background: none;
-  cursor: pointer;
+.site-header--reader .brand-back .brand-mark {
+  display: block;
+  font-size: 1.125rem;
+  line-height: 1;
+  color: inherit;
 }
 
-.site-header--reader button.brand-mark:focus-visible {
+.site-header--reader .brand-back:hover,
+.site-header--reader .brand-back:focus-visible {
+  color: var(--red-bright);
+}
+
+.site-header--reader .brand-back:focus-visible {
   outline: 3px solid var(--red-bright);
   outline-offset: var(--space-1);
+}
+
+.reader-doc-label {
+  min-width: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 0.9;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .site-header--reader #toc-toggle {
