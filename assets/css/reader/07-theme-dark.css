@@ -166,6 +166,11 @@ html[data-theme='dark'] .collection-hero .prose-brief .table-wrap {
   box-shadow: var(--chrome-ink-shadow);
 }
 
+html[data-theme='dark'] .collection-hero .prose-brief .prose-img-iso__frame {
+  border-color: var(--chrome-stroke);
+  box-shadow: var(--chrome-ink-shadow);
+}
+
 html[data-theme='dark'] .collection-hero :focus-visible {
   outline-color: var(--chrome-red-bright);
 }

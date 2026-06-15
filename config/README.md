@@ -138,6 +138,16 @@ Independent of glyph patterns. Object under `theme.graphics.imageHalftone`. Defa
 
 Legacy flat keys (`imageHalftoneDotPx`, etc.) still merge if present.
 
+#### `imageIsometric` — prose image frame (config-only)
+
+MD Gallery frames **all** prose images when enabled. Unlike md-portfolio, framing is not opt-in via `iso` in the image title — set `tableChrome` in config. Image titles still become the caption chip: `![alt](url "Caption here")`.
+
+| Key | Default | Role |
+|-----|---------|------|
+| `tableChrome` | `true` | When `true`, every prose image gets a frame with the same border and solid shadow as `.prose .table-wrap` on posters (`--chrome-ink-shadow` on page paper, `--poster-ink-shadow` on grounds). Set `false` to render plain `<img>` tags with no frame. |
+
+Configured in `config/gallery.config.json` under `theme.graphics.imageIsometric`. Applied at render time (`lib/render-document.js`) and via `data-image-frame` on `<html>` (`lib/gallery-config.js`).
+
 #### `heroGlyph` — mega background glyph
 
 Random alternative to mini `typePattern` on a poster. Defaults in `lib/poster-hero-glyph.js`. Uses **`typePattern.symbol`** + **`typePattern.blend`**.

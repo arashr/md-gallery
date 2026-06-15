@@ -18,13 +18,20 @@
 }
 
 .page-landing .landing-aside.landing-featured {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-4);
   width: 100%;
   min-width: 0;
   padding: 0 0 var(--space-8);
   box-sizing: border-box;
+}
+
+/* Very narrow — stack quick-start cards */
+@container reader-shell (max-width: 29.999rem) {
+  .page-landing .landing-aside.landing-featured {
+    grid-template-columns: 1fr;
+  }
 }
 
 .page-landing .landing-aside.landing-featured[hidden] {
@@ -50,8 +57,8 @@
   padding-top: var(--space-8);
 }
 
-/* Wide: drop zone cols 1–8, demo posters cols 9–12 */
-@container reader-shell (min-width: 75rem) {
+/* Wide: drop zone cols 1–8, quick-start cols 9–12 */
+@container reader-shell (min-width: 62rem) {
   /* Let hero wrap + aside stretch as sibling grid items */
   .page-landing .landing-main:not(.landing-main--gallery) .landing-feed {
     display: contents;
@@ -69,6 +76,8 @@
   }
 
   .page-landing .landing-aside.landing-featured {
+    display: flex;
+    flex-direction: column;
     grid-column: 9 / -1;
     grid-row: 1;
     align-self: stretch;
@@ -78,6 +87,18 @@
   .page-landing .landing-main:not(.landing-main--gallery) .drop-zone {
     flex: 1 1 0;
     min-height: 0;
+  }
+}
+
+/* Stacked hero — tighter vertical rhythm */
+@container reader-shell (max-width: 61.999rem) {
+  .page-landing .landing-feed {
+    padding-bottom: var(--space-3);
+  }
+
+  .page-landing .landing-aside.landing-featured {
+    padding-top: 0;
+    padding-bottom: var(--space-6);
   }
 }
 

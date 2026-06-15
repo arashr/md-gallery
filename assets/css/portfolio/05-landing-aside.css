@@ -74,7 +74,7 @@
   margin-top: var(--space-2);
 }
 
-@container reader-shell (min-width: 75rem) {
+@container reader-shell (min-width: 62rem) {
   .page-landing .landing-feed {
     grid-column: 1 / 10;
   }

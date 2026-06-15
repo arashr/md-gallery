@@ -56,7 +56,7 @@
   display: none;
 }
 
-/* Isometric UI frame — opt in via image title: ![](path "isometric") */
+/* Framed prose images — enabled via theme.graphics.imageIsometric.tableChrome */
 .prose-img-iso {
   margin: clamp(var(--space-6), 4vw, var(--space-11)) 0 clamp(var(--space-8), 5vw, calc(var(--space-12) + var(--space-1)));
   max-width: min(var(--poster-width), 100%);
@@ -132,6 +132,37 @@
   .prose-img-iso__frame {
     transform: none;
   }
+}
+
+/* Config: theme.graphics.imageIsometric.tableChrome — poster table border + shadow on all prose images */
+html[data-image-frame='table'] .prose-img-iso {
+  margin: var(--space-4) 0 var(--space-scroll-anchor-gap);
+  perspective: none;
+}
+
+html[data-image-frame='table'] .prose-img-iso__frame {
+  transform: none;
+  border: var(--chrome-stroke-width) solid var(--hair);
+  box-shadow: var(--chrome-ink-shadow);
+  background: var(--paper);
+}
+
+html[data-image-frame='table'] .prose-img-iso__caption {
+  left: var(--space-1);
+  max-width: calc(100% - 2 * var(--space-1));
+  background: var(--chrome-stroke);
+}
+
+html[data-image-frame='table'] .post-card[class*='ground-'] .prose-img-iso__frame,
+html[data-image-frame='table'] .mini-poster[class*='ground-'] .prose-img-iso__frame {
+  background: var(--surface);
+  border-color: var(--on-ground-edge);
+  box-shadow: var(--poster-ink-shadow);
+}
+
+html[data-image-frame='table'] .post-card[class*='ground-'] .prose-img-iso__caption,
+html[data-image-frame='table'] .mini-poster[class*='ground-'] .prose-img-iso__caption {
+  background: var(--on-ground-edge);
 }
 
 .post-card .prose hr {
