@@ -1,0 +1,22 @@
+/* Portfolio landing — brand home button (reader header) */
+
+.brand-home {
+  font: inherit;
+  font-weight: 600;
+  color: var(--ink);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.brand-home:hover,
+.brand-home:focus-visible {
+  color: var(--red);
+}
+
+.landing-error {
+  grid-column: 1 / -1;
+  padding: var(--space-4) 0;
+}

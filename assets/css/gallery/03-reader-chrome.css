@@ -1,0 +1,101 @@
+/* MD Gallery reader chrome — single-row header with search + open file */
+
+.site-header--reader .header-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+}
+
+.brand--reader {
+  flex-shrink: 0;
+}
+
+.reader-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-left: auto;
+}
+
+.btn-with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-scroll-anchor-gap);
+}
+
+.btn-icon-slot {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+
+/* In-field clear — icon only, no ink box (sits inside highlight input) */
+.site-header .nav-highlight-clear.btn-ghost {
+  position: absolute;
+  right: var(--space-1);
+  top: 50%;
+  z-index: 1;
+  translate: 0 -50%;
+  min-width: 1.75rem;
+  width: 1.75rem;
+  height: calc(100% - var(--space-1));
+  padding: 0;
+  border: none;
+  box-shadow: var(--chrome-ink-shadow-rest);
+  background: transparent;
+  color: var(--ink-mute);
+}
+
+.site-header .nav-highlight-clear.btn-ghost:hover:not(:disabled),
+.site-header .nav-highlight-clear.btn-ghost:focus-visible:not(:disabled) {
+  transform: none;
+  box-shadow: none;
+  color: var(--ink);
+  background: color-mix(in oklch, var(--surface) 88%, var(--ink) 12%);
+}
+
+.site-header .nav-highlight-clear.btn-ghost:active:not(:disabled) {
+  box-shadow: none;
+}
+
+html[data-theme='dark'] .site-header .nav-highlight-clear.btn-ghost {
+  color: var(--chrome-ink-mute);
+}
+
+html[data-theme='dark'] .site-header .nav-highlight-clear.btn-ghost:hover:not(:disabled),
+html[data-theme='dark'] .site-header .nav-highlight-clear.btn-ghost:focus-visible:not(:disabled) {
+  color: var(--chrome-ink);
+  background: color-mix(in oklch, var(--surface) 88%, var(--chrome-ink) 12%);
+}
+
+.search-highlight {
+  background: color-mix(in oklch, var(--ground-butter) 55%, transparent);
+  border-radius: 2px;
+  padding: 0 var(--space-1);
+}
+
+html[data-theme='dark'] .search-highlight {
+  background: color-mix(in oklch, var(--ground-butter) 35%, transparent);
+}
+
+.post-card.is-filtered-out {
+  display: none;
+}
+
+.post-card-wrap:has(.post-card.is-filtered-out) {
+  display: none;
+}
+
+@media (max-width: 699px) {
+  .reader-actions {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .nav--highlight {
+    flex: 1;
+    min-width: 0;
+  }
+}

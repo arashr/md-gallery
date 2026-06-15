@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   resolveHeroGlyphOptions,
   resolveHeroGlyphConfig,
+  resolveHeroGlyphPaint,
   resolveHeroGlyphPaintState,
   shouldUseHeroGlyph,
   isHeroGlyphAllowed,
@@ -29,6 +30,26 @@ describe('poster hero glyph', () => {
     assert.equal(opts.probability, 0.5);
     assert.equal(opts.lengthMax, 3);
     assert.equal(opts.lengthMin, HERO_GLYPH_DEFAULTS.lengthMin);
+    assert.equal(opts.color, 'glyph');
+  });
+
+  it('resolveHeroGlyphPaint resolves semantic paint keys from card CSS vars', () => {
+    const card = {
+      getPropertyValue(prop) {
+        const vars = {
+          '--glyph-pattern-color': '#c8102e',
+          '--on-ground-display': '#2c2781',
+          '--on-ground-accent': '#b00037'
+        };
+        return vars[prop] ?? '';
+      }
+    };
+    card.style = card;
+    globalThis.getComputedStyle = () => card;
+
+    assert.equal(resolveHeroGlyphPaint(card, { color: 'glyph' }), '#c8102e');
+    assert.equal(resolveHeroGlyphPaint(card, { color: 'display' }), '#2c2781');
+    assert.equal(resolveHeroGlyphPaint(card, { color: '#ff00aa' }), '#ff00aa');
   });
 
   it('shouldUseHeroGlyph is deterministic per slug', () => {

@@ -2,7 +2,7 @@
 
 **Purpose:** Durable context for humans and agents continuing this repo. Update when architecture, workflows, or conventions change.
 
-**Last updated:** 2026-05-31
+**Last updated:** 2026-06-14
 
 ---
 
@@ -24,11 +24,12 @@ npm start          # npx serve . → http://localhost:3000
 ```
 
 - Drop a `.md` file on the landing page, or open **Gallery Demo** / **Poster Logic** mini posters (`docs/demo/gallery-showcase.md`, `docs/POSTER_LOGIC.md`).
-- **Contents** in the nav opens the TOC drawer.
+- **Contents:** drawer TOC on narrow screens; **sticky TOC rail** (cols 10–12) when the reader shell is ≥75rem wide and the document has a TOC.
 - **Highlight** (nav field) marks matches in poster body text only; all posters stay visible (no filter/hide).
-- **View controls:** theme toggle on landing + reader headers (synced); zoom −/+ in reader only; **serif/sans** toggle for poster body text (`data-prose-font`, persisted). Toolbar icons: **Lineicons Basic** inlined in `assets/icons.js` (`currentColor` fills, no npm dep). Dark mode uses `--chrome-*` / `--chrome-red*` on UI only; `:root` `--red` stays `#c8102e` on poster grounds.
-- **Solid-ink controls:** header, search, TOC, and header buttons use `--chrome-stroke` / `--chrome-ink-shadow` (page ink). Poster **export** and **copy** use the same 1px + growing hard shadow via `--poster-ink-shadow` (on-ground edge color). No translate on hover. Tokens in `assets/site.css`; header rules in `assets/reader.css`.
-- **Design system:** ground rules in `docs/DESIGN.md` (APCA, OKLCH, 8px grid). Config in `config/gallery.config.json`; field reference in `config/README.md`. Applied via `lib/gallery-config.js`. Refocus tab after save to reload.
+- **View controls:** theme toggle on landing + reader headers (synced); zoom −/+ in reader only. Toolbar icons: **Lineicons Basic** inlined in `assets/icons.js` (`currentColor` fills, no npm dep). Dark mode uses `--chrome-*` / `--chrome-red*` on UI only; poster grounds keep light-theme pairs from CSS.
+- **Solid-ink controls:** header, search, TOC, and header buttons use `--chrome-stroke` / `--chrome-ink-shadow` (page ink). Poster **export** and **copy** use the same 1px + growing hard shadow via `--poster-ink-shadow` (on-ground edge color). No translate on hover. Tokens in `assets/css/site/01-tokens.css`; gallery chrome in `assets/css/gallery/`.
+- **Design system:** modular CSS (`assets/css/README.md`). Page/ground colors in **`assets/css/site/01-tokens.css`** + **`04-grounds.css`**; JSON holds graphics/glyph overrides only (`config/gallery.config.json`). Applied via `lib/gallery-config.js`. Refocus tab after save to reload.
+- **Layout:** 12-column grid (`--layout-cols`), poster stagger via **`--poster-col-start`** (6-col span), not rem offset. See `css/reader/05-layout.css`.
 - **Post cards:** Default height hugs content. Short posters (`.post-card--roomy`): B-min height, body `margin-top: auto`. **All** poster titles: `lib/fit-poster-title.js` fits width + per-tier line count from `titleScale.tiers` (natural height, no clip). See **Title fitting** below.
 - **Cursor:** system default (custom crosshair CSS removed from `site.css`).
 - **Open file** returns to landing (file picker).
@@ -45,8 +46,10 @@ npm start          # npx serve . → http://localhost:3000
 | `index.html` | Landing + reader shell; import map for `marked` / `isomorphic-dompurify` |
 | `assets/reader.js` | App: drop, read file, render, search, TOC toggle, scroll; calls `renderGlyphs()` → `lib/poster-glyph-render.js` |
 | `assets/icons.js` | Toolbar SVG icons ([Lineicons Basic](https://github.com/LineiconsHQ/Lineicons), MIT); injected via `[data-icon]` + theme toggle slots |
-| `assets/reader.css` | Drop zone, TOC panel, reader chrome |
-| `assets/site.css` | Poster/gallery/grounds/title-face styles (copied from figlets-blog; extend carefully) |
+| `assets/site.css` | Design system entry — `@import`s `assets/css/site/*` |
+| `assets/reader.css` | Reader entry — layout, TOC rail, dark theme |
+| `assets/gallery.css` | Gallery app entry — drop zone, lightbox, reveal, search chrome |
+| `assets/css/` | Modular CSS modules (see `assets/css/README.md`) |
 | `lib/parse-document.js` | Split MD → document model (posters, toc, intro) |
 | `lib/render-document.js` | Model → HTML (`marked` + sanitize) |
 | `lib/grounds.js` | Ground class per poster slug |

@@ -49,9 +49,11 @@ Run tests:
 npm test
 ```
 
+Production / GitHub Pages uses `npm run build`, which writes minified assets to `dist/` without changing source files under `assets/`, `lib/`, or `assets/css/`.
+
 ## How it works
 
-MD Gallery is a static client-side app. There is no production build step for the reader.
+MD Gallery is a static client-side app. Local development serves the repo root as-is; production deploys a minified `dist/` build (`npm run build`).
 
 The main flow is:
 

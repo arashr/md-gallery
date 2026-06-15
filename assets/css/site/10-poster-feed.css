@@ -1,0 +1,39 @@
+/* Poster gallery feed containers */
+
+/* Each post = its own poster on paper */
+.content-feed .posts-list,
+#blog-posts {
+  width: 100%;
+  min-width: 0;
+  height: fit-content;
+  max-width: none;
+  margin: 0;
+  padding: clamp(var(--space-5), 3vw, var(--space-8)) 0 clamp(var(--space-10), 5vw, calc(var(--space-12) + var(--space-4)));
+  display: flex;
+  flex-direction: column;
+  gap: clamp(var(--space-5), 3vw, var(--space-8));
+  background: var(--paper);
+}
+
+/* Collection / landing feed: 12-column poster grid (wide screens; see reader.css) */
+.collection-feed .poster-gallery,
+.landing-feed .poster-gallery {
+  align-items: start;
+  padding-left: 0;
+  padding-right: 0;
+  gap: clamp(var(--space-5), 3vw, var(--space-8));
+}
+
+.collection-feed .poster-gallery .post-card-wrap,
+.landing-feed .poster-gallery .post-card-wrap {
+  width: 100%;
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.collection-feed .poster-gallery .post-card-wrap .post-card,
+.landing-feed .poster-gallery .post-card-wrap .post-card {
+  width: 100%;
+  max-width: 100%;
+}

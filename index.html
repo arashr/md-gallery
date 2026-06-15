@@ -10,6 +10,7 @@
   <link id="fonts-link" rel="stylesheet" href="">
   <link rel="stylesheet" href="assets/site.css">
   <link rel="stylesheet" href="assets/reader.css">
+  <link rel="stylesheet" href="assets/gallery.css">
   <script>
     if (localStorage.getItem('md-gallery-theme') === 'dark') {
       document.documentElement.setAttribute('data-theme', 'dark');
@@ -20,13 +21,15 @@
   <a class="skip-link" href="#main">Skip to content</a>
 
   <section class="page-landing" id="landing" aria-label="Open a Markdown file">
-    <header class="site-header">
+    <header class="site-header site-header--reader">
       <div class="header-inner">
-        <span class="brand"><span class="brand-mark">◆</span> MD Gallery</span>
-        <div class="app-chrome-actions" role="group" aria-label="View options">
-          <button type="button" class="btn-icon btn-ghost theme-toggle" id="theme-toggle" aria-label="Dark mode" aria-pressed="false">
-            <span class="theme-toggle__icons" aria-hidden="true"></span>
-          </button>
+        <span class="brand brand--reader"><span class="brand-mark" aria-hidden="true">◆</span> <span>MD Gallery</span></span>
+        <div class="reader-actions">
+          <div class="reader-controls" role="group" aria-label="View options">
+            <button type="button" class="btn-icon btn-ghost theme-toggle" id="theme-toggle" aria-label="Dark mode" aria-pressed="false">
+              <span class="theme-toggle__icons" aria-hidden="true"></span>
+            </button>
+          </div>
         </div>
       </div>
     </header>
@@ -66,7 +69,7 @@
   <section class="page-reader" id="reader" hidden aria-label="Document reader">
     <header class="site-header site-header--reader">
       <div class="header-inner">
-        <span class="brand brand--reader"><span class="brand-mark">◆</span> <span id="doc-label">MD Gallery</span></span>
+        <span class="brand brand--reader"><button type="button" class="brand-home brand-mark" id="reader-home" aria-label="Home">◆</button> <span id="doc-label">MD Gallery</span></span>
         <div class="reader-actions">
           <button type="button" class="btn-ghost btn-with-icon" id="open-another">
             <span class="btn-icon-slot" data-icon="folderOpen" aria-hidden="true"></span>
@@ -106,7 +109,15 @@
         </div>
       </div>
     </header>
-    <main id="main-reader" class="content-feed collection-feed"></main>
+    <div class="reader-layout">
+      <main id="main-reader" class="content-feed collection-feed"></main>
+      <aside class="reader-toc-rail" id="reader-toc-rail" aria-hidden="true" aria-label="Table of contents">
+        <div class="reader-toc-rail__inner">
+          <p class="toc-panel__label">Contents</p>
+          <div id="toc-rail-root"></div>
+        </div>
+      </aside>
+    </div>
     <button type="button" id="back-to-top" class="back-to-top" aria-label="Back to top">↑</button>
   </section>
 

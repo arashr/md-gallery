@@ -72,7 +72,7 @@ describe('resolve graphics config', () => {
     });
     assert.equal(flat.probability, 0.5);
     assert.equal(flat.lengthMax, 3);
-    assert.equal(flat.glyphColor, 'accent');
+    assert.equal(flat.color, 'accent');
     assert.equal(flat.sizeRatio, 0.8);
     assert.deepEqual(flat.blendModes, ['overlay', 'exclusion']);
     assert.deepEqual(flat.blendOpacity.overlay, { min: 0.1, max: 0.2 });
@@ -100,6 +100,13 @@ describe('resolve graphics config', () => {
       ['appearance']
     );
     applyAppearanceOpacityFallback(flat, { opacityMin: 0.15, opacityMax: 0.25 }, 0.07);
+    assert.equal(flat.opacityMin, 0.15);
+    assert.equal(flat.opacityMax, 0.25);
+  });
+
+  it('applyAppearanceOpacityFallback keeps top-level opacity range from grouped flatten', () => {
+    const flat = { opacityMin: 0.15, opacityMax: 0.25, blendOpacity: { difference: { min: 0.2, max: 0.4 } } };
+    applyAppearanceOpacityFallback(flat, undefined, undefined, 1);
     assert.equal(flat.opacityMin, 0.15);
     assert.equal(flat.opacityMax, 0.25);
   });

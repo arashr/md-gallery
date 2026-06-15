@@ -7,12 +7,14 @@ import {
   fontsHrefFromConfig,
   normalizeGround,
   resolveColor,
+  themeColors,
   getGroundDefs,
   buildGroundStylesheet,
   buildCodeStylesheet,
   buildCodeStylesheetForExport,
   buildTitleFaceStylesheet,
   resolveTitleFaceTypography,
+  typographyTokens,
   codeBlockBgFromSurface,
   resolveCodeStepMix,
   resolveCodeBlockSteps
@@ -20,17 +22,12 @@ import {
 
 describe('gallery config', () => {
   it('merges partial config over defaults', () => {
-    setGalleryConfig({ theme: { colors: { red: '#ff0000' } } });
+    setGalleryConfig({ theme: { graphics: { glyph: { opacity: 0.12 } } } });
     const cfg = getGalleryConfig();
-    assert.equal(cfg.theme.colors.red, '#ff0000');
-    assert.equal(cfg.theme.colors.paper, '#eff1f3');
-    assert.equal(cfg.theme.graphics.glyphPatternColor, 'display');
-    assert.equal(cfg.theme.graphics.glyphPatternOpacity, 0.07);
+    assert.equal(cfg.theme.graphics.glyph.opacity, 0.12);
     assert.equal(cfg.theme.graphics.imageHalftone.enabled, true);
-    assert.equal(cfg.theme.graphics.imageHalftone.pattern, 'stagger');
-    assert.deepEqual(cfg.theme.graphics.typePattern.patternTypes, ['wave', 'grid', 'line']);
-    assert.equal(cfg.theme.graphics.typePattern.fillSpace, false);
     assert.ok(cfg.fonts.titleFaces.length >= 1);
+    assert.ok(cfg.grounds.pink);
   });
 
   it('builds Google Fonts URL from config', () => {
@@ -39,26 +36,31 @@ describe('gallery config', () => {
     assert.match(href, /Inconsolata/);
   });
 
-  it('resolves semantic foreground colors', () => {
+  it('resolves semantic foreground colors from CSS token fallbacks', () => {
     setGalleryConfig({});
-    assert.equal(resolveColor('red'), '#c8102e');
+    assert.equal(resolveColor('red'), themeColors().red);
     assert.equal(resolveColor('#abc'), '#abc');
+    assert.match(resolveColor('ground-pink'), /^#/);
   });
 
-  it('normalizes string ground to surface + preset foreground', () => {
+  it('normalizes string ground to surface slug + preset foreground refs', () => {
     const g = normalizeGround('#f8c0d4', 'pink');
     assert.equal(g.surface, '#f8c0d4');
-    assert.equal(g.foreground.display, '#710617');
-    assert.equal(g.foreground.linkHoverText, '#ffffff');
+    assert.equal(g.foreground.display, 'ground-pink-display');
+    assert.equal(g.foreground.linkHoverText, 'ground-link-hover-text');
   });
 
-  it('builds per-ground CSS with foreground and link-hover tokens', () => {
-    setGalleryConfig({});
+  it('builds per-ground glyph override CSS when configured', () => {
+    setGalleryConfig({
+      grounds: {
+        pink: {
+          glyph: { color: 'white', opacity: 0.5 }
+        }
+      }
+    });
     const css = buildGroundStylesheet(getGalleryConfig());
-    assert.match(css, /\.ground-carmine\{[^}]*--on-ground-display:#ffffff/);
-    assert.match(css, /\.ground-pink\{[^}]*--on-ground-link-hover-text:#ffffff/);
-    assert.match(css, /\.ground-mint\{[^}]*--on-ground-glyph-pattern-color:#710617/);
-    assert.match(css, /\.ground-mint\{[^}]*--on-ground-glyph-pattern-opacity:0\.07/);
+    assert.match(css, /\.ground-pink\{--on-ground-glyph-pattern-color:white/);
+    assert.match(css, /--on-ground-glyph-pattern-opacity:0\.5/);
   });
 
   it('builds code block CSS with OKLCH darken steps', () => {
@@ -66,19 +68,8 @@ describe('gallery config', () => {
     const css = buildCodeStylesheet(getGalleryConfig());
     assert.match(css, /--on-ground-code-bg:color-mix\(in oklch/);
     assert.match(css, /--code-block-bg:color-mix\(in oklch, var\(--paper\)/);
-    assert.match(css, /--code-chip-bg:color-mix\(in oklch, var\(--paper\) 90%, black\)/);
-    assert.match(
-      css,
-      /\.ground-butter\{--on-ground-code-chip-bg:color-mix\(in oklch, var\(--surface\) 80%, var\(--config-paper\)\)/
-    );
-    assert.match(
-      css,
-      /\.ground-white\{--on-ground-code-chip-bg:color-mix\(in oklch, var\(--surface\) 90%, black\)/
-    );
-    assert.match(
-      css,
-      /\.ground-carmine\{--on-ground-code-chip-bg:color-mix\(in oklch, var\(--surface\) 90%, black\)/
-    );
+    assert.match(css, /--code-chip-bg:oklch\(from var\(--paper\)/);
+    assert.match(css, /\.ground-butter\{--on-ground-code-chip-bg:oklch\(from var\(--surface\)/);
   });
 
   it('builds export code CSS without OKLCH', () => {
@@ -91,13 +82,13 @@ describe('gallery config', () => {
   it('builds per-title-face line-height and letter-spacing CSS', () => {
     setGalleryConfig({});
     const css = buildTitleFaceStylesheet(getGalleryConfig());
-    assert.match(css, /\.post-card\.title-face-monoton[^}]*line-height:0\.88/);
+    assert.match(css, /\.post-card\.title-face-limelight[^}]*line-height:0\.8/);
     assert.match(css, /\.post-card\.title-face-ultra[^}]*letter-spacing:-0\.005em/);
-    assert.match(css, /\.post-card\.title-face-notable .prose :is\(h2,h3,h4\)\{line-height:0\.9/);
+    assert.match(css, /\.post-card\.title-face-calsans .prose :is\(h2,h3,h4\)\{line-height:0\.94/);
   });
 
   it('resolveTitleFaceTypography prefers headingLineHeight over lineHeight', () => {
-    const typo = getGalleryConfig().theme.typography;
+    const typo = typographyTokens();
     const resolved = resolveTitleFaceTypography(
       { id: 'test', google: 'Test', lineHeight: '0.88', headingLineHeight: '0.95' },
       typo
@@ -124,25 +115,25 @@ describe('gallery config', () => {
     assert.equal(resolveCodeStepMix(getGalleryConfig()), 0.36);
   });
 
-  it('getGroundDefs lists all configured grounds', () => {
+  it('getGroundDefs lists all configured grounds with CSS surface slugs', () => {
     setGalleryConfig({});
     const defs = getGroundDefs();
     assert.ok(defs.mint);
-    assert.equal(defs.mint.surface, '#a7dbce');
-    assert.equal(defs.tangerine.surface, '#fbc090');
+    assert.equal(defs.mint.surface, 'ground-mint');
+    assert.equal(defs.tangerine.surface, 'ground-tangerine');
   });
 
   it('replaces grounds map when provided', () => {
     setGalleryConfig({
       grounds: {
         pink: {
-          surface: '#f8c0d4'
+          glyph: { opacity: 0.3 }
         }
       }
     });
     const defs = getGroundDefs();
     assert.ok(defs.pink);
-    assert.equal(defs.pink.surface, '#f8c0d4');
+    assert.equal(defs.pink.glyph?.opacity, 0.3);
     assert.equal(defs.chartreuse, undefined);
   });
 });

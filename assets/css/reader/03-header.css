@@ -1,0 +1,38 @@
+/* Reader-only header overrides */
+
+.site-header--reader .brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  margin-block: calc((2.75rem - 1em) / -2);
+  margin-inline: calc((2.75rem - 1ch) / -2) var(--space-scroll-anchor-gap);
+  padding: 0;
+  font: inherit;
+  color: var(--red);
+  line-height: 1;
+  vertical-align: baseline;
+}
+
+.site-header--reader button.brand-mark {
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.site-header--reader button.brand-mark:focus-visible {
+  outline: 3px solid var(--red-bright);
+  outline-offset: var(--space-1);
+}
+
+.site-header--reader #toc-toggle {
+  padding-top: var(--space-3);
+  padding-bottom: var(--space-3);
+}
+
+.doc-meta {
+  margin: 0;
+  text-align: left;
+}

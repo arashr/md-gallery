@@ -16,6 +16,9 @@ import { exportPosterAsPdf } from '../lib/poster-export.js';
 import { copyCodeFromButton, enhanceCodeBlocks } from '../lib/code-blocks.js';
 import { renderPosterGlyphPatterns } from '../lib/poster-glyph-render.js';
 import { enhancePosterImageHalftone } from '../lib/image-halftone.js';
+import { applyImageTableLayouts } from '../lib/image-table-layout.js';
+import { setupImageLightbox } from '../lib/image-lightbox.js';
+import { mountEdgeHalftone } from '../lib/edge-halftone.js';
 import { ICONS } from './icons.js';
 
 (function () {
@@ -59,14 +62,19 @@ import { ICONS } from './icons.js';
   const tocToggle = document.getElementById('toc-toggle');
   const tocPanel = document.getElementById('toc-panel');
   const tocRoot = document.getElementById('toc-root');
+  const tocRail = document.getElementById('reader-toc-rail');
+  const tocRailRoot = document.getElementById('toc-rail-root');
+  const readerLayout = document.querySelector('#reader .reader-layout');
   const openAnother = document.getElementById('open-another');
+  const readerHome = document.getElementById('reader-home');
   const backToTop = document.getElementById('back-to-top');
 
   const ZOOM_MIN = 0.85;
   const ZOOM_MAX = 1.5;
   const ZOOM_STEP = 0.1;
   /** Extra space below the sticky reader header (pairs with `scroll-margin-top` / `scroll-padding-top`). */
-  const SCROLL_GAP_PX = 8;
+  const SCROLL_GAP_PX = 6;
+  let lastReaderHeaderHeight = 0;
   let readerZoom = clampZoom(parseFloat(localStorage.getItem('md-gallery-zoom') || '1', 10));
 
   let bodyCache = new Map();
@@ -81,6 +89,8 @@ import { ICONS } from './icons.js';
   let landingGalleryItems = null;
   let currentRelativePath = '';
   let appDocsMode = false;
+  /** @type {{ destroy: () => void, refresh: () => void }} */
+  let edgeHalftone = { destroy() {}, refresh() {} };
 
   function injectIcons() {
     document.querySelectorAll('[data-icon]').forEach((slot) => {
@@ -92,12 +102,108 @@ import { ICONS } from './icons.js';
     });
   }
 
+  function closeTocPanel() {
+    tocPanel.classList.remove('is-open');
+    tocToggle.setAttribute('aria-expanded', 'false');
+  }
+
+  function tocRailFits() {
+    if (!readerLayout) return false;
+    const style = getComputedStyle(readerLayout);
+    const padInline =
+      (Number.parseFloat(style.paddingLeft) || 0) +
+      (Number.parseFloat(style.paddingRight) || 0);
+    const minWidth = readCssLengthPx('--toc-rail-min', 1200);
+    return readerLayout.clientWidth - padInline >= minWidth;
+  }
+
+  function updateTocRailOffset() {
+    if (!tocRail || reader.hidden || !readerLayout) return;
+    const firstPoster = mainReader.querySelector('.poster-gallery .post-card-wrap');
+    if (!firstPoster) {
+      tocRail.style.setProperty('--toc-rail-offset', '0px');
+      return;
+    }
+    const layoutTop = readerLayout.getBoundingClientRect().top;
+    const posterTop = firstPoster.getBoundingClientRect().top;
+    const offset = posterTop - layoutTop;
+    tocRail.style.setProperty('--toc-rail-offset', `${Math.max(0, Math.round(offset))}px`);
+  }
+
+  function updateTocLayout() {
+    if (reader.hidden) {
+      reader.classList.remove('has-toc');
+      reader.classList.remove('has-toc-rail');
+      tocRail?.setAttribute('aria-hidden', 'true');
+      return;
+    }
+
+    const hasToc = Boolean(tocRoot.querySelector('.toc-list'));
+    reader.classList.toggle('has-toc', hasToc);
+    const useRail = hasToc && tocRailFits();
+    reader.classList.toggle('has-toc-rail', useRail);
+    tocRail?.setAttribute('aria-hidden', useRail ? 'false' : 'true');
+    if (useRail) {
+      updateTocRailOffset();
+      closeTocPanel();
+    }
+  }
+
+  function setTocHtml(html) {
+    tocRoot.innerHTML = html;
+    if (tocRailRoot) tocRailRoot.innerHTML = html;
+    updateTocLayout();
+  }
+
+  function handleTocLinkClick(e) {
+    const a = e.target.closest('[data-toc-link]');
+    if (!a) return;
+    e.preventDefault();
+    const id = a.getAttribute('href')?.slice(1);
+    const el = id && document.getElementById(id);
+    if (el) scrollToEl(el);
+    closeTocPanel();
+  }
+
+  function readCssLengthPx(token, fallback = 0) {
+    const raw = getComputedStyle(document.documentElement).getPropertyValue(token).trim();
+    if (!raw) return fallback;
+    const n = parseFloat(raw);
+    if (!Number.isFinite(n)) return fallback;
+    if (raw.endsWith('rem')) {
+      const root = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      return n * (Number.isFinite(root) ? root : 16);
+    }
+    return n;
+  }
+
+  function readerHeaderEl() {
+    return document.querySelector('#reader .site-header--reader');
+  }
+
+  function readAnchorOffsetPx() {
+    const header = readerHeaderEl();
+    const headerBottom = header ? Math.ceil(header.getBoundingClientRect().bottom) : 0;
+    const gap = readCssLengthPx('--space-scroll-anchor-gap', SCROLL_GAP_PX);
+    const adjust = readCssLengthPx('--space-scroll-anchor-adjust', 0);
+    return headerBottom + gap + adjust;
+  }
+
+  function syncScrollOffsetVar() {
+    const header = readerHeaderEl();
+    if (header) lastReaderHeaderHeight = header.getBoundingClientRect().height;
+    const offset = readAnchorOffsetPx();
+    document.documentElement.style.setProperty('--scroll-offset', `${offset}px`);
+    return offset;
+  }
+
   function updateScrollOffset() {
     if (reader.hidden) return;
-    const header = document.querySelector('.site-header--reader');
+    const header = readerHeaderEl();
     if (!header) return;
     const height = header.getBoundingClientRect().height;
-    document.documentElement.style.setProperty('--scroll-offset', `${Math.ceil(height) + SCROLL_GAP_PX}px`);
+    if (Math.abs(height - lastReaderHeaderHeight) < 1) return;
+    syncScrollOffsetVar();
   }
 
   /** Poster slugs live on `.post-card`; scroll to the visible title row, not card padding. */
@@ -108,36 +214,51 @@ import { ICONS } from './icons.js';
     return el;
   }
 
-  function scrollToEl(el, { behavior } = {}) {
-    const target = resolveScrollTarget(el);
-    updateScrollOffset();
-    target.scrollIntoView({
-      behavior: behavior ?? (prefersReducedMotion ? 'auto' : 'smooth'),
-      block: 'start',
-    });
-    const hashId = el.id;
-    if (hashId) history.replaceState(null, '', `#${hashId}`);
+  let anchorSettleTimer = 0;
+
+  function clearAnchorSettle() {
+    clearTimeout(anchorSettleTimer);
+    anchorSettleTimer = 0;
+  }
+
+  function anchorTopPx(target) {
+    syncScrollOffsetVar();
+    return Math.max(0, target.getBoundingClientRect().top + window.scrollY - readAnchorOffsetPx());
+  }
+
+  function userScrollBehavior() {
+    return prefersReducedMotion ? 'auto' : 'smooth';
   }
 
   function realignScrollToHash() {
     const id = location.hash.slice(1);
-    if (!id || reader.hidden) return;
+    if (!id || id === 'read' || id === 'gallery' || reader.hidden) return;
     const el = document.getElementById(id);
     if (!el) return;
     scrollToEl(el, { behavior: 'auto' });
+  }
+
+  function scrollToEl(el, { behavior } = {}) {
+    clearAnchorSettle();
+    const target = resolveScrollTarget(el);
+    window.scrollTo({ top: anchorTopPx(target), behavior: behavior ?? userScrollBehavior() });
+
+    const hashId = el.id;
+    if (hashId) history.replaceState(history.state, '', `#${hashId}`);
   }
 
   function renderGlyphs() {
     renderPosterGlyphPatterns(posterEls, getGalleryConfig());
   }
 
-  function schedulePosterTitleFit() {
+  function schedulePosterTitleFit({ realignHash = false } = {}) {
     cancelAnimationFrame(titleScaleFrame);
     titleScaleFrame = requestAnimationFrame(() => {
       void mainReader.offsetHeight;
       fitPosterTitles(posterEls, getGalleryConfig().titleScale);
       renderGlyphs();
-      if (location.hash) realignScrollToHash();
+      updateTocLayout();
+      if (realignHash && location.hash) realignScrollToHash();
     });
   }
 
@@ -164,7 +285,7 @@ import { ICONS } from './icons.js';
     zoomOut.disabled = readerZoom <= ZOOM_MIN;
     zoomIn.disabled = readerZoom >= ZOOM_MAX;
     updateScrollOffset();
-    schedulePosterTitleFit();
+    schedulePosterTitleFit({ realignHash: Boolean(location.hash) });
   }
 
   function applyTheme(theme) {
@@ -179,6 +300,7 @@ import { ICONS } from './icons.js';
       btn.setAttribute('aria-label', dark ? 'Light mode' : 'Dark mode');
     });
     localStorage.setItem('md-gallery-theme', dark ? 'dark' : 'light');
+    edgeHalftone.refresh();
   }
 
   function landingMiniPosterEls() {
@@ -214,6 +336,8 @@ import { ICONS } from './icons.js';
 
   async function boot() {
     await reloadGalleryConfig();
+    edgeHalftone.destroy();
+    edgeHalftone = mountEdgeHalftone(getGalleryConfig());
     injectIcons();
     renderFeaturedLanding();
     applyZoom();
@@ -229,12 +353,23 @@ import { ICONS } from './icons.js';
     headerResize.observe(readerHeader);
   }
 
+  if (readerLayout && typeof ResizeObserver !== 'undefined') {
+    const readerLayoutResize = new ResizeObserver(() => updateTocLayout());
+    readerLayoutResize.observe(readerLayout);
+  }
+
+  if (mainReader && typeof ResizeObserver !== 'undefined') {
+    const readerContentResize = new ResizeObserver(() => updateTocLayout());
+    readerContentResize.observe(mainReader);
+  }
+
   function showReader() {
     landing.classList.add('is-hidden');
     reader.hidden = false;
     reader.classList.add('is-active');
     document.body.classList.remove('page-landing');
     document.body.classList.add('page-collection');
+    edgeHalftone.refresh();
   }
 
   function showLandingShell() {
@@ -245,8 +380,8 @@ import { ICONS } from './icons.js';
     document.body.classList.remove('page-collection');
     searchInput.value = '';
     syncHighlightClear();
-    tocPanel.classList.remove('is-open');
-    tocToggle.setAttribute('aria-expanded', 'false');
+    closeTocPanel();
+    edgeHalftone.refresh();
   }
 
   function showLanding() {
@@ -327,7 +462,11 @@ import { ICONS } from './icons.js';
   function enhanceReaderContent() {
     enhanceCodeBlocks(mainReader, { copyIcon: ICONS.copy });
     injectIcons();
+    applyImageTableLayouts(mainReader);
     enhancePosterImageHalftone(mainReader, getGalleryConfig());
+    setupImageLightbox(mainReader, {
+      icons: { zoomIn: ICONS.zoomIn, zoomOut: ICONS.zoomOut, xmark: ICONS.xmark }
+    });
   }
 
   function posterExportName(card) {
@@ -341,7 +480,7 @@ import { ICONS } from './icons.js';
     const doc = parseDocument(text, filename);
     mainReader.innerHTML = renderDocument(doc, relativePath);
     docLabel.textContent = relativePath;
-    tocRoot.innerHTML = renderToc(doc.toc);
+    setTocHtml(renderToc(doc.toc));
     showReader();
 
     posterEls = Array.from(mainReader.querySelectorAll('.post-card'));
@@ -354,7 +493,9 @@ import { ICONS } from './icons.js';
     enhanceReaderContent();
     applySearch();
     setupTitleFitObserver();
-    updateScrollOffset();
+    lastReaderHeaderHeight = 0;
+    syncScrollOffsetVar();
+    updateTocLayout();
     schedulePosterTitleFit();
     requestAnimationFrame(renderGlyphs);
     requestAnimationFrame(() => enhancePosterImageHalftone(mainReader, getGalleryConfig()));
@@ -372,6 +513,7 @@ import { ICONS } from './icons.js';
       });
     }
     if (updateHistory) pushReadState(relativePath);
+    clearAnchorSettle();
     window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
   }
 
@@ -678,8 +820,7 @@ import { ICONS } from './icons.js';
       if (!el) return;
       e.preventDefault();
       scrollToEl(el);
-      tocPanel.classList.remove('is-open');
-      tocToggle.setAttribute('aria-expanded', 'false');
+      closeTocPanel();
       return;
     }
 
@@ -697,16 +838,8 @@ import { ICONS } from './icons.js';
     }
   });
 
-  tocRoot.addEventListener('click', (e) => {
-    const a = e.target.closest('[data-toc-link]');
-    if (!a) return;
-    e.preventDefault();
-    const id = a.getAttribute('href')?.slice(1);
-    const el = id && document.getElementById(id);
-    if (el) scrollToEl(el);
-    tocPanel.classList.remove('is-open');
-    tocToggle.setAttribute('aria-expanded', 'false');
-  });
+  tocRoot.addEventListener('click', handleTocLinkClick);
+  tocRailRoot?.addEventListener('click', handleTocLinkClick);
 
   function highlightHtml(html, query) {
     if (!query) return html;
@@ -840,13 +973,17 @@ import { ICONS } from './icons.js';
   document.addEventListener('click', (e) => {
     const wrap = tocToggle.closest('.nav-toc-wrap');
     if (tocPanel.contains(e.target) || wrap?.contains(e.target)) return;
-    tocPanel.classList.remove('is-open');
-    tocToggle.setAttribute('aria-expanded', 'false');
+    closeTocPanel();
   });
 
   openAnother.addEventListener('click', () => {
     showLanding();
     void pickFileToOpen();
+  });
+
+  readerHome?.addEventListener('click', () => {
+    showLanding();
+    history.pushState({ view: 'landing' }, '', '#');
   });
 
   if (backToTop) {
@@ -861,10 +998,15 @@ import { ICONS } from './icons.js';
 
   async function reloadConfigAndRefresh() {
     await reloadGalleryConfig();
+    edgeHalftone.destroy();
+    edgeHalftone = mountEdgeHalftone(getGalleryConfig());
     enhancePosterImageHalftone(mainReader, getGalleryConfig());
     schedulePosterTitleFit();
     if (!landing.classList.contains('is-hidden')) {
       scheduleLandingMiniGlyphs();
+      edgeHalftone.refresh();
+    } else {
+      enhanceReaderContent();
     }
   }
 
@@ -891,14 +1033,12 @@ import { ICONS } from './icons.js';
       if (!landing.classList.contains('is-hidden')) {
         scheduleLandingMiniGlyphs();
       }
-      if (location.hash) realignScrollToHash();
     }, 120);
   });
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && tocPanel.classList.contains('is-open')) {
-      tocPanel.classList.remove('is-open');
-      tocToggle.setAttribute('aria-expanded', 'false');
+      closeTocPanel();
     }
   });
 })();

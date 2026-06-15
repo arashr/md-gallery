@@ -23,10 +23,12 @@ Read these before changing code:
 
 ```bash
 npm install
-npm start
+npm start          # dev — readable source from repo root
+npm run build      # minified JS + bundled CSS → dist/
+npm run preview    # serve dist/ locally
 ```
 
-No production build step. Run parser tests:
+No build step is required for local development. Run parser tests:
 
 ```bash
 npm test

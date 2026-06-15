@@ -1,0 +1,137 @@
+/* TOC drawer and nav highlight */
+
+/* Anchor targets — pair with html scroll-padding-top / JS anchor offset */
+.post-header,
+.prose :is(h3, h4, h5, h6)[id] {
+  scroll-margin-top: var(--scroll-offset, var(--space-scroll-anchor-adjust));
+}
+
+/* TOC drawer (in nav) */
+.toc-panel {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 100;
+  width: min(320px, calc(100vw - 2 * var(--pad)));
+  max-height: min(70vh, 480px);
+  overflow: auto;
+  margin-top: var(--space-scroll-anchor-gap);
+  padding: var(--space-4) var(--space-4);
+  border: var(--chrome-stroke-width) solid var(--chrome-stroke);
+  border-radius: 0;
+  background: var(--surface);
+  box-shadow: var(--chrome-ink-shadow-rest);
+  transition: box-shadow var(--chrome-ink-duration) var(--chrome-ink-ease);
+}
+
+/* In-field clear — icon only, no ink box (sits inside highlight input) */
+.site-header .nav-highlight-clear.btn-ghost {
+  position: absolute;
+  right: var(--space-1);
+  top: 50%;
+  z-index: 1;
+  translate: 0 -50%;
+  min-width: 1.75rem;
+  width: 1.75rem;
+  height: calc(100% - var(--space-1));
+  padding: 0;
+  border: none;
+  box-shadow: var(--chrome-ink-shadow-rest);
+  background: transparent;
+  color: var(--ink-mute);
+}
+
+.site-header .nav-highlight-clear.btn-ghost:hover:not(:disabled),
+.site-header .nav-highlight-clear.btn-ghost:focus-visible:not(:disabled) {
+  transform: none;
+  box-shadow: none;
+  color: var(--ink);
+  background: color-mix(in oklch, var(--surface) 88%, var(--ink) 12%);
+}
+
+.site-header .nav-highlight-clear.btn-ghost:active:not(:disabled) {
+  box-shadow: none;
+}
+
+.site-header .nav-search-icon {
+  color: var(--ink-mute);
+}
+
+.toc-panel.is-open {
+  display: block;
+  box-shadow: var(--chrome-ink-shadow);
+}
+
+.toc-panel__label {
+  margin: 0 0 var(--space-3);
+  color: var(--red);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.toc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.toc-item {
+  margin: var(--space-1) 0;
+}
+
+.toc-item a {
+  display: block;
+  padding: var(--space-1) 0;
+  color: var(--ink-soft);
+  text-decoration: none;
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.toc-item a:hover,
+.toc-item a.is-active {
+  color: var(--red);
+}
+
+.toc-depth-2 a {
+  font-weight: 600;
+}
+.toc-depth-3 {
+  padding-left: var(--space-3);
+}
+.toc-depth-4 {
+  padding-left: var(--space-6);
+}
+.toc-depth-5 {
+  padding-left: var(--space-9);
+}
+.toc-depth-6 {
+  padding-left: var(--space-12);
+}
+
+.toc-empty {
+  margin: 0;
+}
+
+.nav-toc-wrap {
+  position: relative;
+}
+
+@media (max-width: 599px) {
+  .reader-header__tools {
+    position: relative;
+  }
+
+  .nav-toc-wrap {
+    position: static;
+  }
+
+  .toc-panel {
+    right: auto;
+    left: 0;
+    width: auto;
+    max-width: none;
+  }
+}

@@ -36,6 +36,21 @@ describe('TOC ids align with rendered heading ids', () => {
     assert.ok(html.includes('id="beta"'));
   });
 
+  it('heading ids use plain text so TOC matches links and inline markup', () => {
+    const md = `## Alpha
+
+### [Docs](https://example.com)
+
+### **Bold** label
+`;
+    const doc = parseDocument(md, 'links.md');
+    const html = renderDocument(doc, 'links.md');
+    const tocBodyIds = doc.toc.filter((t) => t.depth > 2).map((t) => t.id);
+    const renderedIds = headingIdsFromHtml(html);
+    assert.deepEqual(tocBodyIds, renderedIds);
+    assert.ok(html.includes('id="docs"'));
+    assert.ok(html.includes('id="bold-label"'));
+  });
   it('reserves poster slugs so body headings do not collide', () => {
     const md = `## hello
 
