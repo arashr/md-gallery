@@ -23,7 +23,12 @@ const CSS_ENTRIES = [
 ];
 
 const JS_BUNDLES = [
-  { entry: 'assets/reader.js', outfile: 'assets/reader.js' },
+  {
+    entry: 'assets/reader.js',
+    outfile: 'assets/reader.js',
+    splitting: true,
+    chunkNames: 'chunks/[name]-[hash]'
+  },
   { entry: 'assets/config-lab.js', outfile: 'assets/config-lab.js' }
 ];
 
@@ -55,18 +60,30 @@ function patchHtmlForRelease(filename) {
 
 async function bundleJs() {
   await Promise.all(
-    JS_BUNDLES.map(({ entry, outfile }) =>
-      esbuild.build({
+    JS_BUNDLES.map(({ entry, outfile, splitting, chunkNames }) => {
+      const options = {
         entryPoints: [join(root, entry)],
-        outfile: join(dist, outfile),
         bundle: true,
         minify: true,
         format: 'esm',
         platform: 'browser',
         target: ['es2020'],
         logLevel: 'info'
-      })
-    )
+      };
+      if (splitting) {
+        return esbuild.build({
+          ...options,
+          outdir: join(dist, 'assets'),
+          entryNames: '[name]',
+          chunkNames: chunkNames || 'chunks/[name]-[hash]',
+          splitting: true
+        });
+      }
+      return esbuild.build({
+        ...options,
+        outfile: join(dist, outfile)
+      });
+    })
   );
 }
 

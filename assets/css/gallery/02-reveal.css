@@ -30,3 +30,13 @@
     box-shadow: var(--card-shadow-rest);
   }
 }
+
+/* Landing pick cards (demo + folder grid): preserve chrome hover transitions */
+button.mini-poster.landing-pick-card.reveal,
+.landing-pick-card.reveal {
+  transition:
+    opacity var(--reveal-duration) var(--reveal-ease),
+    transform var(--chrome-ink-duration) var(--chrome-ink-ease),
+    box-shadow var(--chrome-ink-duration) var(--chrome-ink-ease),
+    border-color var(--chrome-ink-duration) var(--chrome-ink-ease);
+}

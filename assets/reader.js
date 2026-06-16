@@ -1,9 +1,12 @@
-import { parseDocument, peekDocumentTitle } from '../lib/parse-document.js';
-import { renderDocument, renderToc } from '../lib/render-document.js';
 import { renderLandingGallery } from '../lib/render-landing-gallery.js';
 import { renderMiniPoster } from '../lib/render-mini-poster.js';
-import { reloadGalleryConfig, getGalleryConfig } from '../lib/gallery-config.js';
-import { fitPosterTitles } from '../lib/fit-poster-title.js';
+import {
+  applyGalleryConfigToDocument,
+  getGalleryConfig,
+  loadGalleryConfig,
+  loadReaderFonts,
+  reloadGalleryConfig
+} from '../lib/gallery-config.js';
 import {
   isExternalHref,
   isLocalMarkdownHref,
@@ -12,15 +15,9 @@ import {
   resolveRelativeMarkdownPath
 } from '../lib/local-md-links.js';
 import { fetchBundledMarkdown } from '../lib/bundled-md.js';
-import { exportPosterAsPdf } from '../lib/poster-export.js';
-import { copyCodeFromButton, enhanceCodeBlocks } from '../lib/code-blocks.js';
 import { getGrounds } from '../lib/grounds.js';
 import { getTitleFaces } from '../lib/title-faces.js';
 import { renderPosterGlyphPatterns } from '../lib/poster-glyph-render.js';
-import { enhancePosterImageHalftone } from '../lib/image-halftone.js';
-import { applyImageTableLayouts } from '../lib/image-table-layout.js';
-import { setupImageLightbox } from '../lib/image-lightbox.js';
-import { mountEdgeHalftone } from '../lib/edge-halftone.js';
 import { ICONS } from './icons.js';
 
 (function () {
@@ -91,6 +88,16 @@ import { ICONS } from './icons.js';
   let appDocsMode = false;
   /** @type {{ destroy: () => void, refresh: () => void }} */
   let edgeHalftone = { destroy() {}, refresh() {} };
+  let readerChromeMounted = false;
+  /** @type {Promise<import('../lib/reader-modules.js').ReaderModules> | null} */
+  let readerModulesPromise = null;
+
+  function loadReaderModules() {
+    if (!readerModulesPromise) {
+      readerModulesPromise = import('../lib/reader-modules.js').then((mod) => mod.loadReaderModules());
+    }
+    return readerModulesPromise;
+  }
 
   function injectIcons() {
     document.querySelectorAll('[data-icon]').forEach((slot) => {
@@ -252,13 +259,16 @@ import { ICONS } from './icons.js';
   }
 
   function schedulePosterTitleFit({ realignHash = false } = {}) {
+    if (!posterEls.length) return;
     cancelAnimationFrame(titleScaleFrame);
     titleScaleFrame = requestAnimationFrame(() => {
-      void mainReader.offsetHeight;
-      fitPosterTitles(posterEls, getGalleryConfig().titleScale);
-      renderGlyphs();
-      updateTocLayout();
-      if (realignHash && location.hash) realignScrollToHash();
+      void loadReaderModules().then((mods) => {
+        void mainReader.offsetHeight;
+        mods.fitPosterTitles(posterEls, getGalleryConfig().titleScale);
+        renderGlyphs();
+        updateTocLayout();
+        if (realignHash && location.hash) realignScrollToHash();
+      });
     });
   }
 
@@ -338,6 +348,15 @@ import { ICONS } from './icons.js';
     dropZone.dataset.slug = slug;
   }
 
+  function deferLandingGlyphs() {
+    const run = () => scheduleLandingMiniGlyphs();
+    if (typeof requestIdleCallback === 'function') {
+      requestIdleCallback(run, { timeout: 2000 });
+    } else {
+      setTimeout(run, 0);
+    }
+  }
+
   function scheduleLandingMiniGlyphs() {
     requestAnimationFrame(() => {
       const cards = [
@@ -367,18 +386,23 @@ import { ICONS } from './icons.js';
         attrs: { 'data-bundled-md': item.path }
       })
     ).join('');
-    scheduleLandingMiniGlyphs();
   }
 
-  async function boot() {
-    await reloadGalleryConfig();
-    edgeHalftone.destroy();
-    edgeHalftone = mountEdgeHalftone(getGalleryConfig());
+  function paintLandingShell() {
+    applyGalleryConfigToDocument(getGalleryConfig(), { fontScope: 'landing' });
     injectIcons();
     decorateDropZone();
     renderFeaturedLanding();
     applyZoom();
     applyTheme(localStorage.getItem('md-gallery-theme') === 'dark' ? 'dark' : 'light');
+  }
+
+  async function boot() {
+    paintLandingShell();
+    deferLandingGlyphs();
+    const cfg = await loadGalleryConfig();
+    applyGalleryConfigToDocument(cfg, { fontScope: 'landing' });
+    deferLandingGlyphs();
   }
 
   boot();
@@ -400,6 +424,24 @@ import { ICONS } from './icons.js';
     readerContentResize.observe(mainReader);
   }
 
+  async function ensureReaderChrome() {
+    loadReaderFonts(getGalleryConfig());
+    if (readerChromeMounted) {
+      edgeHalftone.refresh();
+      return;
+    }
+    const mods = await loadReaderModules();
+    edgeHalftone.destroy();
+    edgeHalftone = mods.mountEdgeHalftone(getGalleryConfig());
+    readerChromeMounted = true;
+  }
+
+  function teardownReaderChrome() {
+    edgeHalftone.destroy();
+    edgeHalftone = { destroy() {}, refresh() {} };
+    readerChromeMounted = false;
+  }
+
   function showReader() {
     landing.classList.add('is-hidden');
     reader.hidden = false;
@@ -418,7 +460,7 @@ import { ICONS } from './icons.js';
     searchInput.value = '';
     syncHighlightClear();
     closeTocPanel();
-    edgeHalftone.refresh();
+    teardownReaderChrome();
   }
 
   function showLanding() {
@@ -453,6 +495,7 @@ import { ICONS } from './icons.js';
       paths.map(async (path, index) => {
         const file = map.get(path);
         const text = await file.text();
+        const { peekDocumentTitle } = await import('../lib/parse-document.js');
         const title = peekDocumentTitle(text, displayNameForPath(path));
         return { path, title, index };
       })
@@ -464,7 +507,7 @@ import { ICONS } from './icons.js';
     landingMain?.classList.add('landing-main--gallery');
     landingGalleryCount.textContent = `${items.length} Markdown file${items.length === 1 ? '' : 's'} — choose one`;
     landingGalleryGrid.innerHTML = renderLandingGallery(items);
-    scheduleLandingMiniGlyphs();
+    deferLandingGlyphs();
     window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
 
     if (updateHistory) pushGalleryState();
@@ -494,12 +537,13 @@ import { ICONS } from './icons.js';
     openMarkdown(text, path);
   }
 
-  function enhanceReaderContent() {
-    enhanceCodeBlocks(mainReader, { copyIcon: ICONS.copy });
+  async function enhanceReaderContent() {
+    const mods = await loadReaderModules();
+    mods.enhanceCodeBlocks(mainReader, { copyIcon: ICONS.copy });
     injectIcons();
-    applyImageTableLayouts(mainReader);
-    enhancePosterImageHalftone(mainReader, getGalleryConfig());
-    setupImageLightbox(mainReader, {
+    mods.applyImageTableLayouts(mainReader);
+    mods.enhancePosterImageHalftone(mainReader, getGalleryConfig());
+    mods.setupImageLightbox(mainReader, {
       icons: { zoomIn: ICONS.zoomIn, zoomOut: ICONS.zoomOut, xmark: ICONS.xmark }
     });
   }
@@ -509,13 +553,16 @@ import { ICONS } from './icons.js';
     return card.getAttribute('data-slug') || title || 'poster';
   }
 
-  function openMarkdown(text, relativePath, { updateHistory = true } = {}) {
+  async function openMarkdown(text, relativePath, { updateHistory = true } = {}) {
+    const mods = await loadReaderModules();
+    await ensureReaderChrome();
+
     const filename = displayNameForPath(relativePath);
     currentRelativePath = relativePath;
-    const doc = parseDocument(text, filename);
-    mainReader.innerHTML = renderDocument(doc, relativePath);
+    const doc = mods.parseDocument(text, filename);
+    mainReader.innerHTML = mods.renderDocument(doc, relativePath);
     docLabel.textContent = relativePath;
-    setTocHtml(renderToc(doc.toc));
+    setTocHtml(mods.renderToc(doc.toc));
     showReader();
 
     posterEls = Array.from(mainReader.querySelectorAll('.post-card'));
@@ -525,7 +572,7 @@ import { ICONS } from './icons.js';
       if (body) bodyCache.set(card.id, body.innerHTML);
     });
 
-    enhanceReaderContent();
+    await enhanceReaderContent();
     applySearch();
     setupTitleFitObserver();
     lastReaderHeaderHeight = 0;
@@ -533,12 +580,12 @@ import { ICONS } from './icons.js';
     updateTocLayout();
     schedulePosterTitleFit();
     requestAnimationFrame(renderGlyphs);
-    requestAnimationFrame(() => enhancePosterImageHalftone(mainReader, getGalleryConfig()));
+    requestAnimationFrame(() => mods.enhancePosterImageHalftone(mainReader, getGalleryConfig()));
     if (document.fonts?.ready) {
       document.fonts.ready.then(() => {
         schedulePosterTitleFit();
         renderGlyphs();
-        enhancePosterImageHalftone(mainReader, getGalleryConfig());
+        mods.enhancePosterImageHalftone(mainReader, getGalleryConfig());
       });
     }
     if (document.fonts?.addEventListener) {
@@ -760,7 +807,7 @@ import { ICONS } from './icons.js';
           landingMain?.classList.add('landing-main--gallery');
           landingGalleryCount.textContent = `${landingGalleryItems.length} Markdown file${landingGalleryItems.length === 1 ? '' : 's'} — choose one`;
           landingGalleryGrid.innerHTML = renderLandingGallery(landingGalleryItems);
-          scheduleLandingMiniGlyphs();
+          deferLandingGlyphs();
           return;
         }
         void showLandingGallery(droppedFileMap, { updateHistory: false }).catch((err) => console.error(err));
@@ -811,15 +858,17 @@ import { ICONS } from './icons.js';
     const copyBtn = e.target.closest('.code-block__copy');
     if (copyBtn) {
       e.preventDefault();
-      void copyCodeFromButton(copyBtn).then((ok) => {
-        if (!ok) return;
-        copyBtn.classList.add('is-copied');
-        copyBtn.setAttribute('aria-label', 'Copied');
-        window.setTimeout(() => {
-          copyBtn.classList.remove('is-copied');
-          copyBtn.setAttribute('aria-label', 'Copy code');
-        }, 2000);
-      });
+      void loadReaderModules().then((mods) =>
+        mods.copyCodeFromButton(copyBtn).then((ok) => {
+          if (!ok) return;
+          copyBtn.classList.add('is-copied');
+          copyBtn.setAttribute('aria-label', 'Copied');
+          window.setTimeout(() => {
+            copyBtn.classList.remove('is-copied');
+            copyBtn.setAttribute('aria-label', 'Copy code');
+          }, 2000);
+        })
+      );
       return;
     }
 
@@ -832,7 +881,8 @@ import { ICONS } from './icons.js';
       if (!card || exportBtn.disabled) return;
       exportBtn.disabled = true;
       exportBtn.setAttribute('aria-busy', 'true');
-      void exportPosterAsPdf(card, posterExportName(card))
+      void loadReaderModules()
+        .then((mods) => mods.exportPosterAsPdf(card, posterExportName(card)))
         .catch((err) => {
           console.error(err);
           alert('Could not export this poster as PDF.');
@@ -1032,16 +1082,21 @@ import { ICONS } from './icons.js';
   let configReloadTimer;
 
   async function reloadConfigAndRefresh() {
-    await reloadGalleryConfig();
-    edgeHalftone.destroy();
-    edgeHalftone = mountEdgeHalftone(getGalleryConfig());
-    enhancePosterImageHalftone(mainReader, getGalleryConfig());
-    schedulePosterTitleFit();
-    if (!landing.classList.contains('is-hidden')) {
-      scheduleLandingMiniGlyphs();
-      edgeHalftone.refresh();
+    const onReader = landing.classList.contains('is-hidden');
+    const fontScope = onReader ? 'full' : 'landing';
+    await reloadGalleryConfig('config/gallery.config.json', { fontScope });
+    if (onReader) {
+      if (readerChromeMounted) {
+        const mods = await loadReaderModules();
+        edgeHalftone.destroy();
+        edgeHalftone = mods.mountEdgeHalftone(getGalleryConfig());
+      }
+      const mods = await loadReaderModules();
+      mods.enhancePosterImageHalftone(mainReader, getGalleryConfig());
+      schedulePosterTitleFit();
+      await enhanceReaderContent();
     } else {
-      enhanceReaderContent();
+      deferLandingGlyphs();
     }
   }
 
@@ -1064,10 +1119,13 @@ import { ICONS } from './icons.js';
       updateScrollOffset();
       schedulePosterTitleFit();
       renderGlyphs();
-      enhancePosterImageHalftone(mainReader, getGalleryConfig());
       if (!landing.classList.contains('is-hidden')) {
-        scheduleLandingMiniGlyphs();
+        deferLandingGlyphs();
+        return;
       }
+      void loadReaderModules().then((mods) => {
+        mods.enhancePosterImageHalftone(mainReader, getGalleryConfig());
+      });
     }, 120);
   });
 

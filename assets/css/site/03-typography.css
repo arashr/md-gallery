@@ -16,10 +16,10 @@
 }
 
 .poster__title {
-  font-family: Ultra, Georgia, serif;
+  font-family: Ultra, Impact, sans-serif;
   font-weight: 400;
   line-height: 0.92;
   letter-spacing: -0.005em;
-  color: var(--red);
+  color: var(--ink);
   margin: var(--space-1) 0;
 }

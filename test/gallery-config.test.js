@@ -31,9 +31,17 @@ describe('gallery config', () => {
   });
 
   it('builds Google Fonts URL from config', () => {
-    const href = fontsHrefFromConfig(getGalleryConfig());
+    const href = fontsHrefFromConfig(getGalleryConfig(), { scope: 'full' });
     assert.match(href, /^https:\/\/fonts\.googleapis\.com\/css2\?family=/);
     assert.match(href, /Inconsolata/);
+    assert.match(href, /Libre\+Baskerville/);
+  });
+
+  it('omits ui serif from landing font URL', () => {
+    const landing = fontsHrefFromConfig(getGalleryConfig(), { scope: 'landing' });
+    const full = fontsHrefFromConfig(getGalleryConfig(), { scope: 'full' });
+    assert.doesNotMatch(landing, /Libre\+Baskerville/);
+    assert.match(full, /Libre\+Baskerville/);
   });
 
   it('resolves semantic foreground colors from CSS token fallbacks', () => {
